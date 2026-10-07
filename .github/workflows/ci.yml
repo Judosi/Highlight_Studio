@@ -56,7 +56,10 @@ jobs:
       - name: Lint Python
         run: python -m ruff check backend tools tests
       - name: Test backend
-        run: python -m pytest -q
+        run: python -m pytest -q --junitxml=pytest-results.xml
+      - name: Annotate backend test failures
+        if: failure()
+        run: python tools/quality/report_pytest_failures.py pytest-results.xml
       - name: Audit Python dependencies
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
         run: python -m pip_audit -r backend/requirements.txt --progress-spinner off
