@@ -1,5 +1,6 @@
 from pathlib import Path
 from tools.release.frontend_integrity import verify_frontend
+from tools.release.release_layout import REQUIRED_RELEASE_BINARY_MIN_SIZES, REQUIRED_RELEASE_FILES
 
 from backend.src.highlight_studio.integrations.twitch import source
 
@@ -35,14 +36,25 @@ def test_simple_mode_forces_auto_turbo_payload():
     assert "twitch_download_engine: turboEngine" in app
 
 
-def test_release_contains_complete_turbo_binaries():
-    tdcli = ROOT / "vendor" / "twitchdownloadercli" / "TwitchDownloaderCLI.exe"
-    aria2 = ROOT / "vendor" / "aria2" / "aria2c.exe"
-    assert tdcli.stat().st_size >= source.BUNDLED_TDCLI_MIN_BYTES
-    assert aria2.stat().st_size >= source.BUNDLED_ARIA2_MIN_BYTES
+def test_release_contract_requires_complete_turbo_binaries():
+    tdcli = "vendor/twitchdownloadercli/TwitchDownloaderCLI.exe"
+    aria2 = "vendor/aria2/aria2c.exe"
+    assert {tdcli, aria2} <= REQUIRED_RELEASE_FILES
+    assert REQUIRED_RELEASE_BINARY_MIN_SIZES[tdcli] == source.BUNDLED_TDCLI_MIN_BYTES
+    assert REQUIRED_RELEASE_BINARY_MIN_SIZES[aria2] == source.BUNDLED_ARIA2_MIN_BYTES
 
 
-def test_bundle_integrity_report_marks_release_tools_complete(monkeypatch):
+def test_bundle_integrity_report_marks_release_tools_complete(monkeypatch, tmp_path):
+    tdcli_dir = tmp_path / "twitchdownloadercli"
+    aria2_dir = tmp_path / "aria2"
+    tdcli_dir.mkdir()
+    aria2_dir.mkdir()
+    with (tdcli_dir / "TwitchDownloaderCLI.exe").open("wb") as stream:
+        stream.truncate(source.BUNDLED_TDCLI_MIN_BYTES)
+    with (aria2_dir / "aria2c.exe").open("wb") as stream:
+        stream.truncate(source.BUNDLED_ARIA2_MIN_BYTES)
+    monkeypatch.setattr(source, "BUNDLED_TWITCHDOWNLOADERCLI_DIR", tdcli_dir)
+    monkeypatch.setattr(source, "BUNDLED_ARIA2_DIR", aria2_dir)
     report = source.bundled_turbo_integrity()
     assert report["twitchdownloadercli"]["ok"] is True
     assert report["aria2c"]["ok"] is True

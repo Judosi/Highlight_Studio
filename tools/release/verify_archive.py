@@ -9,10 +9,10 @@ import zipfile
 from pathlib import Path, PurePosixPath
 try:
     from ._identity import load_identity
-    from .release_layout import REQUIRED_RELEASE_FILES
+    from .release_layout import REQUIRED_RELEASE_BINARY_MIN_SIZES, REQUIRED_RELEASE_FILES
 except ImportError:  # direct script execution
     from _identity import load_identity
-    from release_layout import REQUIRED_RELEASE_FILES
+    from release_layout import REQUIRED_RELEASE_BINARY_MIN_SIZES, REQUIRED_RELEASE_FILES
 
 FORBIDDEN_PARTS = {
     ".git",
@@ -127,6 +127,16 @@ def validate_archive(archive_path: Path) -> tuple[list[str], list[str], list[str
         root_prefix = f"{root_name}/"
         if root_name != EXPECTED_ROOT_NAME:
             bad.append(f"unexpected-release-root:{root_name}")
+
+        info_by_name = {info.filename: info for info in file_infos}
+        for relative_name, minimum_size in REQUIRED_RELEASE_BINARY_MIN_SIZES.items():
+            member_name = root_prefix + relative_name
+            info = info_by_name.get(member_name)
+            if info is not None and info.file_size < minimum_size:
+                bad.append(
+                    f"undersized-release-binary:{relative_name}:"
+                    f"{info.file_size}<{minimum_size}"
+                )
 
         try:
             manifest = json.loads(archive.read(checksum_name))

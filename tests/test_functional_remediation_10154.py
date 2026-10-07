@@ -546,10 +546,13 @@ def test_hs040_short_smart_zoom_label_is_truthful_not_tracking_claim():
     assert "без слежения" in src.lower()
 
 
-def test_hs042_ci_checks_current_generated_archive_name():
+def test_hs042_ci_separates_source_checkout_from_release_archive():
     root=Path(__file__).resolve().parents[1]
     ci=(root/".github/workflows/ci.yml").read_text(encoding="utf-8")
-    assert "Highlight_Studio_11.2.7.zip" in ci
+    assert "source-release-contract:" in ci
+    assert "git check-ignore -q vendor/twitchdownloadercli/TwitchDownloaderCLI.exe" in ci
+    assert "tools/release/make_release.py" not in ci
+    assert "tools/release/verify_archive.py" not in ci
     assert "highlight_studio_v1050_hybrid_desktop.zip" not in ci
 
 

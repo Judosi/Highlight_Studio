@@ -1,11 +1,11 @@
-from __future__ import annotations
-
 """Static architecture audit for Highlight Studio.
 
 The audit is intentionally dependency-free so it can run before the application
 virtual environment is created.  It verifies layer direction, root hygiene and
 legacy wrapper shape, while reporting large modules as refactoring candidates.
 """
+
+from __future__ import annotations
 
 import ast
 import json
