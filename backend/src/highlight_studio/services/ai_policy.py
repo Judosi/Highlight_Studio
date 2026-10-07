@@ -1,11 +1,11 @@
-from __future__ import annotations
-
 """Pure AI batching and validation policy for the analysis pipeline.
 
 No filesystem, HTTP, FFmpeg or model-client I/O belongs here.  Keeping these
 rules isolated makes the retry/completeness behavior unit-testable without
 loading the whole media pipeline.
 """
+
+from __future__ import annotations
 
 import math
 from typing import Any, Callable

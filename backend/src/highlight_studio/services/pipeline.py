@@ -32,10 +32,8 @@ from .ai_policy import (
     extract_ai_items,
     normalize_ai_items_by_id,
     plan_prompt_safe_batches,
-    require_complete_ai_result,
-    scored_ai_items_complete,
+    require_complete_ai_result as require_complete_ai_result,
     strict_ai_enabled,
-    strict_missing_message,
 )
 from ..core.utils import (
     audio_streams,

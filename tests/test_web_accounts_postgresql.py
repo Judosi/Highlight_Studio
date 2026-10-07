@@ -1,4 +1,6 @@
+import os
 from pathlib import Path
+import sys
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from backend.src.highlight_studio.infrastructure.database.models import Base, User
@@ -17,6 +19,19 @@ def db(tmp_path: Path):
     engine = create_engine(f"sqlite+pysqlite:///{tmp_path / 'auth.db'}", connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine)
     return sessionmaker(bind=engine, expire_on_commit=False)()
+
+
+def subprocess_test_env(**overrides: str) -> dict[str, str]:
+    """Return a UTF-8 subprocess environment that keeps Windows OS discovery intact."""
+    env = os.environ.copy()
+    env.setdefault("PYTHONUTF8", "1")
+    env.setdefault("PYTHONIOENCODING", "utf-8")
+    if os.name == "nt":
+        system_root = env.get("SystemRoot") or env.get("WINDIR") or f"{env.get('SystemDrive', 'C:')}\\Windows"
+        env.setdefault("SystemRoot", system_root)
+        env.setdefault("ComSpec", str(Path(system_root) / "System32" / "cmd.exe"))
+    env.update(overrides)
+    return env
 
 
 def test_register_login_session(tmp_path):
@@ -114,9 +129,7 @@ def test_password_reset_and_email_verification_tokens(tmp_path):
 
 
 def test_web_auth_status_and_route_guards_in_subprocess(tmp_path):
-    import os
     import subprocess
-    import sys
     import textwrap
 
     script = textwrap.dedent(
@@ -143,9 +156,8 @@ def test_web_auth_status_and_route_guards_in_subprocess(tmp_path):
             assert client.get('/api/auth/status').json()['authenticated'] is False
         """
     )
-    env = os.environ.copy()
-    env.update(
-        {
+    env = subprocess_test_env(
+        **{
             "HIGHLIGHT_STUDIO_DEPLOYMENT_MODE": "web",
             "HIGHLIGHT_STUDIO_DATABASE_URL": f"sqlite+pysqlite:///{tmp_path / 'web.db'}",
             "HIGHLIGHT_STUDIO_DATA_DIR": str(tmp_path / "data"),
@@ -153,7 +165,7 @@ def test_web_auth_status_and_route_guards_in_subprocess(tmp_path):
             "HIGHLIGHT_STUDIO_COOKIE_SECURE": "0",
             "HIGHLIGHT_STUDIO_ALLOW_REGISTRATION": "1",
             "HIGHLIGHT_STUDIO_ALLOW_SQLITE_WEB_TESTS": "1",
-        }
+        },
     )
     result = subprocess.run(
         [sys.executable, "-c", script],
@@ -168,9 +180,7 @@ def test_web_auth_status_and_route_guards_in_subprocess(tmp_path):
 
 
 def test_web_viewer_cannot_read_server_logs_and_twitch_paths_are_redacted(tmp_path):
-    import os
     import subprocess
-    import sys
     import textwrap
 
     script = textwrap.dedent(
@@ -245,9 +255,8 @@ def test_web_viewer_cannot_read_server_logs_and_twitch_paths_are_redacted(tmp_pa
             assert '<REDACTED>' in editor_dashboard.json()['logs'], editor_dashboard.text
         """
     )
-    env = os.environ.copy()
-    env.update(
-        {
+    env = subprocess_test_env(
+        **{
             "HIGHLIGHT_STUDIO_DEPLOYMENT_MODE": "web",
             "HIGHLIGHT_STUDIO_DATABASE_URL": f"sqlite+pysqlite:///{tmp_path / 'web-privacy.db'}",
             "HIGHLIGHT_STUDIO_DATA_DIR": str(tmp_path / "data"),
@@ -255,7 +264,7 @@ def test_web_viewer_cannot_read_server_logs_and_twitch_paths_are_redacted(tmp_pa
             "HIGHLIGHT_STUDIO_COOKIE_SECURE": "0",
             "HIGHLIGHT_STUDIO_ALLOW_REGISTRATION": "1",
             "HIGHLIGHT_STUDIO_ALLOW_SQLITE_WEB_TESTS": "1",
-        }
+        },
     )
     result = subprocess.run(
         [sys.executable, "-c", "import os\n" + script],
@@ -270,20 +279,17 @@ def test_web_viewer_cannot_read_server_logs_and_twitch_paths_are_redacted(tmp_pa
 
 
 def test_database_requires_migrations_when_auto_create_is_disabled(tmp_path):
-    import os
     import subprocess
-    import sys
 
-    env = os.environ.copy()
-    env.update(
-        {
+    env = subprocess_test_env(
+        **{
             "HIGHLIGHT_STUDIO_DEPLOYMENT_MODE": "web",
             "HIGHLIGHT_STUDIO_DATABASE_URL": f"sqlite+pysqlite:///{tmp_path / 'unmigrated.db'}",
             "HIGHLIGHT_STUDIO_AUTO_CREATE_DATABASE": "0",
             "HIGHLIGHT_STUDIO_ALLOW_SQLITE_WEB_TESTS": "1",
             "HIGHLIGHT_STUDIO_DATA_DIR": str(tmp_path / "data"),
             "HIGHLIGHT_STUDIO_PROJECTS_DIR": str(tmp_path / "projects"),
-        }
+        },
     )
     code = """
 from backend.src.highlight_studio.infrastructure.database.engine import init_database
@@ -341,18 +347,15 @@ def test_session_management_lists_and_revokes_devices(tmp_path):
 
 
 def test_web_mode_refuses_sqlite_without_explicit_test_override(tmp_path):
-    import os
     import subprocess
-    import sys
 
-    env = os.environ.copy()
-    env.update(
-        {
+    env = subprocess_test_env(
+        **{
             "HIGHLIGHT_STUDIO_DEPLOYMENT_MODE": "web",
             "HIGHLIGHT_STUDIO_DATABASE_URL": f"sqlite+pysqlite:///{tmp_path / 'forbidden.db'}",
             "HIGHLIGHT_STUDIO_DATA_DIR": str(tmp_path / "data"),
             "HIGHLIGHT_STUDIO_PROJECTS_DIR": str(tmp_path / "projects"),
-        }
+        },
     )
     env.pop("HIGHLIGHT_STUDIO_ALLOW_SQLITE_WEB_TESTS", None)
     result = subprocess.run(

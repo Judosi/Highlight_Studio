@@ -1,13 +1,14 @@
 from pathlib import Path
 
-from tools.diagnostics.verify_release_identity import EXPECTED_ROOT, verify
+from tools.diagnostics.verify_release_identity import verify
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_current_release_has_verified_english_identity_and_redesigned_dist():
-    assert ROOT.name == EXPECTED_ROOT
+def test_current_source_checkout_has_verified_identity_and_redesigned_dist():
+    # A source checkout may have any directory name. The canonical top-level
+    # release name is enforced separately by the archive verifier.
     assert verify(ROOT) == []
 
 

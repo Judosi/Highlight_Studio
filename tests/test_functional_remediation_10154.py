@@ -546,10 +546,13 @@ def test_hs040_short_smart_zoom_label_is_truthful_not_tracking_claim():
     assert "без слежения" in src.lower()
 
 
-def test_hs042_ci_checks_current_generated_archive_name():
+def test_hs042_ci_separates_source_checkout_from_release_archive():
     root=Path(__file__).resolve().parents[1]
     ci=(root/".github/workflows/ci.yml").read_text(encoding="utf-8")
-    assert "Highlight_Studio_11.2.7.zip" in ci
+    assert "source-release-contract:" in ci
+    assert "git check-ignore -q vendor/twitchdownloadercli/TwitchDownloaderCLI.exe" in ci
+    assert "tools/release/make_release.py" not in ci
+    assert "tools/release/verify_archive.py" not in ci
     assert "highlight_studio_v1050_hybrid_desktop.zip" not in ci
 
 
@@ -628,7 +631,14 @@ def test_hs020_orphan_reconcile_terminates_only_matching_recorded_process(tmp_pa
     monkeypatch.setattr(core_utils, "_read_process_command", lambda pid: f"ffmpeg -i {project / 'input.mp4'}")
     monkeypatch.setattr(core_utils, "_read_process_start_marker", lambda pid: "start-1")
     killed = []
-    monkeypatch.setattr(core_utils.os, "kill", lambda pid, sig: killed.append(pid))
+    if core_utils.os.name == "nt":
+        monkeypatch.setattr(
+            core_utils.subprocess,
+            "run",
+            lambda command, **kwargs: killed.append(int(command[2])),
+        )
+    else:
+        monkeypatch.setattr(core_utils.os, "kill", lambda pid, sig: killed.append(pid))
     assert core_utils.reconcile_orphaned_processes(project) == 1
     assert killed == [23456]
 

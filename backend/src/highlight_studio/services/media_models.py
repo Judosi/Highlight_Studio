@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Domain data carried through the media-analysis pipeline.
 
 These dataclasses intentionally have no I/O or service dependencies.  Keeping
@@ -7,6 +5,8 @@ them separate from the 11k-line pipeline makes their contract reusable without
 importing FFmpeg/AI orchestration. ``pipeline`` re-exports both names for legacy
 callers.
 """
+
+from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass, field

@@ -43,7 +43,6 @@ from .schemas import (
     ReleaseEvidenceRequest,
     ShortRenderRequest,
     TwitchProjectRequest,
-    YouTubeUploadItem,
     YouTubeUploadRequest,
 )
 

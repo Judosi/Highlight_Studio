@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -159,9 +160,13 @@ def test_output_revision_changes_when_same_path_is_replaced(tmp_path):
     output = tmp_path / "outputs/shorts/short_01.mp4"
     output.parent.mkdir(parents=True)
     output.write_bytes(b"first")
+    first_mtime_ns = 1_700_000_000_000_000_000
+    os.utime(output, ns=(first_mtime_ns, first_mtime_ns))
     before = pipeline.list_output_files(tmp_path)[0]
     replacement = output.with_suffix(".pending.mp4")
     replacement.write_bytes(b"second")
+    second_mtime_ns = first_mtime_ns + 2_000_000_000
+    os.utime(replacement, ns=(second_mtime_ns, second_mtime_ns))
     replacement.replace(output)
     after = pipeline.list_output_files(tmp_path)[0]
     assert before["revision"] != after["revision"]

@@ -3,6 +3,7 @@ import json
 import zipfile
 
 from tools.release.make_release import ROOT, should_include
+from tools.release.release_layout import REQUIRED_RELEASE_BINARY_MIN_SIZES
 from tools.release.verify_archive import (
     EXPECTED_ROOT_NAME,
     EXPECTED_VERSION,
@@ -76,8 +77,20 @@ def test_release_verifier_rejects_unmanifested_extra_file(tmp_path) -> None:
 def test_release_verifier_accepts_complete_manifest(tmp_path) -> None:
     archive_path = tmp_path / "release.zip"
     required = _required_members()
+    for name, minimum_size in REQUIRED_RELEASE_BINARY_MIN_SIZES.items():
+        required[name] = b"\0" * minimum_size
     _write_test_archive(archive_path, required)
     assert validate_archive(archive_path) == ([], [], [])
+
+
+def test_release_verifier_rejects_placeholder_turbo_binaries(tmp_path) -> None:
+    archive_path = tmp_path / "release.zip"
+    _write_test_archive(archive_path, _required_members())
+    bad, missing, mismatches = validate_archive(archive_path)
+    assert not missing
+    assert not mismatches
+    for name in REQUIRED_RELEASE_BINARY_MIN_SIZES:
+        assert any(item.startswith(f"undersized-release-binary:{name}:") for item in bad)
 
 
 def test_release_builder_excludes_symlinks(tmp_path) -> None:

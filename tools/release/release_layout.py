@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+# These executables are intentionally supplied only by the trusted release
+# build. They remain ignored in a source checkout, while archive verification
+# rejects missing or placeholder payloads in a built portable release.
+REQUIRED_RELEASE_BINARY_MIN_SIZES = {
+    "vendor/twitchdownloadercli/TwitchDownloaderCLI.exe": 60_000_000,
+    "vendor/aria2/aria2c.exe": 5_000_000,
+}
+
 # Files that define the supported portable source release. Historical reports are
 # deliberately not part of this contract; they live under docs/releases/10.15/history.
 REQUIRED_RELEASE_FILES = frozenset({

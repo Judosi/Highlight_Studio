@@ -1,11 +1,11 @@
-from __future__ import annotations
-
 """Pydantic contracts for the HTTP API.
 
 Keeping request/settings schemas out of ``app.py`` makes the transport layer
 smaller and prevents route orchestration from becoming the owner of validation
 rules.  The classes are re-exported by ``api.app`` for backward compatibility.
 """
+
+from __future__ import annotations
 
 import math
 import re
