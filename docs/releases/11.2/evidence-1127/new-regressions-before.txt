@@ -1,0 +1,202 @@
+FFFFFFFFFF                                                               [100%]
+=================================== FAILURES ===================================
+_______________ test_ai_failure_preserves_saved_metadata[False] ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-1/test_ai_failure_preserves_save0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc7f3f7fd70>
+strict = False
+
+    @pytest.mark.parametrize('strict', [False, True])
+    def test_ai_failure_preserves_saved_metadata(tmp_path, monkeypatch, strict):
+        previous = metadata_project(tmp_path)
+        def fail(*args, **kwargs):
+            raise RuntimeError('provider unavailable')
+        monkeypatch.setattr(pipeline, 'make_ai_client', lambda *a, **kw: SimpleNamespace(generate_json=fail))
+        settings = {'metadata_ai_enabled': True, 'metadata_ai_retries': 1, 'require_ai_metadata': strict}
+        if strict:
+            with pytest.raises(RuntimeError):
+                pipeline.generate_youtube_metadata(tmp_path, settings)
+        else:
+            result = pipeline.generate_youtube_metadata(tmp_path, settings)
+>           assert result['preserved_previous'] is True
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'preserved_previous'
+
+tests/test_audit_regressions_1127.py:30: KeyError
+________________ test_ai_failure_preserves_saved_metadata[True] ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-1/test_ai_failure_preserves_save1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc7f3ec7320>
+strict = True
+
+    @pytest.mark.parametrize('strict', [False, True])
+    def test_ai_failure_preserves_saved_metadata(tmp_path, monkeypatch, strict):
+        previous = metadata_project(tmp_path)
+        def fail(*args, **kwargs):
+            raise RuntimeError('provider unavailable')
+        monkeypatch.setattr(pipeline, 'make_ai_client', lambda *a, **kw: SimpleNamespace(generate_json=fail))
+        settings = {'metadata_ai_enabled': True, 'metadata_ai_retries': 1, 'require_ai_metadata': strict}
+        if strict:
+            with pytest.raises(RuntimeError):
+                pipeline.generate_youtube_metadata(tmp_path, settings)
+        else:
+            result = pipeline.generate_youtube_metadata(tmp_path, settings)
+            assert result['preserved_previous'] is True
+            assert result['warning']
+>       assert utils.read_json(tmp_path / 'youtube_metadata.json') == previous
+E       AssertionError: assert {'ai_used': F...ion': '', ...} == {'ai_used': T...ментов.', ...}
+E         
+E         Omitting 4 identical items, use -vv to show
+E         Differing items:
+E         {'montage_summary': ''} != {'montage_summary': 'Главные темы монтажа: Мастер проверяет двигатель. Отобрано 1 сцен.'}
+E         {'tags': []} != {'tags': ['мастер проверяет двигатель', 'двигатель', 'мастер', 'проверяет', 'вращаться', 'двигателя', ...]}
+E         {'strict_ai': True} != {'strict_ai': False}
+E         {'short_titles': []} != {'short_titles': ['Мастер проверяет двигатель', 'Мастер проверяет двигатель — ЧТО ПРОИЗОШЛО НА СТРИМЕ', 'Мастер провер...ель — эпизоды эфира', 'Главное за стрим: Мастер проверяет двигатель', 'Мастер проверяет двигатель — фрагменты стрима']}...
+E         
+E         ...Full output truncated (13 lines hidden), use '-vv' to show
+
+tests/test_audit_regressions_1127.py:32: AssertionError
+__________________ test_empty_montage_does_not_erase_metadata __________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-1/test_empty_montage_does_not_er0')
+
+    def test_empty_montage_does_not_erase_metadata(tmp_path):
+        previous = metadata_project(tmp_path)
+        utils.write_json(tmp_path / 'segments.json', [])
+        assert pipeline.generate_youtube_metadata(tmp_path, {})['ok'] is False
+>       assert utils.read_json(tmp_path / 'youtube_metadata.json') == previous
+E       AssertionError: assert {'ai_used': F...монтаж.', ...} == {'ai_used': T...ментов.', ...}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'montage_summary': ''} != {'montage_summary': 'Главные темы монтажа: Мастер проверяет двигатель. Отобрано 1 сцен.'}
+E         {'tags': []} != {'tags': ['мастер проверяет двигатель', 'двигатель', 'мастер', 'проверяет', 'вращаться', 'двигателя', ...]}
+E         {'warning': ''} != {'warning': 'Creator Pack собран локально из конкретных сцен. Для более выразительных формулировок доступно AI-обновление.'}
+E         {'hashtags': []} != {'hashtags': ['#мастерпроверяетдвигатель', '#двигатель', '#мастер', '#проверяет', '#вращаться']}...
+E         
+E         ...Full output truncated (38 lines hidden), use '-vv' to show
+
+tests/test_audit_regressions_1127.py:39: AssertionError
+_____________ test_cancel_before_empty_montage_preserves_metadata ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-1/test_cancel_before_empty_monta0')
+
+    def test_cancel_before_empty_montage_preserves_metadata(tmp_path):
+        previous = metadata_project(tmp_path)
+        utils.write_json(tmp_path / 'segments.json', [])
+        pipeline.cancel_path(tmp_path).write_text('cancel')
+>       with pytest.raises(utils.OperationCancelled):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'highlight_studio.core.utils.OperationCancelled'>
+
+tests/test_audit_regressions_1127.py:46: Failed
+________________ test_failed_write_preserves_last_valid_backup _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-1/test_failed_write_preserves_la0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc7f3ec6ed0>
+
+    def test_failed_write_preserves_last_valid_backup(tmp_path, monkeypatch):
+        target = tmp_path / 'segments.json'
+        utils.write_json(target, [{'id': 1}])
+        utils.write_json(target, [{'id': 2}])
+        target.write_text('{broken')
+        def disk_full(*args, **kwargs):
+            raise OSError(28, 'No space left on device')
+        monkeypatch.setattr(utils, '_replace_with_retry', disk_full)
+        with pytest.raises(OSError):
+            utils.write_json(target, [{'id': 3}])
+>       assert utils.read_json(target) == [{'id': 1}]
+E       AssertionError: assert None == [{'id': 1}]
+E        +  where None = <function read_json at 0x7fc7f456d260>(PosixPath('/tmp/pytest-of-root/pytest-1/test_failed_write_preserves_la0/segments.json'))
+E        +    where <function read_json at 0x7fc7f456d260> = utils.read_json
+
+tests/test_audit_regressions_1127.py:61: AssertionError
+___________________ test_probe_rejects_invalid_duration[NaN] ___________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-1/test_probe_rejects_invalid_dur0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc7f3ec6db0>
+value = 'NaN'
+
+    @pytest.mark.parametrize('value', ['NaN', 'inf', '-1', '0'])
+    def test_probe_rejects_invalid_duration(tmp_path, monkeypatch, value):
+        monkeypatch.setattr(utils, 'run_cmd', lambda *a, **kw: SimpleNamespace(returncode=0, stdout=value))
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests/test_audit_regressions_1127.py:67: Failed
+___________________ test_probe_rejects_invalid_duration[inf] ___________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-1/test_probe_rejects_invalid_dur1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc7f3ec7950>
+value = 'inf'
+
+    @pytest.mark.parametrize('value', ['NaN', 'inf', '-1', '0'])
+    def test_probe_rejects_invalid_duration(tmp_path, monkeypatch, value):
+        monkeypatch.setattr(utils, 'run_cmd', lambda *a, **kw: SimpleNamespace(returncode=0, stdout=value))
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests/test_audit_regressions_1127.py:67: Failed
+___________________ test_probe_rejects_invalid_duration[-1] ____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-1/test_probe_rejects_invalid_dur2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc7f3ed2ae0>
+value = '-1'
+
+    @pytest.mark.parametrize('value', ['NaN', 'inf', '-1', '0'])
+    def test_probe_rejects_invalid_duration(tmp_path, monkeypatch, value):
+        monkeypatch.setattr(utils, 'run_cmd', lambda *a, **kw: SimpleNamespace(returncode=0, stdout=value))
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests/test_audit_regressions_1127.py:67: Failed
+____________________ test_probe_rejects_invalid_duration[0] ____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-1/test_probe_rejects_invalid_dur3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc7f3ed3a10>
+value = '0'
+
+    @pytest.mark.parametrize('value', ['NaN', 'inf', '-1', '0'])
+    def test_probe_rejects_invalid_duration(tmp_path, monkeypatch, value):
+        monkeypatch.setattr(utils, 'run_cmd', lambda *a, **kw: SimpleNamespace(returncode=0, stdout=value))
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests/test_audit_regressions_1127.py:67: Failed
+___________________ test_probe_does_not_invent_video_stream ____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-1/test_probe_does_not_invent_vid0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fc7f3ed3050>
+
+    def test_probe_does_not_invent_video_stream(tmp_path, monkeypatch):
+        monkeypatch.setattr(utils, 'run_cmd', lambda *a, **kw: SimpleNamespace(returncode=0, stdout='{"streams": []}'))
+>       assert utils.video_info(tmp_path / 'audio.mp4').get('error')
+E       AssertionError: assert None
+E        +  where None = <built-in method get of dict object at 0x7fc7f3d09640>('error')
+E        +    where <built-in method get of dict object at 0x7fc7f3d09640> = {'duration': 0, 'fps': 25.0, 'fps_den': 1, 'fps_num': 25, ...}.get
+E        +      where {'duration': 0, 'fps': 25.0, 'fps_den': 1, 'fps_num': 25, ...} = <function video_info at 0x7fc7f456dc60>((PosixPath('/tmp/pytest-of-root/pytest-1/test_probe_does_not_invent_vid0') / 'audio.mp4'))
+E        +        where <function video_info at 0x7fc7f456dc60> = utils.video_info
+
+tests/test_audit_regressions_1127.py:73: AssertionError
+=============================== warnings summary ===============================
+backend/src/highlight_studio/services/pipeline.py:6
+  <APP_ROOT>/backend/src/highlight_studio/services/pipeline.py:6: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13
+    import audioop
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_audit_regressions_1127.py::test_ai_failure_preserves_saved_metadata[False]
+FAILED tests/test_audit_regressions_1127.py::test_ai_failure_preserves_saved_metadata[True]
+FAILED tests/test_audit_regressions_1127.py::test_empty_montage_does_not_erase_metadata
+FAILED tests/test_audit_regressions_1127.py::test_cancel_before_empty_montage_preserves_metadata
+FAILED tests/test_audit_regressions_1127.py::test_failed_write_preserves_last_valid_backup
+FAILED tests/test_audit_regressions_1127.py::test_probe_rejects_invalid_duration[NaN]
+FAILED tests/test_audit_regressions_1127.py::test_probe_rejects_invalid_duration[inf]
+FAILED tests/test_audit_regressions_1127.py::test_probe_rejects_invalid_duration[-1]
+FAILED tests/test_audit_regressions_1127.py::test_probe_rejects_invalid_duration[0]
+FAILED tests/test_audit_regressions_1127.py::test_probe_does_not_invent_video_stream
+10 failed, 1 warning in 0.14s

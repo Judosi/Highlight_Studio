@@ -1,0 +1,30 @@
+Highlight Studio 10.15.12
+App identity: v10.15.12-ux-workflow
+Design identity: studio-audited-v13
+
+Цель релиза:
+- исправить рассинхронизацию frontend после завершения фонового анализа;
+- гарантировать, что `one_click=done` приводит к загрузке актуальных candidates/segments/freshness;
+- сохранить ручной переход в «Монтаж» без самовольной навигации;
+- сохранить все UX/Product-улучшения 10.15.11;
+- сохранить атомарное «Добавить в итоговую нарезку» без Firefox TDZ-ошибки;
+- не менять Qwen3 8B, Semantic Quality, scoring, Visual/OCR coverage и качество отбора.
+
+Ключевое исправление 10.15.12:
+- source React получает отдельную синхронизацию по глобальному terminal analysis job;
+- production compatibility layer следит за `/api/jobs` и сверяет `/dashboard-state`;
+- если backend уже завершил анализ, а DOM всё ещё показывает старый pre-analysis snapshot, выполняется ограниченная служебная reload-гидратация;
+- текущий шаг сохраняется как `analysis`, поэтому Review/Монтаж не открывается автоматически;
+- после гидратации sidebar и Review используют реальный analysis revision и реальные candidates/segments.
+
+Production frontend:
+- основной проверенный production bundle 10.15.11 сохранён как база и получил identity 10.15.12;
+- отсутствующий в production bundle terminal hydration закрыт отдельным watchdog `ux-workflow-101512.js`;
+- исправление также внесено в `frontend/src/app/App.jsx`, чтобы при следующем полном Vite rebuild логика была нативной;
+- чистый Vite rebuild в текущей Linux QA-среде недоступен из-за отсутствующих npm package payloads/jsdom и недоступного npm registry.
+
+Проверка финального релиза:
+- backend: 295 PASS / 2 Linux-only VAD failures (`onnxruntime` отсутствует в QA environment);
+- frontend contracts: 76/76 PASS (2 jsdom suites не запускались из-за отсутствующих npm payloads);
+- Electron: 10/10 PASS;
+- production stale-terminal sync и atomic Review add проверены в Chromium.

@@ -1,0 +1,12 @@
+Highlight Studio 10.15.7 — Quality & Performance
+Release identity: v10.15.7-quality-performance
+Design identity: studio-audited-v11
+
+Основные изменения:
+- Quality Guard без снижения Qwen3 8B / Whisper / Visual / OCR coverage.
+- Исправлен low-VRAM micro_batch=1 regression из 10.15.6.
+- Ollama warm-up + release перед Visual/OCR.
+- Visual decode CPU/CUDA runtime benchmark с безопасным fallback.
+- Adaptive bounded OCR workers.
+- Lightweight active-job frontend polling.
+- Исправленный ETA и performance_telemetry.json.

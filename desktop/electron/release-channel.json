@@ -1,0 +1,7 @@
+{
+  "channel": "stable",
+  "stableUpdateUrl": "",
+  "betaUpdateUrl": "",
+  "allowChannelSwitch": true,
+  "notes": "Set HTTPS channel URLs during the signed Windows release build."
+}

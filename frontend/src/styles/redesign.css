@@ -1,0 +1,2356 @@
+/*
+ * Highlight Studio v10.15.7
+ * Product shell and workflow redesign. This file is loaded last so the
+ * release can keep compatibility with older feature styles while all
+ * user-facing workflow surfaces use one token-driven system.
+ */
+
+:root {
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  color: var(--color-text-primary);
+  background: var(--color-canvas);
+}
+
+html,
+body,
+#root {
+  min-width: 320px;
+  min-height: 100%;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-body);
+  line-height: var(--line-body);
+}
+
+body::before {
+  opacity: .12;
+  background-size: 96px 96px;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+button {
+  min-height: var(--control-default);
+  padding: 10px 16px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-control);
+  background: var(--color-action-secondary);
+  color: var(--color-text-primary);
+  box-shadow: none;
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  line-height: 20px;
+  transition:
+    background var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+}
+
+button:hover:not(:disabled) {
+  transform: none;
+  background: var(--color-action-secondary-hover);
+  border-color: var(--color-border-strong);
+  box-shadow: none;
+}
+
+button.primary,
+.studioApp button.primaryStrong,
+.studioApp button.success {
+  min-height: var(--control-default);
+  background: var(--color-action-primary) !important;
+  border-color: var(--color-action-primary) !important;
+  color: var(--color-action-on-primary) !important;
+  box-shadow: none !important;
+  font-weight: 600;
+}
+
+button.primary:hover:not(:disabled),
+.studioApp button.primaryStrong:hover:not(:disabled),
+.studioApp button.success:hover:not(:disabled) {
+  background: var(--color-action-primary-hover) !important;
+  border-color: var(--color-action-primary-hover) !important;
+}
+
+button.dangerBtn,
+button.danger {
+  background: var(--color-danger-surface) !important;
+  border-color: color-mix(in srgb, var(--color-danger) 56%, transparent) !important;
+  color: color-mix(in srgb, var(--color-danger) 36%, white) !important;
+}
+
+button.textButton {
+  min-height: 36px;
+  padding: 6px 2px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+button.textButton:hover:not(:disabled) {
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-text-primary);
+}
+
+button:disabled {
+  transform: none;
+}
+
+input,
+select,
+textarea {
+  min-height: var(--control-default);
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
+  box-shadow: none;
+  font-size: var(--font-size-body);
+  line-height: var(--line-body);
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+
+textarea {
+  min-height: 128px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  appearance: auto;
+  flex: 0 0 auto;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  margin: 0;
+  padding: 0 !important;
+  border-radius: 4px;
+  box-shadow: none;
+}
+
+input[type="radio"] {
+  border-radius: 50%;
+}
+
+:where(button, input, select, textarea, a, [tabindex]):focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  box-shadow: none !important;
+}
+
+.studioApp {
+  min-height: 100vh;
+  padding: 0 0 var(--space-7);
+  background:
+    radial-gradient(circle at 50% -15%, color-mix(in srgb, var(--color-action-primary) 9%, transparent), transparent 36%),
+    var(--color-canvas);
+}
+
+/* Neutral application bootstrap */
+.appBootScreen {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-4);
+  background: var(--color-canvas);
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.appBootScreen > div:nth-child(2) {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.appBootScreen b {
+  font-size: var(--font-size-h2);
+  line-height: var(--line-h2);
+}
+
+.appBootScreen span {
+  color: var(--color-text-secondary);
+}
+
+.bootMark {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border-default);
+  border-radius: 15px;
+  background: var(--color-surface-2);
+  color: var(--color-ai);
+}
+
+.bootProgress {
+  width: 220px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-surface-3);
+}
+
+.bootProgress i {
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-action-primary);
+  animation: boot-slide 1.25s var(--ease-standard) infinite alternate;
+}
+
+@keyframes boot-slide {
+  from { transform: translateX(-35%); }
+  to { transform: translateX(175%); }
+}
+
+/* Product header */
+.studioTopbar.productHeader {
+  position: sticky;
+  inset: 0 0 auto;
+  z-index: var(--z-header);
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: auto minmax(220px, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 10px 24px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--color-canvas-elevated) 94%, transparent);
+  box-shadow: none;
+  backdrop-filter: blur(18px);
+}
+
+.brandButton {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.brandButton:hover:not(:disabled) {
+  border: 0;
+  background: transparent;
+}
+
+.studioApp .brandIcon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border-default);
+  border-radius: 11px;
+  background: var(--color-surface-2);
+  color: var(--color-ai);
+  box-shadow: none;
+}
+
+.brandCopy {
+  display: grid !important;
+  gap: 1px;
+  margin: 0 !important;
+}
+
+.brandCopy b {
+  color: var(--color-text-primary);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 19px;
+}
+
+.brandCopy small {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-caption);
+}
+
+.projectIdentityButton {
+  min-width: 0;
+  max-width: 560px;
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  justify-self: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.projectIdentityButton:hover:not(:disabled) {
+  border-color: var(--color-border-subtle);
+  background: var(--color-surface-1);
+}
+
+.projectIdentityButton > span {
+  min-width: 0;
+  display: grid;
+  text-align: left;
+}
+
+.projectIdentityButton b,
+.projectIdentityButton small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.projectIdentityButton b {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-small);
+  line-height: var(--line-small);
+}
+
+.projectIdentityButton small {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-caption);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  flex-wrap: nowrap;
+}
+
+.headerActions .iconButton,
+.taskCenter .iconButton {
+  width: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-control);
+}
+
+.taskCenterButton {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 7px 11px;
+  border-color: var(--color-border-subtle);
+  background: var(--color-surface-1);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.taskCenterButton.running {
+  border-color: color-mix(in srgb, var(--color-action-primary) 58%, transparent);
+  color: var(--color-text-primary);
+}
+
+.taskCenterButton.error,
+.headerWarning {
+  border-color: color-mix(in srgb, var(--color-danger) 54%, transparent);
+  background: var(--color-danger-surface);
+  color: color-mix(in srgb, var(--color-danger) 28%, white);
+}
+
+.taskCenterButton i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-ai);
+  animation: task-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes task-pulse {
+  50% { opacity: .35; transform: scale(.8); }
+}
+
+.headerWarning {
+  min-height: 38px;
+  padding: 7px 11px;
+  font-size: var(--font-size-small);
+}
+
+.utilityMenuWrap {
+  position: relative;
+}
+
+.studioApp .utilityMenu {
+  z-index: var(--z-menu);
+  top: 48px;
+  width: 252px;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-panel);
+  background: var(--color-overlay);
+  box-shadow: var(--shadow-floating);
+}
+
+.utilityMenuSection {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-1) 0 var(--space-2);
+}
+
+.utilityMenuSection + .utilityMenuSection {
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--space-2);
+}
+
+.utilityMenuSection button {
+  min-height: 38px;
+  justify-content: flex-start;
+  border-color: transparent;
+  background: transparent;
+  font-size: var(--font-size-small);
+  text-align: left;
+}
+
+.utilityMenuSection button.selected {
+  border-color: color-mix(in srgb, var(--color-action-primary) 48%, transparent);
+  background: color-mix(in srgb, var(--color-action-primary) 14%, transparent);
+}
+
+.utilityMenuLabel,
+.sectionKicker {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.utilityVersion {
+  padding: var(--space-2) var(--space-3) var(--space-1);
+  border-top: 1px solid var(--color-border-subtle);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+/* Structured notices */
+.studioApp .noticeBanner {
+  width: min(760px, calc(100% - 32px));
+  min-height: 58px;
+  margin: var(--space-3) auto 0;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-radius: var(--radius-panel);
+  box-shadow: none;
+  font-weight: 400;
+}
+
+.structuredNotice {
+  position: relative;
+  z-index: 80;
+}
+
+.noticeCopy {
+  min-width: 0;
+  display: grid;
+  flex: 1;
+  gap: 2px;
+}
+
+.noticeCopy b {
+  color: inherit;
+  font-size: var(--font-size-body);
+  font-weight: 700;
+}
+
+.noticeCopy > span {
+  color: inherit;
+  font-size: var(--font-size-small);
+  opacity: .9;
+}
+
+.noticeActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.noticeBanner .noticeAction {
+  width: auto;
+  min-height: 36px;
+  padding: 6px 11px;
+  border-radius: var(--radius-control);
+}
+
+.noticeBanner .noticeClose {
+  width: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+}
+
+/* Global task center */
+.studioApp .jobBar.taskCenter {
+  width: min(1120px, calc(100% - 48px));
+  margin: var(--space-3) auto 0;
+  padding: var(--space-4);
+  display: grid;
+  grid-template-columns: 1fr;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface-1);
+  box-shadow: var(--shadow-panel);
+}
+
+.taskCenterHeader {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.taskCenterHeader > div:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.taskCenterHeader b {
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taskCenterHeader span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.taskCenter .jobMain {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3) 0 0 28px;
+}
+
+.taskCenter .jobLine,
+.stageHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.taskCenter .jobLine span,
+.stageHeader span {
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+.taskCenter .progress,
+.youtubeUploadProgress > div:last-child {
+  height: 7px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-surface-3);
+}
+
+.taskCenter .progress > span,
+.youtubeUploadProgress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-action-primary);
+  transition: width var(--motion-progress) linear;
+}
+
+.progressCaption,
+.taskCenterFooter,
+.progressFacts {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.progressCaption .inlineMini {
+  min-height: 32px !important;
+  margin-left: auto;
+}
+
+.taskCenterFooter {
+  justify-content: space-between;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.taskCenterFooter button {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stageProgressBox {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-2);
+}
+
+/* Layout and workflow navigation */
+.studioApp .studioLayout,
+.studioApp.density-compact .studioLayout {
+  width: min(var(--content-editor), 100%);
+  margin: 0 auto;
+  padding: 0 var(--space-5) var(--space-7);
+  display: block;
+}
+
+.studioApp .studioWorkspace {
+  min-width: 0;
+}
+
+.studioLayout.utilityLayout {
+  width: min(var(--content-form), 100%);
+  padding-top: var(--space-3);
+}
+
+.workflowStepper {
+  position: sticky;
+  top: 64px;
+  z-index: 60;
+  margin: 0 calc(var(--space-5) * -1) var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: color-mix(in srgb, var(--color-canvas) 94%, transparent);
+  backdrop-filter: blur(16px);
+}
+
+.workflowStepper ol {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  list-style: none;
+}
+
+.workflowStepper li {
+  position: relative;
+  min-width: 0;
+}
+
+.workflowStepper li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 20px;
+  right: -7px;
+  z-index: 2;
+  width: 14px;
+  height: 1px;
+  background: var(--color-border-default);
+}
+
+.workflowStepper .stepButton {
+  width: 100%;
+  min-height: 52px;
+  margin: 0;
+  padding: 6px 10px;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  grid-template-areas: "number copy";
+  align-items: center;
+  gap: 9px;
+  border-color: transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  text-align: left;
+}
+
+.workflowStepper .stepButton:hover:not(:disabled) {
+  border-color: var(--color-border-subtle);
+  background: var(--color-surface-1);
+}
+
+.workflowStepper .stepButton.current {
+  border-color: color-mix(in srgb, var(--color-action-primary) 58%, transparent);
+  background: color-mix(in srgb, var(--color-action-primary) 13%, transparent);
+}
+
+.workflowStepper .stepButton.blocked {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.workflowStepper .stepNum {
+  grid-area: number;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border-default);
+  border-radius: 9px;
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+}
+
+.workflowStepper .completed .stepNum {
+  border-color: color-mix(in srgb, var(--color-success) 54%, transparent);
+  background: var(--color-success-surface);
+  color: var(--color-success);
+}
+
+.workflowStepper .current .stepNum {
+  border-color: var(--color-action-primary);
+  background: var(--color-action-primary);
+  color: var(--color-action-on-primary);
+}
+
+.workflowStepper .stepIcon {
+  display: none;
+}
+
+.workflowStepper .stepCopy {
+  grid-area: copy;
+  min-width: 0;
+  display: grid;
+}
+
+.workflowStepper .stepCopy b {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+  line-height: var(--line-small);
+}
+
+.workflowStepper .stepCopy small {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workflowStepper .blocked .stepCopy b,
+.workflowStepper .blocked .stepCopy small {
+  color: var(--color-text-disabled);
+}
+
+/* Pages, headings and surfaces */
+.studioApp .uPage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.studioApp .stepHero {
+  min-height: auto;
+  margin: 0;
+  padding: var(--space-5) 0 var(--space-2);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.studioApp .stepHero::before {
+  display: none;
+}
+
+.studioApp .stepHero > div:first-child {
+  max-width: 760px;
+}
+
+.studioApp .stepHero .eyebrow,
+.studioApp .uCardHead > div > span,
+.studioApp .uField > span,
+.studioApp .uFormGrid label > span {
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 700 !important;
+  letter-spacing: .08em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.studioApp .stepHero h2 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-h1);
+  font-weight: 700;
+  letter-spacing: -.02em;
+  line-height: var(--line-h1);
+}
+
+.studioApp .stepHero p:not(.eyebrow) {
+  max-width: var(--content-reading);
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-large);
+  line-height: var(--line-body-large);
+}
+
+.studioApp .uCard,
+.studioApp .card {
+  min-width: 0;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-subtle) !important;
+  border-radius: var(--radius-panel) !important;
+  background: var(--color-surface-1) !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+}
+
+.studioApp .uCardHead {
+  margin: 0 0 var(--space-4);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.studioApp .uCardHead h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-h3);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: var(--line-h3);
+}
+
+.studioApp .uCardHead p {
+  max-width: var(--content-reading);
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+  line-height: var(--line-body);
+}
+
+.studioApp .uProjectStats div,
+.studioApp .uStatusGrid div,
+.exportSummary span,
+.analysisSummary > span {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-2);
+  box-shadow: none;
+}
+
+.blockedStepCard {
+  max-width: 640px;
+  margin: var(--space-7) auto;
+  padding: var(--space-6);
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface-1);
+}
+
+.blockedStepCard > svg {
+  color: var(--color-warning);
+}
+
+.blockedStepCard > span {
+  color: var(--color-warning);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+}
+
+.blockedStepCard h2,
+.blockedStepCard p {
+  margin: 0;
+}
+
+.blockedStepCard p {
+  color: var(--color-text-secondary);
+}
+
+/* Projects home */
+.projectsHome {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.projectStartCard,
+.currentProjectCard,
+.resumeTaskCard,
+.recentProjectsSection,
+.analysisCompleteCard,
+.youtubePublishSurface {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface-1);
+}
+
+.projectStartCard {
+  padding: var(--space-6);
+  display: grid;
+  grid-template-columns: minmax(240px, .75fr) minmax(0, 1.25fr);
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.projectStartCard h2,
+.currentProjectCard h2,
+.recentProjectsSection h2,
+.analysisCompleteCard h2 {
+  margin: 2px 0 var(--space-2);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-h2);
+  font-weight: 700;
+  line-height: var(--line-h2);
+}
+
+.projectStartCard p,
+.currentProjectCard p,
+.resumeTaskCard p,
+.analysisCompleteCard p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.sourceLaunchGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.sourceLaunch {
+  min-height: 96px;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-color: var(--color-border-subtle);
+  background: var(--color-surface-2);
+  text-align: left;
+}
+
+.sourceLaunch.primarySource {
+  border-color: color-mix(in srgb, var(--color-action-primary) 52%, transparent);
+  background: color-mix(in srgb, var(--color-action-primary) 11%, var(--color-surface-2));
+}
+
+.sourceLaunch > svg {
+  color: var(--color-ai);
+}
+
+.sourceLaunch > span {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.sourceLaunch b,
+.sourceLaunch small {
+  display: block;
+}
+
+.sourceLaunch b {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body);
+  font-weight: 700;
+}
+
+.sourceLaunch small {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-caption);
+}
+
+.resumeTaskCard {
+  padding: var(--space-4);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  border-color: color-mix(in srgb, var(--color-ai) 40%, var(--color-border-subtle));
+}
+
+.resumeTaskIcon,
+.recentProjectIcon,
+.sourceDropIcon,
+.completeIcon {
+  display: grid;
+  place-items: center;
+  color: var(--color-ai);
+}
+
+.resumeTaskCard > div:nth-child(2) {
+  min-width: 0;
+}
+
+.resumeTaskCard span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.resumeTaskCard h3 {
+  margin: 1px 0;
+  font-size: var(--font-size-body-large);
+}
+
+.currentProjectCard {
+  padding: var(--space-5);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.currentProjectStats {
+  display: flex;
+  gap: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.currentProjectStats span {
+  display: grid;
+}
+
+.currentProjectStats b {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-small);
+}
+
+.recentProjectsSection {
+  padding: var(--space-5);
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.sectionHeading h2,
+.sectionHeading h3 {
+  margin: 1px 0 0;
+}
+
+.sectionHeading button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.recentProjectGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.recentProjectRow {
+  min-width: 0;
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-color: transparent;
+  background: transparent;
+  text-align: left;
+}
+
+.recentProjectRow:hover:not(:disabled),
+.recentProjectRow.active {
+  border-color: var(--color-border-subtle);
+  background: var(--color-surface-2);
+}
+
+.recentProjectRow > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+}
+
+.recentProjectRow b,
+.recentProjectRow small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recentProjectRow small {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.recentProjectRow .rowArrow {
+  transform: rotate(-90deg);
+  color: var(--color-text-muted);
+}
+
+.emptyProjectState,
+.compactEmptyState {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.emptyProjectState b {
+  color: var(--color-text-primary);
+}
+
+/* Source */
+.compactTabs {
+  width: fit-content;
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 13px;
+  background: var(--color-surface-1);
+}
+
+.studioApp .compactTabs button {
+  min-width: 150px;
+  min-height: 48px;
+  padding: 7px 12px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-color: transparent;
+  border-radius: var(--radius-control);
+  background: transparent !important;
+  text-align: left;
+  box-shadow: none !important;
+}
+
+.studioApp .compactTabs button.active {
+  border-color: color-mix(in srgb, var(--color-action-primary) 48%, transparent) !important;
+  background: color-mix(in srgb, var(--color-action-primary) 13%, transparent) !important;
+}
+
+.compactTabs button > span {
+  display: grid;
+}
+
+.compactTabs b {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-small);
+}
+
+.compactTabs small {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.sourceLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.sourceContext {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.sourceDropzone {
+  width: 100%;
+  min-height: 108px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  background: var(--color-surface-2);
+}
+
+.sourceDropzone.selected {
+  justify-content: flex-start;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--color-success) 52%, transparent);
+  background: var(--color-success-surface);
+}
+
+.sourceDropzone > span:last-child {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-1);
+  text-align: left;
+}
+
+.sourceDropzone b,
+.sourceDropzone small {
+  overflow-wrap: anywhere;
+}
+
+.sourceDropzone small {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+}
+
+.studioApp .primaryActionRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.uAdvancedBox {
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-2);
+}
+
+.nativeFileField {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.systemReadyLine {
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-success) 38%, var(--color-border-subtle));
+  border-radius: var(--radius-panel);
+  background: var(--color-success-surface);
+  color: var(--color-success);
+}
+
+.systemReadyLine.checking {
+  border-color: var(--color-border-subtle);
+  background: var(--color-surface-1);
+  color: var(--color-info);
+}
+
+.systemReadyLine > div {
+  display: grid;
+}
+
+.systemReadyLine b {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-small);
+}
+
+.systemReadyLine span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+}
+
+.systemReadyLine button {
+  min-height: 36px;
+}
+
+/* Format */
+.formatPage {
+  max-width: var(--content-form);
+  margin: 0 auto;
+}
+
+.studioApp .uPresetGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.studioApp .uPreset {
+  position: relative;
+  min-height: 142px;
+  padding: var(--space-4);
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border-subtle) !important;
+  border-radius: var(--radius-panel);
+  background: var(--color-surface-1) !important;
+  color: var(--color-text-primary) !important;
+  box-shadow: none !important;
+  text-align: left;
+}
+
+.studioApp .uPreset.active {
+  border-color: var(--color-action-primary) !important;
+  background: color-mix(in srgb, var(--color-action-primary) 11%, var(--color-surface-1)) !important;
+}
+
+.uPreset > span {
+  color: var(--color-ai);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+}
+
+.uPreset > b {
+  font-size: var(--font-size-body-large);
+  line-height: var(--line-body-large);
+}
+
+.uPreset > small {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  line-height: var(--line-small);
+}
+
+.uPreset > i {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-action-primary);
+  font-size: var(--font-size-caption);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.styleSettingsCard {
+  max-width: 960px;
+}
+
+.pageActionBar {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.pageActionBar > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.pageActionBar > div:last-child {
+  display: flex;
+  grid-auto-flow: column;
+  align-items: center;
+  justify-content: end;
+  gap: var(--space-2);
+}
+
+.pageActionBar b {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body);
+}
+
+.pageActionBar span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.advancedSection {
+  border-style: dashed !important;
+}
+
+/* Analysis */
+.analysisPage {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.analysisSummary,
+.exportSummary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.analysisSummary > span,
+.exportSummary > span {
+  min-width: 0;
+  padding: var(--space-3);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "icon value" "icon label";
+  align-items: center;
+  column-gap: var(--space-2);
+}
+
+.analysisSummary svg {
+  grid-area: icon;
+  color: var(--color-success);
+}
+
+.analysisSummary .warning svg,
+.exportSummary .warning b {
+  color: var(--color-warning);
+}
+
+.analysisSummary b,
+.exportSummary b {
+  grid-area: value;
+  overflow: hidden;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analysisSummary small,
+.exportSummary small {
+  grid-area: label;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.uPreflight.ready {
+  border-color: color-mix(in srgb, var(--color-success) 38%, var(--color-border-subtle)) !important;
+}
+
+.uLiveStatus.active {
+  border-color: color-mix(in srgb, var(--color-action-primary) 52%, var(--color-border-subtle)) !important;
+}
+
+.analysisProgressValue {
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.analysisProgressValue b {
+  font-size: 34px;
+  line-height: 42px;
+}
+
+.analysisProgressValue span {
+  color: var(--color-text-secondary);
+}
+
+.studioApp .uProgressLine {
+  height: 8px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-surface-3);
+}
+
+.studioApp .uProgressLine > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-action-primary);
+  transition: width var(--motion-progress) linear;
+}
+
+.progressFacts {
+  margin-top: var(--space-3);
+}
+
+.analysisCompleteCard {
+  padding: var(--space-6);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-5);
+  border-color: color-mix(in srgb, var(--color-success) 44%, var(--color-border-subtle));
+  background: linear-gradient(135deg, var(--color-success-surface), var(--color-surface-1));
+}
+
+.completeIcon,
+.resultCheckmark {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--color-success-surface);
+  color: var(--color-success);
+}
+
+.analysisCompleteCard > div:nth-child(2) > span {
+  color: var(--color-success);
+  font-size: var(--font-size-small);
+  font-weight: 700;
+}
+
+/* Review Studio */
+.reviewPage {
+  max-width: var(--content-editor);
+}
+
+.studioApp .uTimelinePanel,
+.studioApp .uClipsPanel,
+.studioApp .uPreviewPanel {
+  background: var(--color-surface-1) !important;
+}
+
+.uTimelineClip {
+  min-width: 32px !important;
+  min-height: 32px;
+  top: 7px !important;
+}
+
+.studioApp.density-compact .uTimelineClip {
+  min-height: 32px;
+}
+
+.uTimelineClip span {
+  min-width: 18px;
+  font-size: var(--font-size-caption) !important;
+  font-weight: 700 !important;
+}
+
+.uTimelineTrack > div {
+  min-height: 48px;
+}
+
+.uMomentCard {
+  border-color: var(--color-border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-2);
+  box-shadow: none;
+}
+
+.uMomentCard.active {
+  border-color: var(--color-action-primary);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-action-primary) 24%, transparent);
+}
+
+.uMomentActions button {
+  min-height: 36px;
+  font-size: var(--font-size-small);
+}
+
+.uMomentActions .addAction {
+  border-color: color-mix(in srgb, var(--color-action-primary) 55%, transparent);
+  color: color-mix(in srgb, var(--color-action-primary) 30%, white);
+}
+
+.uFilterLine button {
+  min-height: 36px;
+  font-size: var(--font-size-small);
+}
+
+.reviewSelectionBar {
+  position: sticky;
+  bottom: var(--space-3);
+  z-index: 40;
+  margin: 0 auto;
+  width: min(760px, calc(100% - 24px));
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-panel);
+  background: var(--color-overlay);
+  box-shadow: var(--shadow-floating);
+  backdrop-filter: blur(18px);
+}
+
+.reviewSelectionBar > div {
+  display: grid;
+}
+
+.reviewSelectionBar span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+/* Export, Shorts and publishing */
+.exportPage {
+  max-width: var(--content-form);
+  margin: 0 auto;
+}
+
+.exportTabs {
+  width: fit-content;
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 13px;
+  background: var(--color-surface-1);
+}
+
+.exportTabs button {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-color: transparent;
+  background: transparent;
+}
+
+.exportTabs button.active {
+  border-color: color-mix(in srgb, var(--color-action-primary) 48%, transparent);
+  background: color-mix(in srgb, var(--color-action-primary) 13%, transparent);
+}
+
+.exportTabs button > span:not(.miniYoutubeMark) {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--color-surface-3);
+  font-size: var(--font-size-caption);
+}
+
+.miniYoutubeMark,
+.youtubeBrandMark {
+  display: inline-grid;
+  place-items: center;
+  border-radius: 6px;
+  background: #c50000;
+  color: #fff;
+}
+
+.miniYoutubeMark {
+  width: 23px;
+  height: 17px;
+  font-size: 9px;
+}
+
+.exportSummary > span {
+  display: grid;
+  grid-template-areas: "value" "label";
+}
+
+.exportSummary b {
+  font-size: var(--font-size-body-large);
+}
+
+.finalSuccessCard {
+  border-color: color-mix(in srgb, var(--color-success) 44%, var(--color-border-subtle)) !important;
+  background: linear-gradient(135deg, var(--color-success-surface), var(--color-surface-1)) !important;
+}
+
+.resultCheckmark {
+  display: grid;
+  place-items: center;
+}
+
+.finalSuccessCard::before,
+.successHistoryCard::before,
+.stableProfileCard::before {
+  display: none;
+}
+
+.shortsSetupGrid {
+  display: grid;
+  grid-template-columns: minmax(180px, .45fr) minmax(280px, 1fr);
+  gap: var(--space-3);
+}
+
+.shortsSetupGrid label,
+.youtubePublishGrid label {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.shortsSetupGrid label > span,
+.youtubePublishGrid label > span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+}
+
+.shortsOptions,
+.youtubeOptions {
+  margin-top: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.shortsOptions label,
+.youtubeOptions label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.shortsOutputList {
+  margin-top: var(--space-4);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.shortsOutputList > div {
+  min-width: 0;
+  padding: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-2);
+}
+
+.shortsOutputList span {
+  min-width: 0;
+  display: grid;
+}
+
+.shortsOutputList b,
+.shortsOutputList small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shortsOutputList small {
+  color: var(--color-text-muted);
+}
+
+.youtubePublishSurface {
+  padding: var(--space-5);
+}
+
+.youtubeChannelBar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.youtubeBrandMark {
+  width: 42px;
+  height: 30px;
+  font-size: 14px;
+}
+
+.youtubeChannelBar > div {
+  min-width: 0;
+}
+
+.youtubeChannelBar > div > span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.youtubeChannelBar h3 {
+  margin: 2px 0;
+  font-size: var(--font-size-h3);
+}
+
+.youtubeChannelBar p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.connectionBadge {
+  padding: 6px 9px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 999px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+}
+
+.connectionBadge.connected {
+  border-color: color-mix(in srgb, var(--color-success) 46%, transparent);
+  background: var(--color-success-surface);
+  color: var(--color-success);
+}
+
+.publishPrerequisite,
+.youtubeConnectPanel,
+.publishSafetySummary,
+.inlineIssue {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-2);
+}
+
+.publishPrerequisite > div,
+.youtubeConnectPanel > div,
+.publishSafetySummary > div,
+.inlineIssue {
+  min-width: 0;
+  flex: 1;
+}
+
+.publishPrerequisite b,
+.publishPrerequisite span,
+.youtubeConnectPanel b,
+.youtubeConnectPanel span,
+.publishSafetySummary b,
+.publishSafetySummary span,
+.inlineIssue b,
+.inlineIssue span {
+  display: block;
+}
+
+.publishPrerequisite span,
+.youtubeConnectPanel span,
+.publishSafetySummary span,
+.inlineIssue span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.inlineIssue.error {
+  border-color: color-mix(in srgb, var(--color-danger) 48%, transparent);
+  background: var(--color-danger-surface);
+}
+
+.studioApp .youtubePublishGrid {
+  margin-top: var(--space-5);
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr);
+  gap: var(--space-3);
+}
+
+.youtubePublishGrid .wide {
+  grid-column: 1 / -1;
+}
+
+.publishSafetySummary svg {
+  color: var(--color-success);
+}
+
+.publishActions > div:first-child {
+  display: flex;
+  flex-direction: row;
+}
+
+.youtubeAccountActions {
+  margin-top: var(--space-3);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.dangerText {
+  color: color-mix(in srgb, var(--color-danger) 42%, white) !important;
+}
+
+.youtubeUploadProgress {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--color-action-primary) 44%, transparent);
+  border-radius: var(--radius-control);
+  background: color-mix(in srgb, var(--color-action-primary) 9%, var(--color-surface-2));
+}
+
+.youtubeUploadProgress > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.youtubeResults {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.uploadResult {
+  min-width: 0;
+  margin: var(--space-2) 0 0;
+  padding: var(--space-3);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-2);
+}
+
+.uploadResult > span {
+  min-width: 0;
+  display: grid;
+}
+
+.uploadResult b,
+.uploadResult small {
+  overflow-wrap: anywhere;
+}
+
+.uploadResult a,
+.uploadResult small {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.successResult > svg {
+  color: var(--color-success);
+}
+
+.failedResult {
+  border-color: color-mix(in srgb, var(--color-danger) 42%, var(--color-border-subtle));
+}
+
+.failedResult > svg {
+  color: var(--color-danger);
+}
+
+/* Settings and diagnostics */
+.settingsPage,
+.uPage:has(.userReports) {
+  max-width: var(--content-form);
+  margin: 0 auto;
+}
+
+.settingsPage .settingsActionsCard .primaryActionRow {
+  justify-content: flex-end;
+}
+
+.settingsPage .uFormGrid {
+  gap: var(--space-3);
+}
+
+.settingsPage .settingsGridClean label {
+  padding: var(--space-3);
+  border-color: var(--color-border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-2);
+}
+
+/* Modal layer and onboarding */
+.firstRunOverlay {
+  z-index: var(--z-overlay);
+  background: color-mix(in srgb, var(--color-canvas) 86%, transparent);
+}
+
+.firstRunWizard {
+  border: 1px solid var(--color-border-default);
+  border-radius: 20px;
+  background: var(--color-surface-1);
+  box-shadow: var(--shadow-floating);
+}
+
+.firstRunWizard:focus {
+  outline: none;
+}
+
+.wizardConsent {
+  align-items: flex-start;
+}
+
+/* Compact density preserves legibility and target size. */
+.studioApp.density-compact button {
+  min-height: var(--control-compact);
+  padding: 8px 12px;
+  font-size: var(--font-size-small);
+}
+
+.studioApp.density-compact input,
+.studioApp.density-compact select {
+  min-height: var(--control-compact);
+  padding: 8px 10px;
+  font-size: var(--font-size-small);
+}
+
+.studioApp.density-compact input[type="checkbox"],
+.studioApp.density-compact input[type="radio"] {
+  min-height: 18px;
+  padding: 0;
+}
+
+.studioApp.density-compact .uCard {
+  padding: 20px;
+  border-radius: var(--radius-panel) !important;
+}
+
+.studioApp.density-compact .uCardHead > div > span,
+.studioApp.density-compact .uFormGrid label > span,
+.studioApp.density-compact .uField > span {
+  font-size: 11px;
+}
+
+.studioApp.density-compact .uMomentActions button,
+.studioApp.density-compact .uFilterLine button {
+  min-height: 36px;
+  font-size: var(--font-size-caption);
+}
+
+@media (max-width: 1280px) {
+  .studioTopbar.productHeader {
+    grid-template-columns: auto minmax(160px, 1fr) auto;
+  }
+
+  .brandCopy small {
+    display: none;
+  }
+
+  .workflowStepper ol {
+    width: 100%;
+  }
+
+  .projectStartCard {
+    grid-template-columns: 1fr;
+  }
+
+  .sourceLaunchGrid {
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+  }
+
+  .studioApp .uPresetGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1120px) {
+  .studioApp .studioLayout,
+  .studioApp.density-compact .studioLayout {
+    padding-right: var(--space-4);
+    padding-left: var(--space-4);
+  }
+
+  .workflowStepper {
+    margin-right: calc(var(--space-4) * -1);
+    margin-left: calc(var(--space-4) * -1);
+    padding-right: var(--space-4);
+    padding-left: var(--space-4);
+    overflow-x: auto;
+  }
+
+  .workflowStepper ol {
+    min-width: 760px;
+  }
+
+  .sourceLayout,
+  .uReviewStudioGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sourceContext {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .uPreviewPanel {
+    position: static;
+  }
+}
+
+@media (max-width: 900px) {
+  .studioTopbar.productHeader {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding-right: var(--space-3);
+    padding-left: var(--space-3);
+  }
+
+  .brandCopy {
+    display: none !important;
+  }
+
+  .projectIdentityButton {
+    display: grid;
+    justify-self: stretch;
+  }
+
+  .taskCenterButton span,
+  .headerWarning,
+  .accountPill b {
+    display: none;
+  }
+
+  .taskCenterButton {
+    width: 40px;
+    min-width: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .projectStartCard,
+  .currentProjectCard,
+  .analysisCompleteCard {
+    grid-template-columns: 1fr;
+  }
+
+  .currentProjectStats {
+    flex-wrap: wrap;
+  }
+
+  .sourceLaunchGrid,
+  .studioApp .uPresetGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sourceLaunch {
+    min-height: 72px;
+  }
+
+  .analysisSummary,
+  .exportSummary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .recentProjectGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .studioTopbar.productHeader {
+    min-height: 58px;
+    gap: var(--space-2);
+    padding: 7px var(--space-2);
+  }
+
+  .studioApp .brandIcon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .projectIdentityButton {
+    min-width: 0;
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+
+  .projectIdentityButton > svg:first-child,
+  .projectIdentityButton > svg:last-child,
+  .projectIdentityButton small {
+    display: none;
+  }
+
+  .headerActions {
+    gap: var(--space-1);
+  }
+
+  .headerActions .iconButton:nth-of-type(2) {
+    display: none;
+  }
+
+  .studioApp .jobBar.taskCenter,
+  .studioApp .noticeBanner {
+    width: calc(100% - 16px);
+    margin-top: var(--space-2);
+  }
+
+  .taskCenterHeader {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .taskCenterHeader .dangerBtn {
+    grid-column: 2 / -1;
+    justify-self: start;
+  }
+
+  .taskCenter .jobMain {
+    padding-left: 0;
+  }
+
+  .workflowStepper {
+    top: 58px;
+  }
+
+  .workflowStepper ol {
+    min-width: 650px;
+    grid-template-columns: repeat(5, 130px);
+  }
+
+  .workflowStepper .stepButton {
+    grid-template-columns: 28px minmax(0, 1fr);
+    padding-right: 7px;
+    padding-left: 7px;
+  }
+
+  .workflowStepper .stepNum {
+    width: 28px;
+    height: 28px;
+  }
+
+  .studioApp .studioLayout,
+  .studioApp.density-compact .studioLayout {
+    padding-right: var(--space-3);
+    padding-left: var(--space-3);
+  }
+
+  .workflowStepper {
+    margin-right: calc(var(--space-3) * -1);
+    margin-left: calc(var(--space-3) * -1);
+    padding-right: var(--space-3);
+    padding-left: var(--space-3);
+  }
+
+  .studioApp .stepHero {
+    padding-top: var(--space-4);
+    display: grid;
+    align-items: start;
+  }
+
+  .studioApp .stepHero h2 {
+    font-size: 24px;
+    line-height: 31px;
+  }
+
+  .studioApp .stepHero p:not(.eyebrow) {
+    font-size: var(--font-size-body);
+    line-height: var(--line-body);
+  }
+
+  .stepHeroActions,
+  .stepHeroActions button {
+    width: 100%;
+  }
+
+  .studioApp .uCard,
+  .studioApp.density-compact .uCard,
+  .projectStartCard,
+  .currentProjectCard,
+  .recentProjectsSection,
+  .analysisCompleteCard,
+  .youtubePublishSurface {
+    padding: var(--space-4);
+  }
+
+  .compactTabs {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .studioApp .compactTabs button {
+    min-width: 135px;
+  }
+
+  .sourceContext {
+    grid-template-columns: 1fr;
+  }
+
+  .pageActionBar,
+  .reviewSelectionBar,
+  .youtubeChannelBar {
+    align-items: stretch;
+    flex-direction: column;
+    display: flex;
+  }
+
+  .pageActionBar > div:last-child,
+  .publishActions > div:first-child {
+    display: grid;
+    grid-auto-flow: row;
+    justify-content: stretch;
+  }
+
+  .pageActionBar button,
+  .reviewSelectionBar button {
+    width: 100%;
+  }
+
+  .analysisSummary,
+  .exportSummary,
+  .shortsSetupGrid,
+  .studioApp .youtubePublishGrid,
+  .shortsOutputList {
+    grid-template-columns: 1fr;
+  }
+
+  .youtubePublishGrid .wide {
+    grid-column: auto;
+  }
+
+  .exportTabs {
+    width: 100%;
+  }
+
+  .exportTabs button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .youtubeChannelBar {
+    align-items: flex-start;
+  }
+
+  .connectionBadge {
+    align-self: flex-start;
+  }
+
+  .publishPrerequisite,
+  .youtubeConnectPanel,
+  .publishSafetySummary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .publishPrerequisite button,
+  .youtubeConnectPanel button {
+    width: 100%;
+  }
+
+  .reviewSelectionBar {
+    position: static;
+    width: 100%;
+  }
+
+  .firstRunOverlay {
+    padding: var(--space-2);
+  }
+}
+
+@media (forced-colors: active) {
+  .workflowStepper .stepButton.current,
+  .sourceDropzone.selected,
+  .finalSuccessCard,
+  .analysisCompleteCard {
+    border: 2px solid Highlight !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bootProgress i,
+  .taskCenterButton i {
+    animation: none;
+  }
+}

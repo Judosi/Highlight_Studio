@@ -1,0 +1,16 @@
+Highlight Studio 10.15.10
+Release: v10.15.10-ai-runtime
+Design: studio-audited-v11
+
+Главное:
+- Qwen3 8B сохранён.
+- Semantic Quality 10.15.9 сохранён.
+- Единый AI Runtime Controller.
+- Transport retry отделён от semantic retry.
+- Локальный JSON repair без отдельного Qwen repair-inference.
+- AI runtime trace + candidate decision trace.
+- GPU heavy-resource lease для Ollama/Whisper CUDA.
+- Hardware readiness: detected / runtime_ready / effective.
+
+Запуск: START_HERE.bat
+Проверка версии: VERIFY_RUNNING_VERSION.bat

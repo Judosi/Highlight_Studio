@@ -1,0 +1,8 @@
+Highlight Studio 10.15.5
+App: v10.15.5-analysis-start-hotfix
+Design: studio-audited-v11
+
+Отдельный hotfix поверх 10.15.4.
+Главная цель: восстановить надёжный запуск «Начать анализ» / one-click без блокирующего dashboard refresh, устранить несовместимый профиль safe и показывать реальные preflight-ошибки до запуска фоновой задачи.
+
+См. FUNCTIONAL_REMEDIATION_10.15.5_RU.md и CHANGE_REPORT_V10155_RU.md.

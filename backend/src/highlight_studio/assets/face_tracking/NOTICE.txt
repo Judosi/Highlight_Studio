@@ -1,0 +1,15 @@
+MediaPipe / BlazeFace Short Range
+Copyright Google LLC. Licensed under the Apache License, Version 2.0.
+The model is redistributed unmodified; its model card and license accompany it.
+Model downloaded 2026-09-16 from the official MediaPipe models catalog:
+https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite
+SHA-256: b4578f35940bf5a1a655214a1cce5cab13eba73c1297cd78e1a04c2380b0152f
+
+Project: https://github.com/google-ai-edge/mediapipe
+Documentation: https://developers.google.com/edge/mediapipe/solutions/vision/face_detector/python
+Model documentation: https://developers.google.com/edge/mediapipe/solutions/vision/face_detector
+
+Highlight Studio's adapter, camera smoothing and rendering/reporting logic are
+application code. They are not part of the upstream MediaPipe project.
+This detector locates faces; it does not identify people or determine who speaks.
+Small, turned-away or obscured faces may not be found (see MODEL_CARD.pdf).

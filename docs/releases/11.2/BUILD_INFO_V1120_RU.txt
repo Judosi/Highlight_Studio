@@ -1,0 +1,16 @@
+Highlight Studio 11.2.0
+Release: Runtime Safety + Atomic Shorts Admission + Portable Source Hardening
+App identity: v11.2.0-runtime-safety-atomic-shorts
+Design identity: studio-audited-v15
+Portable root: Highlight_Studio_11.2.0
+Project schema: 4
+Pipeline state schema: 2
+
+Ключевые гарантии:
+- вложенный lease одного GPU-ресурса в том же потоке не создаёт self-deadlock;
+- другие потоки и проекты по-прежнему соблюдают глобальный лимит GPU;
+- правка карточки Short и запуск её regeneration-job допускаются атомарно;
+- завершившаяся функция background job не оставляет статус running;
+- копия проекта использует локальный относительный исходник раньше старого абсолютного;
+- относительный source path не может выйти за корень проекта;
+- известный хороший Short сохраняет полный manifest row после неудачной замены.

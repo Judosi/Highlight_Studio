@@ -1,0 +1,392 @@
+/*
+ * Highlight Studio v10.15.7 — Large UI visual refresh.
+ * Final presentation layer loaded after all legacy styles. It intentionally
+ * owns the visible shell scale, spacing and major workflow surfaces so older
+ * compatibility CSS cannot make the product tiny or shift the layout.
+ */
+
+:root {
+  --v3-sidebar: 304px;
+  --v3-sidebar-compact: 88px;
+  --v3-commandbar: 70px;
+  --v3-content: 1580px;
+  --v3-editor: 1860px;
+  --v3-bg: #080a0f;
+  --v3-sidebar-bg: #0d1118;
+  --v3-surface: #121720;
+  --v3-surface-2: #171d27;
+  --v3-surface-3: #1d2531;
+  --v3-border: #2b3442;
+  --v3-border-strong: #3b4758;
+  --v3-text: #f7f8fb;
+  --v3-muted: #aab4c3;
+  --v3-faint: #7f8a9a;
+  --v3-accent: #8b5cf6;
+  --v3-accent-2: #5b7cff;
+  --v3-success: #45d18b;
+}
+
+html { font-size: 16px; }
+body {
+  background: var(--v3-bg) !important;
+  color: var(--v3-text);
+}
+body::before { opacity: .035 !important; }
+
+/* Stable shell geometry */
+.studioApp.studioAppV2,
+.studioApp.studioAppV2.density-comfortable,
+.studioApp.studioAppV2.density-compact {
+  min-height: 100dvh;
+  grid-template-columns: var(--v3-sidebar) minmax(0, 1fr);
+  background: var(--v3-bg);
+  font-size: 15px;
+}
+.studioApp.studioAppV2.sidebarIsCompact { grid-template-columns: var(--v3-sidebar-compact) minmax(0, 1fr); }
+
+.studioSidebar,
+.studioApp.studioAppV2 > .studioSidebar,
+.studioApp.studioAppV2.density-compact > .studioSidebar,
+.studioApp.studioAppV2.density-comfortable > .studioSidebar {
+  width: auto;
+  height: 100dvh;
+  padding: 18px 16px 16px;
+  border-right: 1px solid var(--v3-border);
+  background: var(--v3-sidebar-bg);
+  box-shadow: 12px 0 38px rgba(0,0,0,.16);
+}
+
+.sidebarBrandRow { min-height: 54px; padding: 0 4px 16px; gap: 12px; }
+.sidebarBrand { gap: 12px; }
+.sidebarBrandMark { width: 44px; height: 44px; border-radius: 14px; }
+.sidebarBrandMark svg { width: 22px; height: 22px; }
+.sidebarBrandText b { font-size: 19px; line-height: 22px; letter-spacing: -.035em; }
+.sidebarBrandText small { margin-top: 2px; font-size: 10px; line-height: 14px; letter-spacing: .18em; }
+.sidebarCollapse { width: 38px; height: 38px; min-height: 38px !important; border-radius: 10px; }
+
+.projectSwitcher { min-height: 66px; padding: 10px 11px; grid-template-columns: 40px minmax(0,1fr) auto; gap: 11px; border-radius: 13px; }
+.projectSwitcherIcon { width: 40px; height: 40px; border-radius: 11px; }
+.projectSwitcherCopy small { font-size: 11px; line-height: 15px; }
+.projectSwitcherCopy b { font-size: 14px; line-height: 20px; }
+.newProjectButton,
+.studioApp.studioAppV2 .newProjectButton { min-height: 48px; margin-top: 12px; border-radius: 12px; font-size: 14px; }
+
+.sidebarNavSection { margin-top: 24px; }
+.sidebarSectionLabel { padding: 0 9px 9px; font-size: 10px; line-height: 14px; letter-spacing: .14em; }
+.sidebarSectionHeading { padding: 0 9px 9px; }
+.sidebarSectionHeading small { font-size: 11px; }
+.sidebarNavItem,
+.studioApp.studioAppV2 .sidebarNavItem { min-height: 48px; padding: 9px 11px; gap: 11px; border-radius: 11px; font-size: 14px; }
+.sidebarNavItem > svg { width: 19px; height: 19px; }
+.workflowNavItem,
+.studioApp.studioAppV2 .workflowNavItem { min-height: 60px; grid-template-columns: 36px minmax(0,1fr) auto; gap: 10px; }
+.workflowNavIcon { width: 36px; height: 36px; border-radius: 10px; }
+.workflowNavIcon svg { width: 18px; height: 18px; }
+.workflowNavCopy b { font-size: 14px; line-height: 19px; }
+.workflowNavCopy small { font-size: 11px; line-height: 16px; }
+.workflowNavIndex { font-size: 10px; line-height: 16px; }
+.workflowNavItem.current::before { inset-block: 12px; width: 4px; }
+.sidebarProjectMini { margin-top: 16px; padding: 12px; gap: 10px; border-radius: 12px; }
+.sidebarProjectMini span { font-size: 10px; }
+.sidebarProjectMini b { font-size: 15px; }
+.sidebarBottomNav { padding-top: 20px; gap: 5px; }
+.sidebarFooter { min-height: 62px; margin-top: 12px; padding: 10px 6px; grid-template-columns: 36px minmax(0,1fr) auto; gap: 10px; }
+.sidebarAvatar { width: 36px; height: 36px; border-radius: 10px; font-size: 11px; }
+.sidebarFooter b { font-size: 12px; }
+.sidebarFooter small { margin-top: 2px; font-size: 10px; }
+
+/* Compact sidebar stays usable and always keeps its expand control visible. */
+.studioSidebar.compact { padding-inline: 14px; }
+.studioSidebar.compact .sidebarBrandRow { min-height: 104px; gap: 9px; }
+.studioApp.studioAppV2 .studioSidebar.compact .sidebarCollapse { width: 44px; height: 36px; min-height: 36px !important; }
+.studioSidebar.compact .sidebarBrandMark { width: 46px; height: 46px; }
+.studioSidebar.compact .projectSwitcher { grid-template-columns: 42px; min-height: 58px; }
+.studioSidebar.compact .projectSwitcherIcon { width: 42px; height: 42px; }
+.studioSidebar.compact .workflowNavItem { grid-template-columns: 38px; }
+.studioSidebar.compact .workflowNavIcon { width: 38px; height: 38px; }
+
+/* Top command bar */
+.studioCommandbar {
+  min-height: var(--v3-commandbar);
+  padding: 0 30px;
+  gap: 22px;
+  border-bottom-color: var(--v3-border);
+  background: rgba(10, 13, 18, .96);
+}
+.commandBreadcrumb { gap: 10px; font-size: 13px; }
+.commandBreadcrumb span { max-width: 360px; }
+.commandbarContext { gap: 18px; }
+.autosaveState, .engineState { font-size: 11px; }
+.commandbarActions { gap: 9px; }
+.commandbarActions .iconButton,
+.commandbarActions .taskCenterButton,
+.commandbarActions .accountPill,
+.commandbarActions .headerWarning { min-height: 40px; border-radius: 11px; font-size: 13px; }
+.commandbarActions .iconButton { width: 40px; min-width: 40px; padding: 0; }
+
+/* Workspace and page rhythm */
+.studioLayoutV2,
+.studioApp.studioAppV2 .studioLayoutV2 {
+  width: 100%;
+  padding: 42px 42px 80px;
+}
+.studioLayoutV2 .studioWorkspace,
+.studioApp.studioAppV2 .studioLayoutV2 .studioWorkspace {
+  width: min(var(--v3-content), 100%);
+  margin: 0 auto;
+}
+.studioLayoutV2.editorLayout { padding: 28px 32px 76px; }
+.studioLayoutV2.editorLayout .studioWorkspace,
+.studioApp.studioAppV2 .studioLayoutV2.editorLayout .studioWorkspace { width: min(var(--v3-editor), 100%); }
+.studioApp.studioAppV2 .uPage,
+.studioApp.studioAppV2.density-compact .uPage { gap: 24px; }
+
+/* Headings: larger, calmer hierarchy */
+.studioAppV2 .stepHero { padding: 0 0 10px; }
+.studioAppV2 .stepHero .eyebrow,
+.dashboardEyebrow,
+.sectionKicker,
+.studioApp .uCardHead > div > span,
+.studioApp .uField > span,
+.studioApp .uFormGrid label > span {
+  font-size: 11px !important;
+  line-height: 16px !important;
+  letter-spacing: .13em;
+}
+.studioAppV2 .stepHero h2 { font-size: clamp(36px, 2.7vw, 48px); line-height: 1.08; letter-spacing: -.04em; }
+.studioAppV2 .stepHero > div > p:last-child { max-width: 850px; margin-top: 10px; font-size: 16px; line-height: 25px; color: var(--v3-muted); }
+
+/* Common surfaces */
+.studioAppV2 .uCard,
+.studioAppV2 .projectStartCard,
+.studioAppV2 .currentProjectCard,
+.studioAppV2 .recentProjectsSection,
+.projectSpotlight,
+.newProjectPanel {
+  border-color: var(--v3-border) !important;
+  border-radius: 16px !important;
+  background: var(--v3-surface) !important;
+  box-shadow: 0 16px 42px rgba(0,0,0,.14) !important;
+}
+.studioApp .uCard { padding: 26px; }
+.studioApp .uCardHead { margin-bottom: 20px; gap: 18px; }
+.studioApp .uCardHead h3 { font-size: 21px; line-height: 28px; letter-spacing: -.015em; }
+.studioApp .uCardHead p { margin-top: 5px; font-size: 14px; line-height: 22px; }
+
+/* Project dashboard */
+.dashboardPageHeader { align-items: flex-end; gap: 30px; margin-bottom: 6px; }
+.dashboardPageHeader > div:first-child { max-width: 990px; }
+.dashboardPageHeader h1 { max-width: 980px; font-size: clamp(42px, 3.35vw, 56px); line-height: 1.06; letter-spacing: -.048em; }
+.dashboardPageHeader p { max-width: 900px; margin-top: 13px; font-size: 16px; line-height: 25px; }
+.dashboardHeaderActions { gap: 10px; padding-bottom: 4px; }
+.dashboardHeaderActions button { min-height: 46px !important; padding-inline: 17px !important; font-size: 14px !important; }
+.dashboardOverviewGrid { grid-template-columns: minmax(0, 1.7fr) minmax(390px, .72fr); gap: 20px; }
+.projectSpotlight { min-height: 430px; padding: 32px; }
+.spotlightEmptyState { min-height: 360px; }
+.spotlightEmptyIcon { width: 74px; height: 74px; margin-bottom: 20px; border-radius: 22px; }
+.spotlightEmptyIcon svg { width: 32px; height: 32px; }
+.spotlightEmptyState h2 { margin: 5px 0 10px; font-size: 28px; line-height: 35px; }
+.spotlightEmptyState p { max-width: 600px; margin-bottom: 26px; font-size: 14px; line-height: 22px; }
+.spotlightEmptyState button { min-height: 48px !important; padding-inline: 20px !important; }
+.projectSpotlight h2 { font-size: 30px; line-height: 37px; }
+.projectSpotlight p { font-size: 13px; line-height: 20px; }
+.projectStatusBadge { padding: 7px 11px; font-size: 10px; }
+.projectWorkflowPreview { margin: 36px 0 32px; }
+.projectWorkflowPreview button { min-height: 66px; gap: 7px; }
+.projectWorkflowPreview button span { width: 34px; height: 34px; font-size: 11px; }
+.projectWorkflowPreview button b { font-size: 11px; }
+.projectSpotlightStats { min-height: 92px; }
+.projectSpotlightStats small, .projectSpotlightStats span { font-size: 10px; }
+.projectSpotlightStats b { font-size: 25px; line-height: 31px; }
+.projectSpotlightStats b.textMetric { font-size: 15px; }
+.projectSpotlightActions { margin-top: 24px; gap: 10px; }
+
+.newProjectPanel { padding: 28px; }
+.newProjectPanelHead h2 { margin-top: 7px; font-size: 24px; line-height: 30px; }
+.newProjectPanelHead p { font-size: 13px; line-height: 20px; }
+.newProjectPanel .sourceLaunchGrid { margin-top: 22px; gap: 10px; }
+.newProjectPanel .sourceLaunch { min-height: 76px; padding: 12px; grid-template-columns: 44px minmax(0,1fr) auto; gap: 12px; border-radius: 12px; }
+.sourceLaunchIcon { width: 44px; height: 44px; border-radius: 12px; }
+.newProjectPanel .sourceLaunch b { font-size: 14px; line-height: 19px; }
+.newProjectPanel .sourceLaunch small { font-size: 11px; line-height: 16px; }
+.localPrivacyNote { padding-top: 18px; gap: 10px; }
+.localPrivacyNote b { font-size: 12px; }
+.localPrivacyNote small { font-size: 11px; }
+.dashboardRecent { padding: 26px; }
+.dashboardRecent .sectionHeading h2 { font-size: 23px; }
+.dashboardRecent .recentProjectGrid { gap: 10px; }
+.dashboardRecent .recentProjectRow { min-height: 72px; padding: 10px 12px; grid-template-columns: 48px minmax(0,1fr) auto auto; }
+.recentProjectThumb { width: 48px; height: 48px; }
+.recentProjectCopy b { font-size: 13px; }
+.recentProjectCopy small, .recentProjectState { font-size: 10px; }
+.emptyProjectState { min-height: 180px; gap: 9px; }
+.emptyProjectState b { font-size: 14px; }
+.emptyProjectState span { font-size: 13px; }
+
+/* Source page */
+.studioAppV2 .uSourceTabs { max-width: 760px; padding: 4px; gap: 4px; border-radius: 12px; }
+.studioAppV2 .uSourceTabs button { min-height: 58px; padding: 8px 16px; gap: 10px; border-radius: 9px; }
+.studioAppV2 .uSourceTabs button svg { width: 21px; height: 21px; }
+.studioAppV2 .uSourceTabs button b { font-size: 14px; line-height: 19px; }
+.studioAppV2 .uSourceTabs button small { font-size: 11px; line-height: 15px; }
+.studioAppV2 .sourceLayout { grid-template-columns: minmax(0, 1fr) 390px; gap: 20px; align-items: start; }
+.studioAppV2 .uSourceForm { min-height: 520px; padding: 28px; }
+.studioAppV2 .sourceContext { gap: 16px; position: sticky; top: calc(var(--v3-commandbar) + 24px); }
+.studioAppV2 .sourceDropzone { min-height: 210px; margin-bottom: 20px; border-radius: 14px; }
+.studioAppV2 .sourceDropIcon { width: 56px; height: 56px; border-radius: 16px; }
+.studioAppV2 .sourceDropIcon svg { width: 25px; height: 25px; }
+.sourceDropzone b { font-size: 16px; line-height: 22px; }
+.sourceDropzone small { font-size: 13px !important; line-height: 19px; }
+.systemReadyLine { min-height: 78px; padding: 16px 18px; gap: 14px; border-radius: 14px; }
+.systemReadyLine > svg { width: 20px; height: 20px; }
+.systemReadyLine b { font-size: 13px; line-height: 18px; }
+.systemReadyLine span { margin-top: 2px; font-size: 11px; line-height: 17px; }
+.systemReadyLine button { min-height: 40px !important; }
+
+/* Forms and controls: readable 1080p scale */
+.studioApp.studioAppV2 button,
+.studioApp.studioAppV2.density-compact button {
+  min-height: 44px;
+  padding: 10px 15px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 20px;
+}
+.studioApp.studioAppV2 input,
+.studioApp.studioAppV2 select,
+.studioApp.studioAppV2 textarea,
+.studioApp.studioAppV2.density-compact input,
+.studioApp.studioAppV2.density-compact select,
+.studioApp.studioAppV2.density-compact textarea {
+  min-height: 46px;
+  padding: 10px 13px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 21px;
+}
+.studioApp .uField,
+.studioApp .uFormGrid label { gap: 7px; }
+.studioApp .uFormGrid { gap: 16px; }
+.studioApp .primaryActionRow { margin-top: 18px; gap: 10px; }
+.studioApp .primaryActionRow button { min-width: 150px; }
+.studioApp .textButton { font-size: 13px; }
+.uAdvancedBox { padding: 20px; border-radius: 12px; }
+
+/* Workflow format + analysis */
+.studioAppV2 .uPresetGrid { gap: 16px !important; }
+.studioAppV2 .uPreset { min-height: 190px; padding: 20px; border-radius: 14px; }
+.studioAppV2 .uPreset > b { font-size: 16px; line-height: 22px; }
+.studioAppV2 .uPreset > small { font-size: 12px; line-height: 18px; }
+.presetVisual { height: 72px; }
+.analysisPipelineMap { gap: 12px; }
+.analysisPipelineMap > div { min-height: 84px; padding: 14px; border-radius: 12px; }
+.analysisPipelineMap b { font-size: 13px; }
+.analysisPipelineMap small { font-size: 11px; }
+
+/* Review/editor: keep dense enough for editing, but no microscopic text. */
+.studioAppV2 .uReviewStudioGrid { grid-template-columns: 390px minmax(0,1fr); gap: 14px; }
+.studioAppV2 .uToolbar { padding: 14px; }
+.studioAppV2 .uMomentList { max-height: 590px; padding: 10px; }
+.studioAppV2 .uMomentMain { min-height: 108px; }
+.studioAppV2 .uMomentBody > b { font-size: 13px; }
+.studioAppV2 .uMomentBody > p { font-size: 11px; line-height: 17px; }
+.clipWorkbench { grid-template-columns: minmax(0,1fr) 340px; }
+.clipPreviewViewport { min-height: 500px; padding: 22px; }
+.clipPreviewViewport .uMainClipPlayer { max-height: 570px; }
+.playerEmptyState b { font-size: 13px; }
+.playerEmptyState span { font-size: 11px; line-height: 17px; }
+.clipInspectorPanel { padding: 18px; }
+.inspectorHeading span { font-size: 9px; }
+.inspectorHeading b { font-size: 13px; }
+.clipInspectorPanel .uExplain b { font-size: 9px; }
+.clipInspectorPanel .uExplain p { font-size: 11px; line-height: 18px; }
+.inspectorActions button { min-height: 38px !important; font-size: 11px !important; }
+.studioAppV2 .editorTimelinePanel { padding: 16px 18px 20px; }
+.studioAppV2 .editorTimelinePanel .uCardHead h3 { font-size: 14px; }
+.studioAppV2 .editorTimelinePanel .uCardHead p { font-size: 11px; }
+
+/* Status / empty states */
+.projectCount { padding: 6px 9px; font-size: 10px; }
+.noticeBanner { font-size: 13px; }
+.blockedStepCard { max-width: 720px; padding: 36px; }
+.blockedStepCard h2 { font-size: 28px; }
+.blockedStepCard p { font-size: 15px; line-height: 23px; }
+
+/* Responsive: reduce shell before collapsing it, never crush content. */
+@media (max-width: 1500px) {
+  :root { --v3-sidebar: 280px; }
+  .studioLayoutV2, .studioApp.studioAppV2 .studioLayoutV2 { padding-inline: 30px; }
+  .dashboardOverviewGrid { grid-template-columns: minmax(0,1.55fr) minmax(350px,.72fr); }
+  .studioAppV2 .sourceLayout { grid-template-columns: minmax(0,1fr) 350px; }
+}
+
+@media (max-width: 1240px) {
+  :root { --v3-sidebar: 260px; }
+  .dashboardOverviewGrid { grid-template-columns: 1fr; }
+  .newProjectPanel .sourceLaunchGrid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .newProjectPanel .sourceLaunch { min-height: 104px; grid-template-columns: 44px minmax(0,1fr); align-content: center; }
+  .newProjectPanel .sourceLaunch > svg { display: none; }
+  .studioAppV2 .sourceLayout { grid-template-columns: 1fr; }
+  .studioAppV2 .sourceContext { position: static; grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+
+@media (max-width: 980px) {
+  .studioApp.studioAppV2,
+  .studioApp.studioAppV2.sidebarIsCompact { grid-template-columns: 1fr; }
+  .studioSidebar, .studioSidebar.compact { width: min(330px, 88vw); }
+  .studioLayoutV2, .studioApp.studioAppV2 .studioLayoutV2 { padding: 28px 22px 64px; }
+  .dashboardPageHeader { align-items: flex-start; flex-direction: column; }
+  .dashboardPageHeader h1 { font-size: clamp(36px, 7vw, 48px); }
+  .dashboardHeaderActions { width: 100%; }
+  .studioAppV2 .sourceContext { grid-template-columns: 1fr; }
+  .studioAppV2 .uReviewStudioGrid { grid-template-columns: 1fr; }
+  .clipWorkbench { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 700px) {
+  .studioCommandbar { padding-inline: 14px; }
+  .studioLayoutV2, .studioApp.studioAppV2 .studioLayoutV2 { padding: 22px 14px 52px; }
+  .studioAppV2 .stepHero h2 { font-size: 32px; }
+  .dashboardPageHeader h1 { font-size: 36px; }
+  .newProjectPanel .sourceLaunchGrid { grid-template-columns: 1fr; }
+  .studioAppV2 .uSourceTabs { max-width: none; display: grid; grid-template-columns: 1fr; }
+  .studioApp .uCard, .studioAppV2 .uSourceForm, .projectSpotlight, .newProjectPanel { padding: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studioAppV2 *, .studioAppV2 *::before, .studioAppV2 *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+
+/* v10.15.7 — keep Twitch VOD import visually stable inside the Source step. */
+.twitchInlineStatus{margin:18px 0 4px;padding:18px;border:1px solid rgba(108,123,160,.28);border-radius:14px;background:rgba(13,19,34,.72);display:grid;gap:13px}
+.twitchInlineStatus.running{border-color:rgba(79,118,255,.5);background:linear-gradient(135deg,rgba(51,74,160,.16),rgba(13,19,34,.78))}
+.twitchInlineStatus.ready{border-color:rgba(38,201,137,.42);background:rgba(13,76,55,.16)}
+.twitchInlineStatusHead{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:12px;align-items:center}
+.twitchInlineDot{width:12px;height:12px;border-radius:50%;background:#74809a;box-shadow:0 0 0 5px rgba(116,128,154,.08)}
+.twitchInlineStatus.running .twitchInlineDot{background:#32d583;box-shadow:0 0 0 5px rgba(50,213,131,.11)}
+.twitchInlineStatus.ready .twitchInlineDot{background:#32d583}
+.twitchInlineStatusHead b{display:block;font-size:15px;line-height:21px}
+.twitchInlineStatusHead small{display:block;margin-top:3px;color:var(--v3-muted);font-size:12px;line-height:18px}
+.twitchInlineStatusHead strong{font-size:15px;color:#dbe4ff}
+.twitchInlineProgress{height:8px;border-radius:999px;background:#162138;overflow:hidden}
+.twitchInlineProgress i{display:block;height:100%;min-width:2px;border-radius:inherit;background:linear-gradient(90deg,#4977ff,#7658ff);transition:width .25s ease}
+.twitchInlineActions{display:flex;justify-content:flex-end;gap:9px}
+.turboHint{margin:14px 0 0;padding:12px 14px;border-radius:10px;background:rgba(79,118,255,.08);border:1px solid rgba(79,118,255,.18);color:var(--v3-muted);font-size:12px;line-height:18px}
+.turboHint b{color:#dbe4ff}
+@media(max-width:700px){.twitchInlineStatusHead{grid-template-columns:14px minmax(0,1fr)}.twitchInlineStatusHead strong{grid-column:2}.twitchInlineActions{justify-content:stretch}.twitchInlineActions button{width:100%}}
+
+/* v10.15.7 — task center must follow v3 shell geometry, not legacy v2 sidebar offsets. */
+.studioApp.studioAppV2 .jobBar.taskCenter,
+.studioApp.studioAppV2.sidebarIsCompact .jobBar.taskCenter {
+  left: auto !important;
+  width: min(1180px, calc(100% - 84px)) !important;
+  margin: 18px auto 0 !important;
+}
+@media (max-width: 900px) {
+  .studioApp.studioAppV2 .jobBar.taskCenter,
+  .studioApp.studioAppV2.sidebarIsCompact .jobBar.taskCenter {
+    width: calc(100% - 28px) !important;
+    margin-top: 14px !important;
+  }
+}

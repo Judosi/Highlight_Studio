@@ -1,0 +1,16 @@
+Highlight Studio 11.2.3
+
+App identity: v11.2.3-micro-ai-recovery-integrity
+Design identity: studio-audited-v15
+Portable root: Highlight_Studio_11.2.3
+
+Ключевая проверка на предоставленном проекте:
+- исходное видео: 2:01:00;
+- целевая длительность: 32 минуты;
+- Micro AI: 56 из 144 окон (38,89%);
+- прежний ошибочный результат: 13 фрагментов / 5:42 со статусом done;
+- причина: два ReadTimeout на batch 8, открытый circuit breaker и пропуск batch 9–18.
+
+Исправлено: нормализованный AITransportError, bounded warmup recovery, адаптивный single-window режим, безопасный batch 4 для 16 ГБ / 4–6 ГБ VRAM, checkpoint-resume и fail-closed защита при покрытии ниже 90%.
+
+Проверка кода: 421 backend/regression tests + 83 frontend contract tests + 10 Electron security tests.

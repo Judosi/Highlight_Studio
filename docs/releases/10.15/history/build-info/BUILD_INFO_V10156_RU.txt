@@ -1,0 +1,17 @@
+Highlight Studio 10.15.6 — Hardware Auto Optimizer
+
+Release identity: v10.15.6-hardware-auto
+Design identity: studio-audited-v11
+
+Основные изменения:
+- автоматическое определение CPU, RAM, NVIDIA GPU и VRAM;
+- фактическая проверка CTranslate2 CUDA и поддерживаемых compute types;
+- реальный runtime-test FFmpeg NVENC перед его выбором;
+- Auto-профиль для любого ПК вместо жёсткой привязки к GTX 1050 Ti;
+- Whisper Auto -> CUDA при готовом runtime, иначе безопасный CPU/int8;
+- точная диагностика CUDA fallback в whisper_runtime.json;
+- ограничение CPU workers и GPU jobs для предотвращения oversubscription/OOM;
+- NVENC в final render, preview, Shorts и HLS там, где он реально работает;
+- безопасный libx264 fallback при ошибке hardware encoder;
+- автоматическая попытка установить NVIDIA runtime в приватную .venv на Windows;
+- старые проекты 10.15.5 автоматически мигрируют на portable Auto-настройки.

@@ -1,0 +1,199 @@
+{
+  "ok": true,
+  "app_version": "v11.2.7-quality-recovery-audit",
+  "ready_for_mass_release": false,
+  "score": 19,
+  "blocker_count": 21,
+  "warning_count": 4,
+  "checks": [
+    {
+      "id": "license_public_key",
+      "ok": false,
+      "severity": "blocker",
+      "message": "Не настроен корректный публичный ключ лицензии."
+    },
+    {
+      "id": "url_license_server",
+      "ok": false,
+      "severity": "blocker",
+      "message": "license_server: не настроен безопасный HTTPS URL."
+    },
+    {
+      "id": "url_checkout",
+      "ok": false,
+      "severity": "blocker",
+      "message": "checkout: не настроен безопасный HTTPS URL."
+    },
+    {
+      "id": "url_account",
+      "ok": false,
+      "severity": "warning",
+      "message": "account: не настроен безопасный HTTPS URL."
+    },
+    {
+      "id": "url_support",
+      "ok": false,
+      "severity": "blocker",
+      "message": "support: не настроен безопасный HTTPS URL."
+    },
+    {
+      "id": "url_privacy",
+      "ok": false,
+      "severity": "blocker",
+      "message": "privacy: не настроен безопасный HTTPS URL."
+    },
+    {
+      "id": "url_terms",
+      "ok": false,
+      "severity": "blocker",
+      "message": "terms: не настроен безопасный HTTPS URL."
+    },
+    {
+      "id": "url_telemetry",
+      "ok": false,
+      "severity": "warning",
+      "message": "telemetry: не настроен безопасный HTTPS URL."
+    },
+    {
+      "id": "url_feedback",
+      "ok": false,
+      "severity": "warning",
+      "message": "feedback: не настроен безопасный HTTPS URL."
+    },
+    {
+      "id": "url_crash_reports",
+      "ok": false,
+      "severity": "warning",
+      "message": "crash_reports: не настроен безопасный HTTPS URL."
+    },
+    {
+      "id": "url_updates",
+      "ok": false,
+      "severity": "blocker",
+      "message": "updates: не настроен безопасный HTTPS URL."
+    },
+    {
+      "id": "legal_privacy",
+      "ok": true,
+      "severity": "info",
+      "message": "PRIVACY_POLICY_RU.md: готов."
+    },
+    {
+      "id": "legal_terms",
+      "ok": true,
+      "severity": "info",
+      "message": "TERMS_OF_USE_RU.md: готов."
+    },
+    {
+      "id": "legal_eula",
+      "ok": true,
+      "severity": "info",
+      "message": "EULA_RU.md: готов."
+    },
+    {
+      "id": "legal_refund",
+      "ok": true,
+      "severity": "info",
+      "message": "REFUND_POLICY_RU.md: готов."
+    },
+    {
+      "id": "legal_third_party",
+      "ok": true,
+      "severity": "info",
+      "message": "THIRD_PARTY_NOTICES.md: готов."
+    },
+    {
+      "id": "sales_website",
+      "ok": true,
+      "severity": "blocker",
+      "message": "Сайт продажи присутствует."
+    },
+    {
+      "id": "benchmark_sample",
+      "ok": false,
+      "severity": "blocker",
+      "message": "Benchmark: 0 VOD; для mass release нужно минимум 30."
+    },
+    {
+      "id": "benchmark_moment_recall_percent",
+      "ok": false,
+      "severity": "blocker",
+      "message": "moment_recall_percent: нет данных; цель ≥80.0%."
+    },
+    {
+      "id": "benchmark_usable_candidates_percent",
+      "ok": false,
+      "severity": "blocker",
+      "message": "usable_candidates_percent: нет данных; цель ≥65.0%."
+    },
+    {
+      "id": "benchmark_duplicate_candidates_percent",
+      "ok": false,
+      "severity": "blocker",
+      "message": "duplicate_candidates_percent: нет данных; цель ≤5.0%."
+    },
+    {
+      "id": "benchmark_cut_context_percent",
+      "ok": false,
+      "severity": "blocker",
+      "message": "cut_context_percent: нет данных; цель ≤10.0%."
+    },
+    {
+      "id": "benchmark_render_success_percent",
+      "ok": false,
+      "severity": "blocker",
+      "message": "render_success_percent: нет данных; цель ≥98.0%."
+    },
+    {
+      "id": "benchmark_project_success_percent",
+      "ok": false,
+      "severity": "blocker",
+      "message": "project_success_percent: нет данных; цель ≥98.0%."
+    },
+    {
+      "id": "benchmark_median_time_saved_percent",
+      "ok": false,
+      "severity": "blocker",
+      "message": "median_time_saved_percent: нет данных; цель ≥50.0%."
+    },
+    {
+      "id": "evidence_windows",
+      "ok": false,
+      "severity": "blocker",
+      "message": "Проверено Windows-устройств: 0/10."
+    },
+    {
+      "id": "evidence_sessions",
+      "ok": false,
+      "severity": "blocker",
+      "message": "Пользовательских сессий: 3/100."
+    },
+    {
+      "id": "evidence_crash_free",
+      "ok": false,
+      "severity": "blocker",
+      "message": "Crash-free sessions: 100.0% (цель ≥99%)."
+    },
+    {
+      "id": "evidence_signed",
+      "ok": false,
+      "severity": "blocker",
+      "message": "Нет подтверждения цифровой подписи."
+    },
+    {
+      "id": "evidence_installer",
+      "ok": false,
+      "severity": "blocker",
+      "message": "Installer ещё не подтверждён на чистой Windows."
+    },
+    {
+      "id": "evidence_update",
+      "ok": false,
+      "severity": "blocker",
+      "message": "Обновление/rollback ещё не подтверждены."
+    }
+  ],
+  "benchmark": {},
+  "evidence": {},
+  "message": "Mass release заблокирован: 21 обязательных условий не выполнено."
+}

@@ -1,0 +1,4 @@
+Highlight Studio 11.0.0
+Release: Shorts Quality Engine V5 + Robust AI Recovery
+App identity: v11.0.0-shorts-quality-engine-v5
+Portable root: Highlight_Studio_11.0.0

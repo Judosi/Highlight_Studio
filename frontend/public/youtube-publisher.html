@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Publisher · Highlight Studio</title>
+  <link rel="stylesheet" href="/youtube-publisher.css" />
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div><a class="back" href="/">← Highlight Studio</a><span class="eyebrow">YouTube Data API</span><h1>YouTube Publisher</h1><p>Загрузка готовых нарезок и Shorts прямо из проекта.</p></div>
+      <div id="channelBadge" class="badge warn" role="status" aria-live="polite">Не подключён</div>
+    </header>
+
+    <div id="notice" class="notice hidden" role="status" aria-live="polite"></div>
+
+    <section class="card" id="connectCard">
+      <div class="head"><div><span>Шаг 1</span><h2>Подключение канала</h2><p>Используется OAuth 2.0. Пароль Google не передаётся приложению.</p></div></div>
+      <div class="row">
+        <label class="fileButton">Выбрать OAuth JSON<input id="credentialsFile" type="file" accept="application/json,.json" hidden /></label>
+        <button id="connectButton" class="primary">Подключить канал</button>
+        <button id="refreshChannelButton">Обновить статус</button>
+        <button id="disconnectButton">Отключить</button>
+      </div>
+      <p id="channelInfo" class="muted">Сначала загрузите OAuth Client JSON типа Desktop app из Google Cloud.</p>
+    </section>
+
+    <section class="card">
+      <div class="head"><div><span>Шаг 2</span><h2>Выбор готового видео</h2><p>Доступны только файлы, которые Highlight Studio создал в outputs.</p></div></div>
+      <div class="grid two">
+        <label><span>Проект</span><select id="projectSelect"><option value="">Выберите проект</option></select></label>
+        <label><span>Файл</span><select id="fileSelect"><option value="">Выберите видео</option></select></label>
+      </div>
+      <div class="stats" id="fileStats">Готовые видео ещё не загружены.</div>
+    </section>
+
+    <section class="card">
+      <div class="head"><div><span>Шаг 3</span><h2>Параметры публикации</h2><p>Для безопасности по умолчанию выбран приватный доступ.</p></div><button id="fillMetadataButton">Взять из Creator Pack</button></div>
+      <div class="grid two">
+        <label class="wide"><span>Название</span><input id="titleInput" maxlength="100" placeholder="Название видео" /></label>
+        <label><span>Доступ</span><select id="privacySelect"><option value="private">Приватное</option><option value="unlisted">По ссылке</option><option value="public">Публичное</option></select></label>
+        <label><span>Категория</span><select id="categorySelect"><option value="22">Люди и блоги</option><option value="20">Игры</option><option value="24">Развлечения</option><option value="23">Юмор</option><option value="27">Образование</option><option value="17">Спорт</option></select></label>
+        <label class="wide"><span>Описание</span><textarea id="descriptionInput" maxlength="5000" rows="7" placeholder="Описание видео"></textarea></label>
+        <label class="wide"><span>Теги через запятую</span><input id="tagsInput" placeholder="стрим, нарезка, реакции" /></label>
+      </div>
+      <div class="checks">
+        <label><input id="notifyInput" type="checkbox" /> Уведомить подписчиков</label>
+        <label><input id="kidsInput" type="checkbox" /> Контент для детей</label>
+        <label><input id="syntheticInput" type="checkbox" /> Есть реалистичный изменённый/AI-контент</label>
+      </div>
+      <div class="row actions">
+        <button id="uploadSelectedButton" class="success">Загрузить выбранное</button>
+        <button id="uploadShortsButton">Загрузить все Shorts</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head"><div><span>Статус</span><h2 id="jobTitle">Ожидание загрузки</h2><p id="jobMessage">После запуска здесь появится прогресс.</p></div><button id="refreshReportButton">Обновить</button></div>
+      <div id="uploadProgress" class="progress" role="progressbar" aria-label="Прогресс загрузки на YouTube" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="progressBar"></i></div>
+      <div id="results" class="results" aria-live="polite"></div>
+    </section>
+  </main>
+  <script type="module" src="/youtube-publisher.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> highlight-studio-desktop@11.2.7 test
+> node --test tests/*.test.js
+
+✔ desktop IPC accepts only existing paths and supported video files (3.210799ms)
+✔ sameOrigin compares parsed origins instead of an unsafe string prefix (2.896144ms)
+✔ application backend URL is restricted to loopback HTTP(S) (1.148669ms)
+✔ update feed requires HTTPS and rejects embedded credentials (0.485415ms)
+✔ external links allow only explicit browser/mail protocols (0.491265ms)
+✔ health payload must belong to the exact compatible app version (0.579489ms)
+✔ external commerce links reject insecure HTTP and embedded credentials (0.345593ms)
+✔ release channel configuration uses explicit stable and beta URLs (0.547219ms)
+✔ current release identity matches backend/design contract (0.385308ms)
+✔ packaged Electron resources include canonical release identity (0.857056ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 242.865846

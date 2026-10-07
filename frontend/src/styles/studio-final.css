@@ -1,0 +1,2204 @@
+/*
+ * Highlight Studio v10.15.7 — audited production workspace.
+ * This is the ONLY post-v3 design layer loaded by the packaged frontend.
+ * It consolidates the former v4/v5/v6/v7 patches and ends with a strict
+ * geometry owner so older CSS cannot move the shell or workflow pages.
+ */
+
+/* ==== merged from studio-v4.css ==== */
+/*
+ * Highlight Studio v10.15.7 — Workspace UX redesign.
+ * Loaded LAST. This layer deliberately owns the visible workflow geometry.
+ * Goal: one coherent desktop app, readable at 1920x1080 and still safe on laptops.
+ */
+
+:root {
+  --v4-sidebar: 286px;
+  --v4-sidebar-compact: 82px;
+  --v4-topbar: 64px;
+  --v4-content: 1500px;
+  --v4-editor: 1840px;
+  --v4-bg: #080b10;
+  --v4-panel: #10151d;
+  --v4-panel-2: #131a24;
+  --v4-panel-3: #182130;
+  --v4-border: #263142;
+  --v4-border-soft: #1e2734;
+  --v4-text: #f5f7fb;
+  --v4-text-2: #b8c2d1;
+  --v4-text-3: #8390a2;
+  --v4-accent: #7c5cff;
+  --v4-accent-2: #4f7cff;
+  --v4-accent-soft: rgba(124, 92, 255, .13);
+  --v4-success: #40d68b;
+  --v4-warning: #f7bd3e;
+  --v4-danger: #f06a7d;
+  --v4-shadow: 0 18px 48px rgba(0, 0, 0, .18);
+}
+
+html { font-size: 16px; }
+body { background: var(--v4-bg) !important; }
+
+/* --------------------------------------------------------------------------
+   APP SHELL
+   -------------------------------------------------------------------------- */
+.studioApp.studioAppV2,
+.studioApp.studioAppV2.density-comfortable,
+.studioApp.studioAppV2.density-compact {
+  grid-template-columns: var(--v4-sidebar) minmax(0, 1fr) !important;
+  background: var(--v4-bg) !important;
+  color: var(--v4-text);
+  font-size: 15px;
+}
+.studioApp.studioAppV2.sidebarIsCompact {
+  grid-template-columns: var(--v4-sidebar-compact) minmax(0, 1fr) !important;
+}
+
+.studioApp.studioAppV2 > .studioSidebar {
+  background: #0c1119 !important;
+  border-right: 1px solid var(--v4-border-soft) !important;
+  box-shadow: 10px 0 34px rgba(0, 0, 0, .14) !important;
+}
+
+.studioCommandbar {
+  min-height: var(--v4-topbar) !important;
+  padding: 0 28px !important;
+  background: rgba(9, 12, 17, .98) !important;
+  border-bottom: 1px solid var(--v4-border-soft) !important;
+}
+.commandBreadcrumb { font-size: 13px !important; }
+.commandbarActions button { min-height: 40px !important; }
+
+.studioLayoutV2,
+.studioApp.studioAppV2 .studioLayoutV2 {
+  padding: 28px 34px 76px !important;
+}
+.studioLayoutV2 .studioWorkspace,
+.studioApp.studioAppV2 .studioLayoutV2 .studioWorkspace {
+  width: min(var(--v4-content), 100%) !important;
+  margin: 0 auto !important;
+}
+.studioLayoutV2.editorLayout .studioWorkspace,
+.studioApp.studioAppV2 .studioLayoutV2.editorLayout .studioWorkspace {
+  width: min(var(--v4-editor), 100%) !important;
+}
+
+.studioApp.studioAppV2 .uPage,
+.studioApp.studioAppV2.density-compact .uPage {
+  gap: 18px !important;
+}
+
+/* --------------------------------------------------------------------------
+   CONSISTENT TYPOGRAPHY / SURFACES
+   -------------------------------------------------------------------------- */
+.studioAppV2 .stepHero {
+  margin: 0 !important;
+  padding: 22px 24px !important;
+  border: 1px solid var(--v4-border-soft);
+  border-radius: 16px;
+  background: linear-gradient(120deg, rgba(20, 28, 42, .92), rgba(14, 19, 28, .9));
+  box-shadow: 0 10px 32px rgba(0, 0, 0, .1);
+}
+.studioAppV2 .stepHero h2 {
+  margin-top: 5px !important;
+  font-size: clamp(32px, 2.35vw, 42px) !important;
+  line-height: 1.06 !important;
+  letter-spacing: -.04em !important;
+}
+.studioAppV2 .stepHero > div > p:last-child {
+  margin-top: 7px !important;
+  max-width: 880px !important;
+  color: var(--v4-text-2) !important;
+  font-size: 15px !important;
+  line-height: 22px !important;
+}
+.studioAppV2 .stepHero .eyebrow,
+.dashboardEyebrow,
+.sectionKicker,
+.studioApp .uCardHead > div > span,
+.studioApp .uField > span,
+.studioApp .uFormGrid label > span {
+  color: #8ea5ff !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  line-height: 14px !important;
+  letter-spacing: .14em !important;
+}
+
+.studioAppV2 .uCard,
+.projectStartCard,
+.currentProjectCard,
+.recentProjectsSection,
+.projectSpotlight,
+.newProjectPanel {
+  border: 1px solid var(--v4-border) !important;
+  border-radius: 16px !important;
+  background: var(--v4-panel) !important;
+  box-shadow: var(--v4-shadow) !important;
+}
+.studioApp .uCard { padding: 22px !important; }
+.studioApp .uCardHead { margin-bottom: 16px !important; }
+.studioApp .uCardHead h3 {
+  font-size: 20px !important;
+  line-height: 26px !important;
+}
+.studioApp .uCardHead p {
+  font-size: 13px !important;
+  line-height: 20px !important;
+  color: var(--v4-text-2) !important;
+}
+
+.studioApp.studioAppV2 button,
+.studioApp.studioAppV2 input,
+.studioApp.studioAppV2 select,
+.studioApp.studioAppV2 textarea {
+  font-size: 14px !important;
+}
+.studioApp.studioAppV2 button:not(.iconButton):not(.sidebarNavItem):not(.sidebarCollapse) {
+  min-height: 42px !important;
+  border-radius: 10px !important;
+}
+.studioApp.studioAppV2 input,
+.studioApp.studioAppV2 select {
+  min-height: 48px !important;
+  padding: 10px 13px !important;
+  border-radius: 10px !important;
+  background: #0b1017 !important;
+  border-color: #344052 !important;
+}
+.studioApp.studioAppV2 textarea {
+  min-height: 120px;
+  background: #0b1017 !important;
+  border-color: #344052 !important;
+}
+.studioApp.studioAppV2 input:focus,
+.studioApp.studioAppV2 select:focus,
+.studioApp.studioAppV2 textarea:focus {
+  border-color: #7085ff !important;
+  box-shadow: 0 0 0 3px rgba(92, 112, 255, .15) !important;
+}
+
+/* --------------------------------------------------------------------------
+   TASK CENTER — active tasks are visible; completed tasks stop eating the page
+   -------------------------------------------------------------------------- */
+.studioApp.studioAppV2 .jobBar.taskCenter,
+.studioApp.studioAppV2.sidebarIsCompact .jobBar.taskCenter {
+  width: min(1320px, calc(100% - 68px)) !important;
+  margin: 14px auto 0 !important;
+  padding: 15px 18px !important;
+  border-radius: 14px !important;
+  border-color: var(--v4-border) !important;
+  background: #0e1520 !important;
+}
+.taskCenterHeader b { font-size: 14px !important; }
+.taskCenterHeader span { font-size: 12px !important; }
+.taskCenter .jobMain { padding-top: 12px !important; gap: 9px !important; }
+.taskCenter.done,
+.taskCenter.cancelled {
+  padding: 12px 16px !important;
+  background: #0d1717 !important;
+  border-color: rgba(64, 214, 139, .28) !important;
+}
+.taskCenter.done .jobMain,
+.taskCenter.cancelled .jobMain { display: none !important; }
+.taskCenter.done .taskCenterHeader > div:nth-child(2) span { color: #8fbda8 !important; }
+
+/* --------------------------------------------------------------------------
+   FORMAT — rebuilt as one coherent screen
+   -------------------------------------------------------------------------- */
+.formatPage { align-content: start !important; }
+.formatPage .stepHero { margin-bottom: 0 !important; }
+
+.studioAppV2 .formatPage .uPresetGrid {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+}
+.studioAppV2 .formatPage .uPreset {
+  position: relative;
+  min-width: 0 !important;
+  min-height: 154px !important;
+  padding: 17px !important;
+  gap: 8px !important;
+  border: 1px solid var(--v4-border) !important;
+  border-radius: 14px !important;
+  background: var(--v4-panel) !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+.studioAppV2 .formatPage .uPreset:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  border-color: #53627a !important;
+  background: #151d28 !important;
+}
+.studioAppV2 .formatPage .uPreset.active {
+  border-color: #7e68ef !important;
+  background: linear-gradient(155deg, rgba(124, 92, 255, .18), #121821 58%) !important;
+  box-shadow: inset 0 0 0 1px rgba(145, 122, 255, .14), 0 12px 30px rgba(0,0,0,.12) !important;
+}
+.formatPage .presetCardTop {
+  width: 100%;
+  min-height: 32px;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.formatPage .presetBadge {
+  width: auto;
+  min-width: 34px;
+  height: 30px;
+  display: inline-grid !important;
+  place-items: center;
+  padding: 0 8px;
+  border: 1px solid rgba(124, 92, 255, .2);
+  border-radius: 9px;
+  background: rgba(124, 92, 255, .1);
+  font-size: 16px !important;
+  line-height: 1 !important;
+}
+.formatPage .presetCardTop > i {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #d8d0ff;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+/* The old pseudo-preview blocks were the main source of wasted vertical space. */
+.formatPage .presetVisual { display: none !important; }
+.studioAppV2 .formatPage .uPreset > b {
+  margin-top: auto;
+  color: var(--v4-text) !important;
+  font-size: 16px !important;
+  line-height: 21px !important;
+  letter-spacing: -.01em;
+}
+.studioAppV2 .formatPage .uPreset > small {
+  color: var(--v4-text-2) !important;
+  font-size: 12px !important;
+  line-height: 18px !important;
+}
+
+.formatPage .styleSettingsCard {
+  padding: 22px !important;
+  overflow: visible;
+}
+.formatPage .styleSettingsCard .uCardHead {
+  margin-bottom: 15px !important;
+}
+.formatPage .styleFormGrid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  align-items: end;
+}
+.formatPage .styleFormGrid label { min-width: 0; }
+.formatPage .uRecommendation {
+  margin-top: 16px !important;
+  padding: 13px 15px !important;
+  border: 1px solid rgba(95, 168, 220, .28) !important;
+  border-radius: 11px !important;
+  background: rgba(41, 120, 160, .11) !important;
+}
+.formatPage .uRecommendation b { font-size: 14px !important; }
+.formatPage .uRecommendation p {
+  margin: 4px 0 0 !important;
+  font-size: 12px !important;
+  line-height: 18px !important;
+}
+
+.pageActionBar {
+  position: sticky;
+  bottom: 14px;
+  z-index: 8;
+  margin-top: 16px !important;
+  padding: 12px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+  border: 1px solid #303a49 !important;
+  border-radius: 12px !important;
+  background: rgba(12, 17, 24, .96) !important;
+  box-shadow: 0 16px 40px rgba(0,0,0,.22) !important;
+  backdrop-filter: blur(16px);
+}
+.pageActionBar > div:first-child { min-width: 0; }
+.pageActionBar > div:last-child {
+  display: flex !important;
+  gap: 9px !important;
+  flex-shrink: 0;
+}
+.pageActionBar b { font-size: 13px !important; }
+.pageActionBar span { font-size: 11px !important; line-height: 17px !important; }
+.pageActionBar .primaryStrong { min-width: 180px; }
+
+/* --------------------------------------------------------------------------
+   SOURCE
+   -------------------------------------------------------------------------- */
+.studioAppV2 .sourceLayout {
+  grid-template-columns: minmax(0, 1fr) 360px !important;
+  gap: 16px !important;
+}
+.sourceContext { gap: 14px !important; }
+.sourceFormCard { padding: 22px !important; }
+.uSourceTabs { gap: 9px !important; }
+.uSourceTabs button { min-height: 62px !important; padding: 10px 14px !important; border-radius: 11px !important; }
+.uSourceTabs b { font-size: 14px !important; }
+.uSourceTabs span { font-size: 11px !important; }
+.sourceDropzone { min-height: 112px !important; border-radius: 13px !important; }
+.twitchInlineStatus { border-radius: 12px !important; }
+
+/* --------------------------------------------------------------------------
+   ANALYSIS
+   -------------------------------------------------------------------------- */
+.analysisPipelineMap {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+.analysisPipelineMap > div {
+  min-height: 78px !important;
+  padding: 12px !important;
+  border-radius: 11px !important;
+}
+.analysisPipelineMap b { font-size: 13px !important; }
+.analysisPipelineMap small { font-size: 10px !important; line-height: 15px !important; }
+.analysisSummary { gap: 10px !important; }
+.analysisSummary > span { min-height: 78px; border-radius: 11px !important; }
+.analysisCompleteCard { border-radius: 16px !important; }
+
+/* --------------------------------------------------------------------------
+   REVIEW / MONTAGE — bigger than legacy UI, but still an editor
+   -------------------------------------------------------------------------- */
+.studioAppV2 .uReviewStudioGrid {
+  grid-template-columns: 410px minmax(0, 1fr) !important;
+  gap: 14px !important;
+}
+.studioAppV2 .uMomentList { max-height: 620px !important; }
+.studioAppV2 .uMomentMain { min-height: 112px !important; }
+.studioAppV2 .uMomentBody > b { font-size: 13px !important; }
+.studioAppV2 .uMomentBody > p { font-size: 11px !important; line-height: 17px !important; }
+.clipWorkbench { grid-template-columns: minmax(0, 1fr) 360px !important; }
+.clipPreviewViewport { min-height: 510px !important; }
+.clipInspectorPanel { padding: 18px !important; }
+.inspectorHeading span { font-size: 10px !important; }
+.inspectorHeading b { font-size: 14px !important; }
+.inspectorActions button { min-height: 40px !important; font-size: 12px !important; }
+
+.uMomentActions .isPending,
+.inspectorActions .isPending {
+  position: relative;
+  border-color: #5f8cff !important;
+  color: #dfe8ff !important;
+  background: rgba(67, 112, 230, .18) !important;
+  cursor: wait !important;
+  opacity: 1 !important;
+}
+
+.uMomentActions .isPending::before,
+.inspectorActions .isPending::before {
+  content: '';
+  width: 11px;
+  height: 11px;
+  margin-right: 7px;
+  display: inline-block;
+  vertical-align: -1px;
+  border: 2px solid rgba(223, 232, 255, .35);
+  border-top-color: #dfe8ff;
+  border-radius: 50%;
+  animation: montage-save-spin .7s linear infinite;
+}
+
+.autosaveState.saving { color: #a9bfff !important; }
+.autosaveState.saving i { background: #7ea0ff !important; animation: montage-save-pulse 1s ease-in-out infinite; }
+.reviewSelectionBar.saving { border-color: rgba(95, 140, 255, .55) !important; }
+
+@keyframes montage-save-spin { to { transform: rotate(360deg); } }
+@keyframes montage-save-pulse { 50% { opacity: .35; } }
+
+/* --------------------------------------------------------------------------
+   EXPORT / SETTINGS / REPORTS
+   -------------------------------------------------------------------------- */
+.exportPage .uCard,
+.settingsPage .uCard,
+.reportsPage .uCard { scroll-margin-top: 84px; }
+.settingsGridClean { gap: 14px !important; }
+.settingsTabs { gap: 6px !important; }
+.settingsTabs button { min-height: 40px !important; }
+
+/* --------------------------------------------------------------------------
+   NOTICES / EMPTY STATES
+   -------------------------------------------------------------------------- */
+.noticeBanner {
+  max-width: 1500px;
+  margin-inline: auto;
+  border-radius: 11px !important;
+  font-size: 12px !important;
+}
+.blockedStepCard {
+  max-width: 680px !important;
+  margin: 80px auto 0 !important;
+  padding: 32px !important;
+  border-radius: 16px !important;
+  text-align: center;
+}
+.blockedStepCard h2 { font-size: 26px !important; }
+.blockedStepCard p { font-size: 14px !important; line-height: 21px !important; }
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE
+   -------------------------------------------------------------------------- */
+@media (max-width: 1600px) {
+  :root { --v4-sidebar: 268px; }
+  .studioLayoutV2, .studioApp.studioAppV2 .studioLayoutV2 { padding-inline: 26px !important; }
+  .studioAppV2 .formatPage .uPresetGrid { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+  .studioAppV2 .formatPage .uPreset { min-height: 164px !important; padding: 15px !important; }
+  .formatPage .styleFormGrid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+}
+
+@media (max-width: 1360px) {
+  :root { --v4-sidebar: 252px; }
+  .studioAppV2 .formatPage .uPresetGrid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .formatPage .styleFormGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .studioAppV2 .sourceLayout { grid-template-columns: minmax(0, 1fr) 320px !important; }
+  .analysisPipelineMap { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+
+@media (max-width: 1080px) {
+  .studioApp.studioAppV2,
+  .studioApp.studioAppV2.sidebarIsCompact { grid-template-columns: 1fr !important; }
+  .studioLayoutV2, .studioApp.studioAppV2 .studioLayoutV2 { padding: 22px 18px 64px !important; }
+  .studioAppV2 .formatPage .uPresetGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .studioAppV2 .sourceLayout { grid-template-columns: 1fr !important; }
+  .analysisPipelineMap { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .studioAppV2 .uReviewStudioGrid,
+  .clipWorkbench { grid-template-columns: 1fr !important; }
+  .pageActionBar { position: static; align-items: stretch !important; flex-direction: column; }
+  .pageActionBar > div:last-child { width: 100%; }
+  .pageActionBar > div:last-child button { flex: 1; }
+}
+
+@media (max-width: 700px) {
+  .studioAppV2 .stepHero { padding: 18px !important; }
+  .studioAppV2 .stepHero h2 { font-size: 30px !important; }
+  .studioAppV2 .formatPage .uPresetGrid,
+  .formatPage .styleFormGrid,
+  .analysisPipelineMap { grid-template-columns: 1fr !important; }
+  .studioAppV2 .formatPage .uPreset { min-height: 132px !important; }
+  .pageActionBar > div:last-child { flex-direction: column; }
+  .pageActionBar > div:last-child button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studioAppV2 *, .studioAppV2 *::before, .studioAppV2 *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .001ms !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   v10.15.7 — wider workspace + stable task center + fixed analysis map
+   -------------------------------------------------------------------------- */
+:root {
+  --v4-content: 1680px;
+  --v4-editor: 1900px;
+}
+
+.studioLayoutV2,
+.studioApp.studioAppV2 .studioLayoutV2 {
+  padding: 22px 20px 72px !important;
+}
+
+.studioLayoutV2 .studioWorkspace,
+.studioApp.studioAppV2 .studioLayoutV2 .studioWorkspace,
+.noticeBanner {
+  width: min(var(--v4-content), 100%) !important;
+  max-width: none !important;
+}
+
+.studioApp.studioAppV2 .jobBar.taskCenter,
+.studioApp.studioAppV2.sidebarIsCompact .jobBar.taskCenter {
+  width: min(var(--v4-content), calc(100% - 40px)) !important;
+  margin: 10px auto 0 !important;
+}
+
+.formatPage,
+.analysisPage,
+.reviewPage,
+.exportPage,
+.settingsPage {
+  width: 100% !important;
+}
+
+.formatPage .styleSettingsCard,
+.analysisPage .uCard,
+.analysisPage .analysisCompleteCard,
+.reviewPage .uReviewStudioGrid,
+.exportPage .uCard,
+.settingsPage .uCard {
+  max-width: none !important;
+}
+
+.analysisPipelineMap {
+  padding: 14px !important;
+  border: 1px solid var(--v4-border) !important;
+  border-radius: 14px !important;
+  background: var(--v4-panel) !important;
+  gap: 12px !important;
+}
+
+.analysisPipelineMap > div {
+  position: relative !important;
+  min-width: 0 !important;
+  min-height: 90px !important;
+  padding: 14px 14px 14px 50px !important;
+  display: grid !important;
+  align-content: start !important;
+  gap: 4px !important;
+  border: 1px solid rgba(55, 66, 82, .9) !important;
+  border-radius: 12px !important;
+  background: #121923 !important;
+  overflow: visible !important;
+}
+
+.analysisPipelineMap > div:not(:last-child)::after {
+  display: none !important;
+}
+
+.analysisPipelineMap span {
+  position: absolute !important;
+  left: 14px !important;
+  top: 14px !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 8px !important;
+  font-size: 10px !important;
+}
+
+.analysisPipelineMap b,
+.analysisPipelineMap small {
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
+.analysisPipelineMap b {
+  font-size: 14px !important;
+  line-height: 18px !important;
+}
+
+.analysisPipelineMap small {
+  font-size: 11px !important;
+  line-height: 16px !important;
+}
+
+.analysisPage .uLiveStatus,
+.analysisPage .uPreflight {
+  padding: 22px !important;
+}
+
+.analysisPage .analysisProgressValue b {
+  font-size: 48px !important;
+}
+
+.analysisPage .progressFacts {
+  gap: 14px !important;
+  flex-wrap: wrap !important;
+}
+
+.pageActionBar {
+  width: 100% !important;
+}
+
+@media (max-width: 1600px) {
+  .studioLayoutV2,
+  .studioApp.studioAppV2 .studioLayoutV2 {
+    padding-inline: 18px !important;
+  }
+}
+
+
+/* ==== merged from studio-v5.css ==== */
+/*
+ * Highlight Studio v10.15.7 — Polished Workspace System.
+ * Loaded LAST after every legacy stylesheet.
+ * This file owns the visible layout, spacing and responsive geometry.
+ */
+
+:root {
+  --v5-sidebar: 274px;
+  --v5-sidebar-compact: 78px;
+  --v5-topbar: 64px;
+  --v5-gap: 18px;
+  --v5-page-pad-x: 22px;
+  --v5-page-pad-y: 22px;
+  --v5-radius: 14px;
+  --v5-radius-lg: 18px;
+  --v5-bg: #080b10;
+  --v5-sidebar-bg: #0c1119;
+  --v5-surface: #10161f;
+  --v5-surface-2: #131b26;
+  --v5-surface-3: #182230;
+  --v5-border: #283447;
+  --v5-border-soft: #202a38;
+  --v5-text: #f6f8fc;
+  --v5-text-2: #bdc8d8;
+  --v5-text-3: #8896aa;
+  --v5-accent: #7b5cff;
+  --v5-accent-2: #4e7cff;
+  --v5-success: #42d991;
+  --v5-warning: #f7c24a;
+  --v5-danger: #f06d82;
+  --v5-shadow: 0 14px 38px rgba(0, 0, 0, .18);
+}
+
+html { font-size: 16px !important; }
+html, body, #root { min-width: 0; min-height: 100%; }
+body { margin: 0; background: var(--v5-bg) !important; overflow-x: hidden; }
+.studioAppV2 *, .studioAppV2 *::before, .studioAppV2 *::after { box-sizing: border-box; }
+
+/* ========================================================================== 
+   APP SHELL — no arbitrary content max-widths
+   ========================================================================== */
+.studioApp.studioAppV2,
+.studioApp.studioAppV2.density-comfortable,
+.studioApp.studioAppV2.density-compact {
+  min-height: 100vh;
+  display: grid !important;
+  grid-template-columns: var(--v5-sidebar) minmax(0, 1fr) !important;
+  background: var(--v5-bg) !important;
+  color: var(--v5-text);
+  font-size: 15px !important;
+}
+.studioApp.studioAppV2.sidebarIsCompact {
+  grid-template-columns: var(--v5-sidebar-compact) minmax(0, 1fr) !important;
+}
+.studioStage { min-width: 0 !important; width: 100% !important; }
+
+.studioApp.studioAppV2 > .studioSidebar {
+  width: 100% !important;
+  min-width: 0 !important;
+  background: var(--v5-sidebar-bg) !important;
+  border-right: 1px solid var(--v5-border-soft) !important;
+  box-shadow: 8px 0 30px rgba(0, 0, 0, .13) !important;
+}
+
+.studioCommandbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 60 !important;
+  min-height: var(--v5-topbar) !important;
+  padding: 0 22px !important;
+  gap: 14px !important;
+  background: rgba(9, 12, 17, .97) !important;
+  border-bottom: 1px solid var(--v5-border-soft) !important;
+  backdrop-filter: blur(18px);
+}
+.commandBreadcrumb { min-width: 0; font-size: 13px !important; }
+.commandBreadcrumb span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.commandbarContext { gap: 12px !important; }
+.commandbarContext span { font-size: 11px !important; white-space: nowrap; }
+.commandbarActions { gap: 8px !important; }
+.commandbarActions button { min-height: 40px !important; }
+
+.studioLayoutV2,
+.studioApp.studioAppV2 .studioLayoutV2 {
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: var(--v5-page-pad-y) var(--v5-page-pad-x) 78px !important;
+}
+.studioLayoutV2 .studioWorkspace,
+.studioApp.studioAppV2 .studioLayoutV2 .studioWorkspace,
+.studioLayoutV2.editorLayout .studioWorkspace,
+.studioApp.studioAppV2 .studioLayoutV2.editorLayout .studioWorkspace {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+.studioApp.studioAppV2 .uPage,
+.studioApp.studioAppV2.density-compact .uPage {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  gap: var(--v5-gap) !important;
+  align-content: start !important;
+}
+
+/* ========================================================================== 
+   SIDEBAR
+   ========================================================================== */
+.sidebarBrand { min-height: 58px !important; }
+.sidebarBrand b { font-size: 16px !important; line-height: 18px !important; }
+.sidebarBrand small { font-size: 10px !important; }
+.projectSwitcher,
+.newProjectButton { min-height: 48px !important; border-radius: 11px !important; }
+.projectSwitcherCopy b { font-size: 13px !important; }
+.projectSwitcherCopy small { font-size: 10px !important; }
+.sidebarSectionLabel { font-size: 9px !important; letter-spacing: .14em !important; }
+.sidebarNavSection { gap: 7px !important; }
+.sidebarNavItem,
+.workflowNavItem {
+  min-height: 50px !important;
+  border-radius: 11px !important;
+  padding: 9px 11px !important;
+}
+.sidebarNavItem > span:not(.workflowNavIcon):not(.workflowNavIndex),
+.workflowNavCopy { min-width: 0 !important; }
+.sidebarNavItem b,
+.workflowNavCopy b { font-size: 13px !important; line-height: 17px !important; }
+.workflowNavCopy small { font-size: 10px !important; line-height: 14px !important; }
+.workflowNavIndex { font-size: 9px !important; }
+.sidebarProjectMini { border-radius: 12px !important; }
+.sidebarProjectMini span { font-size: 9px !important; }
+.sidebarProjectMini b { font-size: 14px !important; }
+.sidebarFooter { min-height: 58px !important; }
+.sidebarFooter b { font-size: 12px !important; }
+.sidebarFooter small { font-size: 9px !important; }
+
+/* ========================================================================== 
+   UNIVERSAL SURFACES / TYPE / CONTROLS
+   ========================================================================== */
+.studioAppV2 .stepHero {
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 21px 24px !important;
+  border: 1px solid var(--v5-border-soft) !important;
+  border-radius: var(--v5-radius-lg) !important;
+  background: linear-gradient(125deg, rgba(18, 27, 42, .96), rgba(13, 19, 29, .94)) !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+.studioAppV2 .stepHero h2 {
+  max-width: none !important;
+  margin: 5px 0 0 !important;
+  font-size: clamp(32px, 2.25vw, 42px) !important;
+  line-height: 1.06 !important;
+  letter-spacing: -.04em !important;
+}
+.studioAppV2 .stepHero > div > p:last-child {
+  max-width: 1000px !important;
+  margin: 7px 0 0 !important;
+  color: var(--v5-text-2) !important;
+  font-size: 14px !important;
+  line-height: 21px !important;
+}
+.studioAppV2 .stepHero .eyebrow,
+.dashboardEyebrow,
+.sectionKicker,
+.studioApp .uCardHead > div > span,
+.studioApp .uField > span,
+.studioApp .uFormGrid label > span,
+.studioApp label > span {
+  color: #91a9ff !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  line-height: 14px !important;
+  letter-spacing: .12em !important;
+}
+
+.studioAppV2 .uCard,
+.projectSpotlight,
+.newProjectPanel,
+.recentProjectsSection,
+.currentProjectCard,
+.projectStartCard {
+  min-width: 0 !important;
+  border: 1px solid var(--v5-border) !important;
+  border-radius: var(--v5-radius-lg) !important;
+  background: var(--v5-surface) !important;
+  box-shadow: var(--v5-shadow) !important;
+}
+.studioApp .uCard { padding: 21px !important; }
+.studioApp .uCardHead { gap: 16px !important; margin-bottom: 16px !important; }
+.studioApp .uCardHead h3 { margin: 4px 0 5px !important; font-size: 20px !important; line-height: 25px !important; }
+.studioApp .uCardHead p { margin: 0 !important; color: var(--v5-text-2) !important; font-size: 13px !important; line-height: 19px !important; }
+
+.studioApp.studioAppV2 button,
+.studioApp.studioAppV2 input,
+.studioApp.studioAppV2 select,
+.studioApp.studioAppV2 textarea { font-size: 14px !important; }
+.studioApp.studioAppV2 button:not(.iconButton):not(.sidebarNavItem):not(.sidebarCollapse):not(.uTimelineClip) {
+  min-height: 42px !important;
+  border-radius: 10px !important;
+}
+.studioApp.studioAppV2 input,
+.studioApp.studioAppV2 select {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 48px !important;
+  padding: 10px 13px !important;
+  border-radius: 10px !important;
+  background: #0b1017 !important;
+  border-color: #344154 !important;
+}
+.studioApp.studioAppV2 textarea {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 118px;
+  padding: 12px 13px !important;
+  border-radius: 10px !important;
+  background: #0b1017 !important;
+  border-color: #344154 !important;
+}
+.studioApp.studioAppV2 input:focus,
+.studioApp.studioAppV2 select:focus,
+.studioApp.studioAppV2 textarea:focus {
+  border-color: #7589ff !important;
+  box-shadow: 0 0 0 3px rgba(117, 137, 255, .14) !important;
+}
+.studioAppV2 button:focus-visible,
+.studioAppV2 input:focus-visible,
+.studioAppV2 select:focus-visible,
+.studioAppV2 textarea:focus-visible {
+  outline: 2px solid #91a2ff !important;
+  outline-offset: 2px !important;
+}
+
+/* ========================================================================== 
+   TASK CENTER — floating drawer: never pushes the workflow down
+   ========================================================================== */
+.studioApp.studioAppV2 .jobBar.taskCenter,
+.studioApp.studioAppV2.sidebarIsCompact .jobBar.taskCenter {
+  position: fixed !important;
+  top: calc(var(--v5-topbar) + 12px) !important;
+  right: 18px !important;
+  left: auto !important;
+  z-index: 90 !important;
+  width: min(610px, calc(100vw - var(--v5-sidebar) - 48px)) !important;
+  max-width: 610px !important;
+  max-height: calc(100vh - var(--v5-topbar) - 32px) !important;
+  margin: 0 !important;
+  padding: 15px 16px !important;
+  overflow: auto !important;
+  border: 1px solid #334158 !important;
+  border-radius: 16px !important;
+  background: rgba(13, 20, 31, .985) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .38) !important;
+  backdrop-filter: blur(18px);
+}
+.studioApp.studioAppV2.sidebarIsCompact .jobBar.taskCenter {
+  width: min(610px, calc(100vw - var(--v5-sidebar-compact) - 48px)) !important;
+}
+.taskCenterHeader { grid-template-columns: auto minmax(0,1fr) auto !important; gap: 12px !important; align-items: start !important; }
+.taskCenterHeader > div:nth-child(2) { min-width: 0 !important; }
+.taskCenterHeader b { display: block; overflow: visible !important; white-space: normal !important; font-size: 14px !important; line-height: 19px !important; }
+.taskCenterHeader span { display: block; margin-top: 3px; color: var(--v5-text-3) !important; font-size: 11px !important; line-height: 16px !important; }
+.taskCenter .jobMain { padding-top: 12px !important; gap: 9px !important; }
+.taskCenter .jobLine { gap: 10px !important; }
+.taskCenter .jobLine b { white-space: normal !important; font-size: 12px !important; }
+.taskCenter .progress { height: 7px !important; margin: 7px 0 !important; }
+.taskCenter .progressCaption { gap: 6px 8px !important; flex-wrap: wrap !important; }
+.taskCenter .progressCaption > span,
+.taskCenter .jobMeta span { font-size: 10px !important; }
+.taskCenterFooter { gap: 10px !important; }
+.taskCenterFooter > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.taskCenter.done .jobMain,
+.taskCenter.cancelled .jobMain { display: none !important; }
+
+/* ========================================================================== 
+   PROJECTS HOME
+   ========================================================================== */
+.dashboardPageHeader {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 28px !important;
+  margin: 0 !important;
+}
+.dashboardPageHeader > div:first-child { min-width: 0; max-width: 980px !important; }
+.dashboardPageHeader h1 { max-width: 930px !important; font-size: clamp(38px, 3vw, 52px) !important; line-height: 1.05 !important; }
+.dashboardPageHeader p { max-width: 880px !important; font-size: 15px !important; line-height: 23px !important; }
+.dashboardHeaderActions { flex-shrink: 0; }
+.dashboardOverviewGrid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.75fr) minmax(330px, .68fr) !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+}
+.projectSpotlight,
+.newProjectPanel { min-height: 350px !important; }
+.projectSpotlightStats { grid-template-columns: repeat(4, minmax(0,1fr)) !important; gap: 10px !important; }
+.recentProjectGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 9px !important; }
+
+/* ========================================================================== 
+   SOURCE
+   ========================================================================== */
+.studioAppV2 .sourceLayout {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 360px !important;
+  gap: 18px !important;
+  align-items: start !important;
+}
+.sourceFormCard { min-width: 0 !important; padding: 22px !important; }
+.sourceContext { min-width: 0 !important; display: grid !important; gap: 14px !important; }
+.uSourceTabs {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+.uSourceTabs button { min-height: 70px !important; padding: 11px 14px !important; border-radius: 11px !important; }
+.uSourceTabs b { font-size: 14px !important; }
+.uSourceTabs span { font-size: 11px !important; line-height: 16px !important; }
+.sourceDropzone { min-height: 120px !important; border-radius: 13px !important; }
+.twitchInlineStatus { border-radius: 12px !important; }
+.uAdvancedBox { border-radius: 13px !important; }
+
+/* ========================================================================== 
+   FORMAT
+   ========================================================================== */
+.formatPage .uPresetGrid {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+}
+.formatPage .uPreset {
+  min-width: 0 !important;
+  min-height: 148px !important;
+  padding: 16px !important;
+  gap: 8px !important;
+  border: 1px solid var(--v5-border) !important;
+  border-radius: 14px !important;
+  background: var(--v5-surface) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+.formatPage .uPreset:hover:not(:disabled) { transform: translateY(-2px) !important; border-color: #56677f !important; }
+.formatPage .uPreset.active { border-color: #806cff !important; background: linear-gradient(155deg, rgba(124,92,255,.18), #121922 60%) !important; }
+.formatPage .presetVisual { display: none !important; }
+.formatPage .presetCardTop { width: 100%; min-height: 31px; display: flex !important; align-items: center; justify-content: space-between; gap: 8px; }
+.formatPage .presetBadge { min-width: 34px; height: 30px; display: inline-grid !important; place-items: center; padding: 0 8px; border-radius: 9px; font-size: 16px !important; }
+.formatPage .uPreset > b { margin-top: auto; color: var(--v5-text) !important; font-size: 16px !important; line-height: 20px !important; }
+.formatPage .uPreset > small { color: var(--v5-text-2) !important; font-size: 12px !important; line-height: 17px !important; }
+.formatPage .styleSettingsCard { width: 100% !important; padding: 21px !important; overflow: visible !important; }
+.formatPage .styleFormGrid { display: grid !important; grid-template-columns: repeat(4, minmax(0,1fr)) !important; gap: 14px !important; align-items: end !important; }
+.formatPage .styleFormGrid label { min-width: 0 !important; }
+.formatPage .uRecommendation { margin-top: 15px !important; border-radius: 11px !important; }
+
+/* Stable action footer: never floats over content */
+.pageActionBar,
+.formatPage .pageActionBar,
+.analysisPage .pageActionBar,
+.exportPage .pageActionBar {
+  position: static !important;
+  width: 100% !important;
+  margin-top: 16px !important;
+  padding: 12px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  border: 1px solid #303c4d !important;
+  border-radius: 12px !important;
+  background: #0c121a !important;
+  box-shadow: none !important;
+}
+.pageActionBar > div:first-child { min-width: 0 !important; }
+.pageActionBar > div:last-child { display: flex !important; gap: 9px !important; flex-shrink: 0 !important; }
+.pageActionBar b { font-size: 13px !important; }
+.pageActionBar span { font-size: 11px !important; line-height: 16px !important; }
+.pageActionBar .primaryStrong { min-width: 180px; }
+
+/* ========================================================================== 
+   ANALYSIS — clean grid, no absolute-position text collisions
+   ========================================================================== */
+.analysisPipelineMap {
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 12px !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  border: 1px solid var(--v5-border) !important;
+  border-radius: 14px !important;
+  background: var(--v5-surface) !important;
+}
+.analysisPipelineMap > div {
+  position: static !important;
+  min-width: 0 !important;
+  min-height: 86px !important;
+  padding: 13px !important;
+  display: grid !important;
+  grid-template-columns: 32px minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+  column-gap: 10px !important;
+  row-gap: 3px !important;
+  align-content: start !important;
+  border: 1px solid #2e394a !important;
+  border-radius: 11px !important;
+  background: #121923 !important;
+  overflow: hidden !important;
+}
+.analysisPipelineMap > div:not(:last-child)::after { display: none !important; content: none !important; }
+.analysisPipelineMap span {
+  position: static !important;
+  grid-column: 1 !important;
+  grid-row: 1 / 3 !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: grid !important;
+  place-items: center !important;
+  align-self: start !important;
+  border-radius: 8px !important;
+  font-size: 10px !important;
+}
+.analysisPipelineMap b {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  color: #c8d2e0 !important;
+  font-size: 13px !important;
+  line-height: 18px !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+.analysisPipelineMap small {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  color: #8fa0b6 !important;
+  font-size: 10px !important;
+  line-height: 15px !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+.analysisPipelineMap .active { border-color: rgba(125, 99, 255, .58) !important; background: rgba(112, 80, 206, .10) !important; }
+.analysisPipelineMap .active b { color: #f0ecff !important; }
+.analysisPage .uLiveStatus,
+.analysisPage .uPreflight { width: 100% !important; padding: 21px !important; }
+.analysisPage .analysisProgressValue { align-items: baseline !important; gap: 12px !important; }
+.analysisPage .analysisProgressValue b { font-size: 40px !important; line-height: 1 !important; }
+.analysisPage .progressFacts { display: flex !important; gap: 10px 14px !important; flex-wrap: wrap !important; }
+.analysisPage .analysisCompleteCard { width: 100% !important; border-radius: 16px !important; }
+
+/* ========================================================================== 
+   REVIEW / MONTAGE
+   ========================================================================== */
+.reviewPage { min-width: 0 !important; }
+.studioAppV2 .uReviewStudioGrid {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: 420px minmax(0, 1fr) !important;
+  gap: 16px !important;
+  align-items: start !important;
+}
+.uClipsPanel, .uPreviewPanel { min-width: 0 !important; }
+.uPreviewPanel { position: sticky !important; top: calc(var(--v5-topbar) + 16px) !important; }
+.uMomentList.upgraded { max-height: calc(100vh - 230px) !important; }
+.uMomentCard { border-radius: 13px !important; }
+.uMomentMain { grid-template-columns: 36px minmax(0, 1fr) !important; }
+.uMomentBody b { font-size: 14px !important; line-height: 19px !important; }
+.uMomentBody p { font-size: 12px !important; line-height: 17px !important; }
+.clipWorkbench { width: 100% !important; grid-template-columns: minmax(0, 1fr) 350px !important; gap: 14px !important; }
+.clipPreviewViewport { min-height: 480px !important; }
+.clipInspectorPanel { min-width: 0 !important; padding: 17px !important; }
+
+/* ========================================================================== 
+   EXPORT / SHORTS / YOUTUBE
+   ========================================================================== */
+.exportPage { min-width: 0 !important; }
+.exportTabs {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  padding: 5px !important;
+  border: 1px solid var(--v5-border) !important;
+  border-radius: 12px !important;
+  background: #0e131b !important;
+}
+.exportTabs button { min-width: 0 !important; }
+.exportSummary { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 10px !important; }
+.uCreatorGrid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 12px !important; }
+.shortsSetupGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 14px !important; }
+.youtubePublishGrid { grid-template-columns: minmax(0, 1fr) minmax(240px, .45fr) !important; gap: 14px !important; }
+.youtubePublishGrid .wide { grid-column: 1 / -1 !important; }
+
+/* ========================================================================== 
+   SETTINGS / REPORTS / GENERIC GRIDS
+   ========================================================================== */
+.settingsPage { min-width: 0 !important; }
+.settingsGridClean { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; }
+.settingsGridClean label { min-width: 0 !important; border-radius: 12px !important; }
+.uReportGrid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 14px !important; }
+.logs { width: 100% !important; max-width: none !important; }
+
+/* ========================================================================== 
+   NOTICES / EMPTY / OVERFLOW SAFETY
+   ========================================================================== */
+.stageNotices { min-width: 0 !important; }
+.noticeBanner {
+  width: calc(100% - (var(--v5-page-pad-x) * 2)) !important;
+  max-width: none !important;
+  margin: 12px var(--v5-page-pad-x) 0 !important;
+  border-radius: 11px !important;
+}
+.blockedStepCard { max-width: 720px !important; margin: 54px auto 0 !important; padding: 30px !important; border-radius: 16px !important; }
+.compactEmptyState, .emptyProjectState { min-height: 110px !important; }
+
+/* Prevent accidental horizontal overflow from any legacy grid child. */
+.studioWorkspace > *,
+.uPage > *,
+.uCard > *,
+.uFormGrid > *,
+.styleFormGrid > *,
+.analysisPipelineMap > *,
+.uReviewStudioGrid > *,
+.dashboardOverviewGrid > * { min-width: 0 !important; }
+
+/* ========================================================================== 
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 1500px) {
+  :root { --v5-sidebar: 258px; --v5-page-pad-x: 18px; }
+  .dashboardOverviewGrid { grid-template-columns: minmax(0, 1.5fr) minmax(310px, .7fr) !important; }
+  .formatPage .uPresetGrid { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+  .formatPage .uPreset { min-height: 158px !important; padding: 14px !important; }
+  .studioAppV2 .uReviewStudioGrid { grid-template-columns: 380px minmax(0, 1fr) !important; }
+}
+
+@media (max-width: 1280px) {
+  :root { --v5-sidebar: 246px; }
+  .commandbarContext { display: none !important; }
+  .dashboardOverviewGrid,
+  .studioAppV2 .sourceLayout { grid-template-columns: 1fr !important; }
+  .newProjectPanel .sourceLaunchGrid { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
+  .formatPage .uPresetGrid { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
+  .formatPage .styleFormGrid { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+  .analysisPipelineMap { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
+  .studioAppV2 .uReviewStudioGrid { grid-template-columns: 340px minmax(0,1fr) !important; }
+  .uReportGrid { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+}
+
+@media (max-width: 1040px) {
+  .studioApp.studioAppV2,
+  .studioApp.studioAppV2.sidebarIsCompact { grid-template-columns: 1fr !important; }
+  .studioApp.studioAppV2 .jobBar.taskCenter,
+  .studioApp.studioAppV2.sidebarIsCompact .jobBar.taskCenter {
+    width: min(610px, calc(100vw - 28px)) !important;
+    right: 14px !important;
+  }
+  .studioLayoutV2, .studioApp.studioAppV2 .studioLayoutV2 { padding: 18px 16px 64px !important; }
+  .dashboardPageHeader { align-items: flex-start !important; flex-direction: column !important; }
+  .formatPage .uPresetGrid { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+  .analysisPipelineMap { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+  .studioAppV2 .uReviewStudioGrid,
+  .clipWorkbench { grid-template-columns: 1fr !important; }
+  .uPreviewPanel { position: static !important; }
+  .uMomentList.upgraded { max-height: 640px !important; }
+  .exportSummary { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+  .uCreatorGrid, .uReportGrid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 720px) {
+  :root { --v5-page-pad-x: 12px; }
+  .studioCommandbar { padding-inline: 12px !important; }
+  .studioAppV2 .stepHero { padding: 18px !important; }
+  .studioAppV2 .stepHero h2 { font-size: 29px !important; }
+  .formatPage .uPresetGrid,
+  .formatPage .styleFormGrid,
+  .analysisPipelineMap,
+  .settingsGridClean,
+  .shortsSetupGrid,
+  .youtubePublishGrid,
+  .uSourceTabs,
+  .newProjectPanel .sourceLaunchGrid,
+  .recentProjectGrid { grid-template-columns: 1fr !important; }
+  .youtubePublishGrid .wide { grid-column: auto !important; }
+  .pageActionBar { align-items: stretch !important; flex-direction: column !important; }
+  .pageActionBar > div:last-child { width: 100% !important; flex-direction: column !important; }
+  .pageActionBar > div:last-child button { width: 100% !important; }
+  .exportTabs { grid-template-columns: 1fr !important; }
+  .exportSummary { grid-template-columns: 1fr !important; }
+  .noticeBanner { width: calc(100% - 24px) !important; margin-inline: 12px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studioAppV2 *, .studioAppV2 *::before, .studioAppV2 *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .001ms !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+
+/* ==== merged from studio-v6.css ==== */
+/*
+ * Highlight Studio v10.15.7 — UI Stability Pass.
+ * Loaded last. Owns task drawer behaviour and final workspace geometry.
+ */
+
+:root {
+  --v6-sidebar: 280px;
+  --v6-topbar: 66px;
+  --v6-page-x: clamp(18px, 1.5vw, 30px);
+  --v6-gap: 18px;
+  --v6-drawer: 460px;
+}
+
+/* Final shell geometry */
+.studioApp.studioAppV2,
+.studioApp.studioAppV2.density-comfortable,
+.studioApp.studioAppV2.density-compact {
+  grid-template-columns: var(--v6-sidebar) minmax(0, 1fr) !important;
+}
+.studioCommandbar {
+  min-height: var(--v6-topbar) !important;
+  height: var(--v6-topbar) !important;
+}
+.studioLayoutV2,
+.studioApp.studioAppV2 .studioLayoutV2 {
+  padding: 22px var(--v6-page-x) 78px !important;
+}
+.studioWorkspace,
+.studioLayoutV2 .studioWorkspace,
+.studioApp.studioAppV2 .studioLayoutV2 .studioWorkspace {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+.studioApp.studioAppV2 .uPage {
+  width: 100% !important;
+  max-width: none !important;
+  gap: var(--v6-gap) !important;
+}
+
+/* Slightly larger navigation: readable without making the sidebar huge. */
+.sidebarNavItem b,
+.workflowNavCopy b { font-size: 14px !important; line-height: 18px !important; }
+.workflowNavCopy small { font-size: 11px !important; line-height: 15px !important; }
+.sidebarSectionLabel { font-size: 10px !important; }
+.sidebarFooter small { font-size: 10px !important; }
+.commandbarContext span { font-size: 12px !important; }
+.studioAppV2 .stepHero .eyebrow,
+.dashboardEyebrow,
+.sectionKicker,
+.studioApp .uCardHead > div > span,
+.studioApp .uField > span,
+.studioApp .uFormGrid label > span,
+.studioApp label > span { font-size: 11px !important; }
+
+/* ========================================================================== 
+   TASKS: one compact indicator in the top bar, details only on demand.
+   The drawer never participates in page layout and never pushes content.
+   ========================================================================== */
+/* Defensive rule: even an older bundled render path cannot force the drawer
+   open while the Tasks button says it is closed. */
+.studioAppV2:not(:has(.taskCenterButton[aria-expanded="true"])) .jobBar.taskCenter {
+  display: none !important;
+}
+
+.commandbarActions .taskCenterButton {
+  max-width: 250px !important;
+  overflow: hidden !important;
+}
+.commandbarActions .taskCenterButton > span {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.commandbarActions .taskCenterButton.running {
+  border-color: rgba(86, 151, 255, .48) !important;
+  background: rgba(36, 75, 133, .18) !important;
+}
+
+.studioApp.studioAppV2 .jobBar.taskCenter,
+.studioApp.studioAppV2.sidebarIsCompact .jobBar.taskCenter {
+  position: fixed !important;
+  inset: calc(var(--v6-topbar) + 10px) 14px auto auto !important;
+  left: auto !important;
+  width: min(var(--v6-drawer), calc(100vw - var(--v6-sidebar) - 42px)) !important;
+  max-width: var(--v6-drawer) !important;
+  max-height: calc(100vh - var(--v6-topbar) - 24px) !important;
+  margin: 0 !important;
+  padding: 16px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  z-index: 120 !important;
+  border: 1px solid #35445b !important;
+  border-radius: 16px !important;
+  background: rgba(12, 18, 28, .985) !important;
+  box-shadow: 0 28px 90px rgba(0,0,0,.46) !important;
+  backdrop-filter: blur(20px);
+}
+
+.taskCenterHeader {
+  display: grid !important;
+  grid-template-columns: 14px minmax(0, 1fr) auto !important;
+  gap: 11px !important;
+  align-items: start !important;
+}
+.taskCenterHeader > div:nth-child(2) { min-width: 0 !important; }
+.taskCenterHeader b {
+  display: block !important;
+  font-size: 14px !important;
+  line-height: 19px !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+.taskCenterHeader span {
+  display: block !important;
+  margin-top: 3px !important;
+  font-size: 11px !important;
+  line-height: 16px !important;
+}
+.taskCenterHeaderActions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+}
+.taskCenterHeader .dangerBtn { min-height: 36px !important; padding: 7px 11px !important; }
+.taskCenterHeader .iconButton { width: 36px !important; height: 36px !important; min-height: 36px !important; }
+
+.taskCenter .jobMain {
+  min-width: 0 !important;
+  padding-top: 14px !important;
+  gap: 10px !important;
+}
+.taskCenter .jobLine { grid-template-columns: minmax(0,1fr) auto !important; gap: 12px !important; }
+.taskCenter .jobLine b { font-size: 13px !important; overflow-wrap: anywhere !important; }
+.taskCenter .jobLine span { font-size: 14px !important; }
+.taskCenter .progress { width: 100% !important; height: 7px !important; overflow: hidden !important; }
+.taskCenter .progressCaption {
+  display: flex !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+}
+.taskCenter .progressCaption > span,
+.taskCenter .jobMeta > span {
+  min-height: 26px !important;
+  padding: 5px 8px !important;
+  font-size: 10px !important;
+  white-space: normal !important;
+}
+.taskCenter .progressCaption .inlineMini { margin-left: 0 !important; }
+
+/* Seven technical stages do not belong in one horizontal row inside a drawer. */
+.taskCenter .phaseRail {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+  overflow: visible !important;
+}
+.taskCenter .phaseItem {
+  min-width: 0 !important;
+  padding: 9px !important;
+  border-radius: 11px !important;
+  grid-template-columns: 24px minmax(0,1fr) !important;
+  grid-template-areas: "n b" "n s" !important;
+  gap: 2px 7px !important;
+}
+.taskCenter .phaseItem span { width: 24px !important; height: 24px !important; border-radius: 8px !important; }
+.taskCenter .phaseItem b,
+.taskCenter .phaseItem small {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.taskCenter .phaseItem b { font-size: 11px !important; }
+.taskCenter .phaseItem small { font-size: 9px !important; }
+.taskCenter .stageProgressBox { min-width: 0 !important; padding: 11px !important; border-radius: 11px !important; }
+.taskCenter .stageHeader { min-width: 0 !important; }
+.taskCenter .stageHeader b { min-width: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
+.taskCenterFooter { min-width: 0 !important; }
+.taskCenterFooter > span { min-width: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
+
+/* ========================================================================== 
+   SOURCE: the VOD progress belongs to the source card, not in a random overlay.
+   ========================================================================== */
+.twitchInlineStatus {
+  width: 100% !important;
+  margin-top: 14px !important;
+  padding: 14px 15px !important;
+  border: 1px solid #314055 !important;
+  border-radius: 12px !important;
+  background: #0d151f !important;
+}
+.twitchInlineStatus.running { border-color: rgba(78,124,255,.46) !important; background: rgba(28,51,91,.17) !important; }
+.twitchInlineStatus.ready { border-color: rgba(66,217,145,.42) !important; background: rgba(27,84,59,.13) !important; }
+.twitchInlineStatusHead {
+  display: grid !important;
+  grid-template-columns: 12px minmax(0,1fr) auto !important;
+  gap: 10px !important;
+  align-items: center !important;
+}
+.twitchInlineStatusHead > div { min-width: 0 !important; }
+.twitchInlineStatusHead b { font-size: 14px !important; line-height: 18px !important; }
+.twitchInlineStatusHead small { display: block; margin-top: 3px; font-size: 11px !important; line-height: 16px !important; overflow-wrap: anywhere; }
+.twitchInlineStatusHead strong { font-size: 16px !important; }
+.twitchInlineProgress { width: 100% !important; height: 7px !important; margin-top: 11px !important; border-radius: 999px !important; overflow: hidden !important; }
+.twitchInlineActions { margin-top: 10px !important; }
+
+/* ========================================================================== 
+   WORKFLOW SCREENS: same rhythm and no legacy width surprises.
+   ========================================================================== */
+.formatPage,
+.analysisPage,
+.reviewPage,
+.exportPage,
+.settingsPage,
+.projectsHome { width: 100% !important; max-width: none !important; }
+
+.formatPage .uPresetGrid { gap: 14px !important; }
+.formatPage .uPreset { min-height: 154px !important; }
+.formatPage .styleSettingsCard,
+.analysisPage .uLiveStatus,
+.analysisPage .uPreflight,
+.exportPage .uCard,
+.settingsPage .uCard { width: 100% !important; max-width: none !important; }
+
+/* Analysis pipeline: exact grid ownership, no inherited absolute connectors. */
+.analysisPipelineMap {
+  grid-template-columns: repeat(5, minmax(0,1fr)) !important;
+  gap: 12px !important;
+  padding: 14px !important;
+}
+.analysisPipelineMap > div {
+  position: static !important;
+  min-height: 92px !important;
+  padding: 14px !important;
+  grid-template-columns: 32px minmax(0,1fr) !important;
+  grid-template-rows: auto auto !important;
+  overflow: hidden !important;
+}
+.analysisPipelineMap > div::after { display: none !important; content: none !important; }
+.analysisPipelineMap span { position: static !important; grid-column: 1 !important; grid-row: 1 / 3 !important; }
+.analysisPipelineMap b,
+.analysisPipelineMap small {
+  min-width: 0 !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+.analysisPipelineMap b { font-size: 14px !important; line-height: 18px !important; }
+.analysisPipelineMap small { font-size: 11px !important; line-height: 16px !important; }
+
+/* Empty/blocked states remain centered but do not make the whole page look broken. */
+.blockedStepCard {
+  width: min(620px, 100%) !important;
+  margin: 58px auto 0 !important;
+  padding: 30px !important;
+}
+
+/* Global overflow guard. */
+.studioStage,
+.studioLayoutV2,
+.studioWorkspace,
+.uPage,
+.uCard,
+.sourceLayout,
+.styleFormGrid,
+.analysisPipelineMap,
+.uReviewStudioGrid,
+.clipWorkbench,
+.exportPage { min-width: 0 !important; max-width: 100% !important; }
+.studioStage { overflow-x: clip !important; }
+
+@media (max-width: 1500px) {
+  :root { --v6-sidebar: 260px; --v6-page-x: 18px; }
+  .formatPage .uPresetGrid { grid-template-columns: repeat(5,minmax(0,1fr)) !important; }
+  .analysisPipelineMap { grid-template-columns: repeat(5,minmax(0,1fr)) !important; }
+}
+
+@media (max-width: 1280px) {
+  :root { --v6-sidebar: 246px; }
+  .formatPage .uPresetGrid { grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
+  .analysisPipelineMap { grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
+}
+
+@media (max-width: 1040px) {
+  .studioApp.studioAppV2,
+  .studioApp.studioAppV2.sidebarIsCompact { grid-template-columns: 1fr !important; }
+  .studioApp.studioAppV2 .jobBar.taskCenter,
+  .studioApp.studioAppV2.sidebarIsCompact .jobBar.taskCenter {
+    width: min(var(--v6-drawer), calc(100vw - 28px)) !important;
+    right: 14px !important;
+  }
+  .analysisPipelineMap { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+}
+
+@media (max-width: 720px) {
+  :root { --v6-page-x: 12px; }
+  .formatPage .uPresetGrid,
+  .analysisPipelineMap,
+  .taskCenter .phaseRail { grid-template-columns: 1fr !important; }
+  .studioApp.studioAppV2 .jobBar.taskCenter,
+  .studioApp.studioAppV2.sidebarIsCompact .jobBar.taskCenter {
+    inset: calc(var(--v6-topbar) + 8px) 8px auto 8px !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+}
+
+
+/* ==== merged from studio-v7.css ==== */
+/*
+ * Highlight Studio v10.15.7 — Navigation & Interaction Stability.
+ * Loaded LAST. This layer fixes compact-sidebar geometry and guards critical
+ * workflow interactions from legacy stylesheet overrides.
+ */
+
+:root {
+  --v7-sidebar-compact: 82px;
+}
+
+/* --------------------------------------------------------------------------
+   COMPACT SIDEBAR
+   The previous final layer matched density-* with the same specificity as the
+   compact rule and restored a 260-280px column while labels were hidden.
+   -------------------------------------------------------------------------- */
+.studioApp.studioAppV2.sidebarIsCompact,
+.studioApp.studioAppV2.density-comfortable.sidebarIsCompact,
+.studioApp.studioAppV2.density-compact.sidebarIsCompact {
+  grid-template-columns: var(--v7-sidebar-compact) minmax(0, 1fr) !important;
+}
+
+.studioApp.studioAppV2 > .studioSidebar.compact {
+  width: var(--v7-sidebar-compact) !important;
+  min-width: var(--v7-sidebar-compact) !important;
+  max-width: var(--v7-sidebar-compact) !important;
+  padding: 10px 9px 12px !important;
+  overflow-x: hidden !important;
+}
+
+.studioSidebar.compact .sidebarBrandRow {
+  min-height: 96px !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  justify-items: center !important;
+  align-content: start !important;
+  gap: 8px !important;
+  padding: 6px 0 0 !important;
+}
+
+.studioSidebar.compact .sidebarBrand,
+.studioSidebar.compact .projectSwitcher,
+.studioSidebar.compact .newProjectButton,
+.studioSidebar.compact .sidebarNavItem,
+.studioSidebar.compact .workflowNavItem,
+.studioSidebar.compact .sidebarFooter {
+  width: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  margin-inline: auto !important;
+  padding-inline: 0 !important;
+  justify-content: center !important;
+}
+
+.studioSidebar.compact .sidebarBrand {
+  min-height: 52px !important;
+  padding: 0 !important;
+}
+.studioSidebar.compact .sidebarBrandMark {
+  width: 46px !important;
+  height: 46px !important;
+}
+
+.studioApp.studioAppV2 .studioSidebar.compact .sidebarCollapse {
+  display: grid !important;
+  width: 40px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  margin: 0 auto !important;
+  place-items: center !important;
+}
+
+.studioSidebar.compact .projectSwitcher {
+  min-height: 56px !important;
+  grid-template-columns: 40px !important;
+  place-items: center !important;
+}
+.studioSidebar.compact .projectSwitcherIcon {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.studioSidebar.compact .newProjectButton {
+  min-height: 52px !important;
+  height: 52px !important;
+  border-radius: 12px !important;
+}
+
+.studioSidebar.compact .sidebarNavSection,
+.studioSidebar.compact .workflowNavSection,
+.studioSidebar.compact .sidebarBottomNav {
+  width: 100% !important;
+  display: grid !important;
+  justify-items: center !important;
+  gap: 8px !important;
+}
+
+.studioSidebar.compact .sidebarWorkflowList {
+  width: 100% !important;
+  display: grid !important;
+  justify-items: center !important;
+  gap: 7px !important;
+}
+.studioSidebar.compact .sidebarWorkflowList > li {
+  width: 52px !important;
+  min-width: 52px !important;
+}
+.studioSidebar.compact .workflowNavItem {
+  grid-template-columns: 38px !important;
+  min-height: 52px !important;
+}
+.studioSidebar.compact .workflowNavIcon {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+.studioSidebar.compact .sidebarBottomNav {
+  margin-top: auto !important;
+  padding-top: 14px !important;
+}
+.studioSidebar.compact .sidebarFooter {
+  min-height: 58px !important;
+  grid-template-columns: 36px !important;
+  place-items: center !important;
+  padding: 9px 0 !important;
+}
+.studioSidebar.compact .sidebarAvatar {
+  width: 36px !important;
+  height: 36px !important;
+}
+
+/* Never leave invisible label boxes participating in the compact layout. */
+.studioSidebar.compact .sidebarBrandText,
+.studioSidebar.compact .projectSwitcherCopy,
+.studioSidebar.compact .projectSwitcher > svg,
+.studioSidebar.compact .newProjectButton > span,
+.studioSidebar.compact .sidebarSectionLabel,
+.studioSidebar.compact .sidebarSectionHeading > small,
+.studioSidebar.compact .sidebarProjectProgress,
+.studioSidebar.compact .sidebarNavItem > span:not(.workflowNavIcon),
+.studioSidebar.compact .workflowNavCopy,
+.studioSidebar.compact .workflowNavIndex,
+.studioSidebar.compact .sidebarProjectMini,
+.studioSidebar.compact .sidebarFooter > span:nth-child(2),
+.studioSidebar.compact .sidebarFooter > svg {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   NEW PROJECT / SOURCE PICKER
+   -------------------------------------------------------------------------- */
+.localBrowser.redone {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+}
+.localBrowserTop,
+.pathRow,
+.rootsRow,
+.fileList { min-width: 0 !important; }
+.pathRow > span {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.fileList button {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+.fileList .videoItem > span {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Keyboard visibility for the most important navigation actions. */
+.newProjectButton:focus-visible,
+.projectSwitcher:focus-visible,
+.sidebarCollapse:focus-visible,
+.sidebarNavItem:focus-visible {
+  outline: 2px solid #8f79ff !important;
+  outline-offset: 2px !important;
+}
+
+/* Keep the content stable while toggling the sidebar. */
+.studioStage,
+.studioLayoutV2,
+.studioWorkspace {
+  min-width: 0 !important;
+}
+
+@media (max-width: 1040px) {
+  .studioApp.studioAppV2.sidebarIsCompact,
+  .studioApp.studioAppV2.density-comfortable.sidebarIsCompact,
+  .studioApp.studioAppV2.density-compact.sidebarIsCompact {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+/* ========================================================================== 
+   10.15.7 FINAL OWNER — shell, navigation, overflow and responsive geometry
+   ========================================================================== */
+:root {
+  --hs-sidebar: 280px;
+  --hs-sidebar-compact: 82px;
+  --hs-topbar: 66px;
+  --hs-page-x: clamp(18px, 1.45vw, 30px);
+  --hs-page-y: 22px;
+  --hs-gap: 18px;
+  --hs-drawer: 520px;
+}
+
+html, body, #root { min-width: 0; min-height: 100%; }
+body { overflow-x: hidden; }
+
+.studioApp.studioAppV2,
+.studioApp.studioAppV2.density-comfortable,
+.studioApp.studioAppV2.density-compact {
+  width: 100%;
+  min-width: 0 !important;
+  grid-template-columns: var(--hs-sidebar) minmax(0, 1fr) !important;
+}
+.studioApp.studioAppV2.sidebarIsCompact,
+.studioApp.studioAppV2.density-comfortable.sidebarIsCompact,
+.studioApp.studioAppV2.density-compact.sidebarIsCompact {
+  grid-template-columns: var(--hs-sidebar-compact) minmax(0, 1fr) !important;
+}
+
+.studioApp.studioAppV2 > .studioSidebar {
+  width: var(--hs-sidebar) !important;
+  min-width: var(--hs-sidebar) !important;
+  max-width: var(--hs-sidebar) !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-gutter: stable;
+}
+.studioApp.studioAppV2 > .studioSidebar.compact {
+  width: var(--hs-sidebar-compact) !important;
+  min-width: var(--hs-sidebar-compact) !important;
+  max-width: var(--hs-sidebar-compact) !important;
+  padding-inline: 9px !important;
+}
+
+/* Long Twitch/project names must never widen navigation or the top bar. */
+.projectSwitcher,
+.projectSwitcherCopy,
+.projectSwitcherCopy b,
+.recentProjectCopy,
+.recentProjectCopy b,
+.commandBreadcrumb,
+.commandBreadcrumb span,
+.taskCenterFooter,
+.taskCenterFooter > span {
+  min-width: 0 !important;
+}
+.projectSwitcherCopy b,
+.recentProjectCopy b,
+.commandBreadcrumb span,
+.taskCenterFooter > span {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Top bar is a real grid: breadcrumb shrinks first, actions never escape viewport. */
+.studioCommandbar {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: var(--hs-topbar) !important;
+  min-height: var(--hs-topbar) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto auto !important;
+  align-items: center !important;
+  column-gap: 14px !important;
+  padding: 0 18px !important;
+  overflow: visible !important;
+}
+.mobileMenuButton { grid-column: auto; }
+.commandBreadcrumb { overflow: hidden !important; }
+.commandBreadcrumb span { max-width: min(34vw, 520px) !important; }
+.commandBreadcrumb b { flex: 0 0 auto; }
+.commandbarContext {
+  min-width: 0 !important;
+  margin-left: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+.commandbarContext span { white-space: nowrap !important; }
+.commandbarActions {
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+}
+.commandbarActions > * { flex: 0 0 auto; }
+.commandbarActions .taskCenterButton { max-width: 220px !important; }
+.commandbarActions .taskCenterButton > span {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.studioStage,
+.studioLayoutV2,
+.studioLayoutV2 .studioWorkspace,
+.studioWorkspace,
+.studioApp.studioAppV2 .uPage,
+.dashboardOverviewGrid,
+.sourceLayout,
+.styleFormGrid,
+.uPresetGrid,
+.analysisPipelineMap,
+.uReviewStudioGrid,
+.clipWorkbench,
+.exportPage,
+.settingsPage,
+.reportsPage {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+.studioStage { width: 100% !important; overflow-x: clip !important; }
+.studioLayoutV2,
+.studioApp.studioAppV2 .studioLayoutV2 {
+  width: 100% !important;
+  padding: var(--hs-page-y) var(--hs-page-x) 78px !important;
+}
+.studioLayoutV2 .studioWorkspace,
+.studioApp.studioAppV2 .studioLayoutV2 .studioWorkspace {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+.studioApp.studioAppV2 .uPage { width: 100% !important; gap: var(--hs-gap) !important; }
+
+/* Project overview: decorative glow and long metrics may not increase scrollWidth. */
+.dashboardOverviewGrid > *,
+.projectSpotlight,
+.newProjectPanel,
+.projectSpotlightHead > div,
+.projectSpotlightStats > div,
+.projectWorkflowPreview > * { min-width: 0 !important; }
+.projectSpotlight {
+  overflow: hidden !important;
+  contain: paint;
+}
+.projectSpotlightGlow {
+  inset: -8% -3% auto auto !important;
+  width: 48% !important;
+  max-width: 560px !important;
+}
+.projectSpotlight h2,
+.projectSpotlightStats b.textMetric {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.projectSpotlight h2 { overflow-wrap: anywhere !important; }
+.projectSpotlightStats b.textMetric { white-space: nowrap !important; }
+
+/* Source / Format / Analysis use predictable responsive grids. */
+.studioAppV2 .sourceLayout {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px) !important;
+  gap: 18px !important;
+}
+.sourceFormCard, .sourceContext, .twitchInlineStatus { min-width: 0 !important; }
+
+.formatPage .uPresetGrid {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+.formatPage .uPreset { min-width: 0 !important; }
+.formatPage .styleFormGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.analysisPipelineMap {
+  width: 100% !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  overflow: hidden !important;
+}
+.analysisPipelineMap > div {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+.analysisPipelineMap b,
+.analysisPipelineMap small {
+  min-width: 0 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* Action bars belong to document flow. They never float over controls. */
+.pageActionBar,
+.reviewSelectionBar {
+  position: static !important;
+  inset: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Detailed Task Center is a drawer only when React renders it after user action. */
+.studioApp.studioAppV2 .jobBar.taskCenter,
+.studioApp.studioAppV2.sidebarIsCompact .jobBar.taskCenter {
+  position: fixed !important;
+  top: calc(var(--hs-topbar) + 10px) !important;
+  right: 14px !important;
+  bottom: auto !important;
+  left: auto !important;
+  width: min(var(--hs-drawer), calc(100vw - var(--hs-sidebar) - 42px)) !important;
+  max-width: var(--hs-drawer) !important;
+  max-height: calc(100vh - var(--hs-topbar) - 24px) !important;
+  margin: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+}
+.studioApp.studioAppV2.sidebarIsCompact .jobBar.taskCenter {
+  width: min(var(--hs-drawer), calc(100vw - var(--hs-sidebar-compact) - 42px)) !important;
+}
+.taskCenter *, .taskCenterHeader, .taskCenter .jobMain, .taskCenter .phaseRail,
+.taskCenter .stageProgressBox, .taskCenterFooter { min-width: 0 !important; max-width: 100% !important; }
+.taskCenter .phaseRail { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; overflow: hidden !important; }
+
+/* Keep common text/control targets readable and consistent. */
+.studioApp.studioAppV2 button:not(.iconButton):not(.sidebarNavItem):not(.sidebarCollapse):not(.uTimelineClip) {
+  min-height: 42px !important;
+}
+.studioApp.studioAppV2 input,
+.studioApp.studioAppV2 select { min-height: 46px !important; }
+
+/* Desktop widths where the old rules were most likely to collide. */
+@media (max-width: 1500px) {
+  .autosaveState { display: none !important; }
+  .dashboardOverviewGrid { grid-template-columns: minmax(0, 1.55fr) minmax(310px, .72fr) !important; }
+  .commandBreadcrumb span { max-width: 27vw !important; }
+}
+
+@media (max-width: 1320px) {
+  .commandbarContext { display: none !important; }
+  .dashboardOverviewGrid,
+  .studioAppV2 .sourceLayout { grid-template-columns: 1fr !important; }
+  .formatPage .uPresetGrid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .formatPage .styleFormGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .analysisPipelineMap { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .projectSpotlightGlow { width: 42% !important; }
+}
+
+@media (max-width: 1040px) {
+  .studioApp.studioAppV2,
+  .studioApp.studioAppV2.density-comfortable,
+  .studioApp.studioAppV2.density-compact,
+  .studioApp.studioAppV2.sidebarIsCompact,
+  .studioApp.studioAppV2.density-comfortable.sidebarIsCompact,
+  .studioApp.studioAppV2.density-compact.sidebarIsCompact {
+    grid-template-columns: 1fr !important;
+  }
+  .studioApp.studioAppV2 > .studioSidebar,
+  .studioApp.studioAppV2 > .studioSidebar.compact {
+    width: min(310px, 88vw) !important;
+    min-width: min(310px, 88vw) !important;
+    max-width: min(310px, 88vw) !important;
+  }
+  .studioCommandbar {
+    grid-template-columns: auto minmax(0,1fr) auto !important;
+    padding-inline: 12px !important;
+  }
+  .mobileMenuButton { display: grid !important; }
+  .commandbarActions .taskCenterButton > span { display: none !important; }
+  .commandbarActions .taskCenterButton { width: 40px !important; min-width: 40px !important; padding-inline: 0 !important; }
+  .formatPage .uPresetGrid,
+  .analysisPipelineMap { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .studioApp.studioAppV2 .jobBar.taskCenter,
+  .studioApp.studioAppV2.sidebarIsCompact .jobBar.taskCenter {
+    width: min(520px, calc(100vw - 24px)) !important;
+    right: 12px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .studioLayoutV2,
+  .studioApp.studioAppV2 .studioLayoutV2 { padding: 16px 12px 56px !important; }
+  .formatPage .uPresetGrid,
+  .formatPage .styleFormGrid,
+  .analysisPipelineMap,
+  .taskCenter .phaseRail { grid-template-columns: 1fr !important; }
+  .pageActionBar { flex-direction: column !important; align-items: stretch !important; }
+  .pageActionBar > div:last-child { width: 100% !important; flex-direction: column !important; }
+  .pageActionBar > div:last-child button { width: 100% !important; }
+  .commandBreadcrumb span { max-width: 42vw !important; }
+}
+
+/* Source context must survive arbitrarily long Twitch/project names. */
+.sourceContext,
+.sourceContext > *,
+.sourceContext .uCard,
+.sourceContext .uCardHead,
+.sourceContext .uCardHead > div,
+.sourceContext .uProjectStats,
+.sourceContext .uProjectStats > div,
+.sourceContext .uCompactActions {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+.sourceContext .uCardHead > div { flex: 1 1 auto !important; }
+.sourceContext .uCardHead h3,
+.sourceContext .uCardHead p {
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+.sourceContext .uCardHead h3 { font-size: 18px !important; line-height: 24px !important; }
+.sourceContext .uCardHead > button { flex: 0 0 auto !important; }
+.sourceContext .uProjectStats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+.sourceContext .uProjectStats b,
+.sourceContext .uProjectStats span {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.sourceContext .uCompactActions {
+  grid-template-columns: minmax(0, 1fr) repeat(3, auto) !important;
+}
+.sourceContext .uCompactActions select { min-width: 0 !important; width: 100% !important; }
+@media (max-width: 1320px) {
+  .sourceContext .uCompactActions { grid-template-columns: minmax(0, 1fr) repeat(3, auto) !important; }
+}
+@media (max-width: 720px) {
+  .sourceContext .uCompactActions { grid-template-columns: 1fr 1fr !important; }
+  .sourceContext .uCompactActions select { grid-column: 1 / -1; }
+}
+
+/* 10.15.14 — global background jobs and calmer task-center hierarchy */
+.globalTaskList {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--v5-border) 78%, transparent);
+  display: grid;
+  gap: 8px;
+}
+.globalTaskListHead { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.globalTaskListHead b { font-size:12px; }
+.globalTaskListHead span { color:var(--v5-text-3); font-size:10px; }
+.globalTaskRow {
+  width:100%; min-width:0; display:grid; grid-template-columns:minmax(0,1fr) 110px; gap:12px; align-items:center;
+  padding:9px 10px; border-radius:10px; border:1px solid var(--v5-border); background:color-mix(in srgb, var(--v5-panel-2) 92%, transparent); text-align:left;
+}
+.globalTaskRow:hover { border-color:color-mix(in srgb, var(--v5-accent) 55%, var(--v5-border)); }
+.globalTaskCopy { min-width:0; display:grid; gap:2px; }
+.globalTaskCopy b { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; }
+.globalTaskCopy small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--v5-text-3); font-size:9px; }
+.globalTaskProgress { min-width:0; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:7px; align-items:center; }
+.globalTaskProgress::before { content:""; grid-column:1; grid-row:1; height:5px; border-radius:99px; background:var(--v5-border); }
+.globalTaskProgress i { grid-column:1; grid-row:1; height:5px; max-width:100%; border-radius:99px; background:var(--v5-accent); z-index:1; }
+.globalTaskProgress small { grid-column:2; grid-row:1; color:var(--v5-text-3); font-size:9px; }
+@media (max-width: 760px) {
+  .globalTaskRow { grid-template-columns:minmax(0,1fr); }
+}
+
+/* 10.15.14 packaged compatibility hooks (kept in source for the next clean Vite build). */
+.hs101513-global-jobs{margin-top:12px;padding-top:12px;border-top:1px solid rgba(137,151,179,.18);display:grid;gap:8px}
+.hs101513-global-head{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px}
+.hs101513-global-head span{opacity:.65}
+.hs101513-job{width:100%;display:grid;grid-template-columns:minmax(0,1fr) 105px;gap:10px;align-items:center;padding:9px 10px;border-radius:10px;border:1px solid rgba(137,151,179,.18);background:rgba(255,255,255,.025);text-align:left;color:inherit}
+.hs101513-job:hover{border-color:rgba(124,92,255,.55)}
+.hs101513-job-copy{min-width:0;display:grid;gap:2px}.hs101513-job-copy b,.hs101513-job-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hs101513-job-copy b{font-size:11px}.hs101513-job-copy small{font-size:9px;opacity:.62}
+.hs101513-job-pct{font-size:10px;text-align:right;opacity:.75}
+.hs101513-ux-note{display:block;margin-top:5px;font-size:11px;line-height:1.45;opacity:.72}
+.hs101513-retry{margin-left:10px;min-height:30px;padding:5px 9px;border-radius:8px}
+@media(max-width:760px){.hs101513-job{grid-template-columns:minmax(0,1fr)}}
+
+/* 10.15.19 — First Run Wizard isolation.
+   Global Studio text-input rules must never stretch consent checkboxes or
+   apply form-label typography to their explanatory copy. */
+.studioApp.studioAppV2 .firstRunWizard .wizardConsent {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+.studioApp.studioAppV2 .firstRunWizard .wizardConsent input[type="checkbox"] {
+  appearance: auto !important;
+  -webkit-appearance: checkbox !important;
+  flex: 0 0 18px !important;
+  width: 18px !important;
+  min-width: 18px !important;
+  max-width: 18px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  max-height: 18px !important;
+  padding: 0 !important;
+  margin: 3px 0 0 !important;
+  border-radius: 4px !important;
+}
+.studioApp.studioAppV2 .firstRunWizard .wizardConsent > span {
+  display: grid !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  gap: 5px !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: 400 !important;
+  line-height: normal !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+.studioApp.studioAppV2 .firstRunWizard .wizardConsent > span > b {
+  color: inherit !important;
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+.studioApp.studioAppV2 .firstRunWizard .wizardConsent > span > small {
+  display: block !important;
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+  white-space: normal !important;
+}
+
+/* 11.2.4 native per-candidate Shorts editor */
+.shortCandidateEditor{display:grid;gap:14px;margin:18px 0}.shortCandidateCard{display:grid;grid-template-columns:minmax(190px,280px) 1fr auto;gap:16px;align-items:start;padding:16px;border:1px solid var(--border,#d9dee8);border-radius:14px;background:var(--surface,#fff)}.shortCandidatePreview{position:relative;aspect-ratio:9/16;max-height:300px;display:grid;place-items:center;overflow:hidden;border-radius:10px;background:#10141d;color:#cad2e0;text-align:center}.shortCandidatePreview video{width:100%;height:100%;object-fit:contain}.shortCandidatePreview>span{display:grid;gap:8px;justify-items:center;padding:18px}.shortSafeZoneOverlay{position:absolute;inset:0;pointer-events:none;z-index:3}.shortSafeRight{position:absolute;right:0;top:18%;bottom:18%;width:17%;background:linear-gradient(90deg,transparent,rgba(255,91,91,.15));border-left:1px dashed rgba(255,130,130,.45)}.shortSafeBottom{position:absolute;left:0;right:0;bottom:0;height:15%;background:linear-gradient(0deg,rgba(255,91,91,.16),transparent);border-top:1px dashed rgba(255,130,130,.45)}.shortSafeCaption{position:absolute;left:9%;right:21%;bottom:19%;height:21%;border:1px dashed rgba(94,234,212,.65);border-radius:8px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}.shortSafeCaption em{position:absolute;left:6px;top:5px;font:700 8px/1 system-ui,sans-serif;letter-spacing:.08em;color:rgba(153,246,228,.85);font-style:normal}.shortCandidateFields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.shortCandidateFields .wide{grid-column:1/-1}.shortCandidateFields textarea{resize:vertical}@media(max-width:900px){.shortCandidateCard{grid-template-columns:1fr}.shortCandidatePreview{max-height:420px}}
+.shortV51Panel{display:grid;gap:12px;margin:16px 0;padding:16px;border:1px solid var(--border,#d9dee8);border-radius:14px;background:var(--surface,#fff)}
+.shortV51Head{display:flex;align-items:center;justify-content:space-between;gap:12px}.shortV51Head>div{display:grid;gap:3px}.shortV51Head small{color:var(--muted,#7b8494)}
+.shortV51SettingsGrid{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:10px}.shortV51Setting{display:grid;gap:6px}.shortV51Setting>span{font-size:12px;font-weight:700;color:var(--muted,#687386)}.shortV51Setting input,.shortV51Setting select{min-height:38px}
+.shortV51Status{font-size:12px;color:var(--muted,#687386)}.shortV51Status[data-type="ok"]{color:#138a68}.shortV51Status[data-type="error"]{color:#c44747}
+.shortV51Actions{display:grid;gap:10px;min-width:180px}.shortV51Actions small{color:var(--muted,#687386);line-height:1.35}
+@media(max-width:900px){.shortV51SettingsGrid{grid-template-columns:1fr}.shortV51Actions{min-width:0}}

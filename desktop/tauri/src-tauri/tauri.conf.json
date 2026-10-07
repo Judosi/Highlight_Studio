@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Highlight Studio",
+  "version": "11.2.7",
+  "identifier": "local.highlight.studio",
+  "build": {
+    "beforeDevCommand": "npm --prefix ../../../frontend run dev",
+    "devUrl": "http://127.0.0.1:5173",
+    "frontendDist": "../../../frontend/dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Highlight Studio",
+        "width": 1500,
+        "height": 950
+      }
+    ]
+  }
+}

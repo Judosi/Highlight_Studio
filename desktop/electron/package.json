@@ -1,0 +1,103 @@
+{
+  "name": "highlight-studio-desktop",
+  "version": "11.2.7",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/*.test.js",
+    "pack:dir": "electron-builder --dir --publish never",
+    "dist:win": "electron-builder --win nsis portable --publish never"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "electron": "43.1.0",
+    "electron-builder": "26.15.3"
+  },
+  "description": "Hybrid desktop shell for Highlight Studio",
+  "author": "Highlight Studio",
+  "build": {
+    "appId": "com.highlightstudio.desktop",
+    "productName": "Highlight Studio",
+    "artifactName": "Highlight-Studio-${version}-${arch}.${ext}",
+    "asar": true,
+    "asarUnpack": [
+      "**/*.node"
+    ],
+    "directories": {
+      "output": "../../build/desktop/installer",
+      "buildResources": "build-resources"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "security.js",
+      "ipc_policy.js",
+      "package.json",
+      "release-channel.json",
+      "paid-beta-channel.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../../release_identity.json",
+        "to": "app/release_identity.json"
+      },
+      {
+        "from": "../../build/desktop/engine/HighlightStudioEngine",
+        "to": "engine"
+      },
+      {
+        "from": "../../frontend/dist",
+        "to": "app/frontend/dist"
+      },
+      {
+        "from": "../../vendor",
+        "to": "app/vendor"
+      },
+      {
+        "from": "../../README.md",
+        "to": "app/README.md"
+      },
+      {
+        "from": "../../docs/legal",
+        "to": "app/docs/legal"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build-resources/icon.ico",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Highlight Studio",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true
+    },
+    "portable": {
+      "artifactName": "Highlight-Studio-Portable-${version}-${arch}.${ext}"
+    }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  }
+}

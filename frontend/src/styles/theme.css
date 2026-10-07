@@ -1,0 +1,561 @@
+/* Highlight Studio v10.15.7 Graphite Design System
+   Semantic tokens are the source of truth. Legacy variables are aliases so
+   older feature styles inherit the active theme without duplicated palettes. */
+:root,
+:root[data-hs-theme="graphite"] {
+  color-scheme: dark;
+  --color-canvas: #080a10;
+  --color-canvas-elevated: #0b0f16;
+  --color-surface-1: #0e131c;
+  --color-surface-2: #151c27;
+  --color-surface-3: #1c2532;
+  --color-surface-hover: #222d3c;
+  --color-overlay: rgba(14, 19, 28, .96);
+
+  --color-border-subtle: #2b3546;
+  --color-border-default: #3b485d;
+  --color-border-strong: #5b6980;
+
+  --color-text-primary: #f4f7fb;
+  --color-text-secondary: #b8c2d1;
+  --color-text-muted: #8e9aaf;
+  --color-text-disabled: #687486;
+
+  --color-action-primary: #2563eb;
+  --color-action-primary-hover: #1d4ed8;
+  --color-action-primary-active: #1e40af;
+  --color-action-on-primary: #ffffff;
+  --color-action-secondary: #1c2532;
+  --color-action-secondary-hover: #273345;
+
+  --color-ai: #22d3ee;
+  --color-ai-on: #06131a;
+  --color-ai-surface: rgba(34, 211, 238, .10);
+  --color-ai-border: rgba(34, 211, 238, .46);
+  --color-brand: #7c3aed;
+  --color-brand-strong: #6d28d9;
+
+  --color-success: #22c55e;
+  --color-success-surface: rgba(34, 197, 94, .12);
+  --color-warning: #fbbf24;
+  --color-warning-surface: rgba(251, 191, 36, .12);
+  --color-danger: #f43f5e;
+  --color-danger-surface: rgba(244, 63, 94, .12);
+  --color-info: #38bdf8;
+  --color-info-surface: rgba(56, 189, 248, .12);
+
+  --color-focus: #38bdf8;
+  --color-selection: rgba(56, 189, 248, .30);
+  --shadow-panel: 0 10px 28px rgba(0, 0, 0, .28);
+  --shadow-floating: 0 20px 54px rgba(0, 0, 0, .42);
+  --radius-panel: 16px;
+  --radius-control: 10px;
+  --radius-small: 8px;
+
+  --font-ui: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  --font-size-caption: 12px;
+  --font-size-small: 13px;
+  --font-size-body: 14px;
+  --font-size-body-large: 16px;
+  --font-size-h3: 18px;
+  --font-size-h2: 22px;
+  --font-size-h1: 28px;
+  --line-caption: 16px;
+  --line-small: 18px;
+  --line-body: 21px;
+  --line-body-large: 24px;
+  --line-h3: 26px;
+  --line-h2: 30px;
+  --line-h1: 36px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --control-compact: 40px;
+  --control-default: 44px;
+  --content-form: 1240px;
+  --content-editor: 1680px;
+  --content-reading: 68ch;
+
+  --motion-fast: 120ms;
+  --motion-menu: 160ms;
+  --motion-page: 180ms;
+  --motion-progress: 240ms;
+  --ease-standard: cubic-bezier(.2, 0, 0, 1);
+
+  --z-header: 100;
+  --z-menu: 300;
+  --z-overlay: 1000;
+
+  /* Compatibility aliases for the existing component stylesheet. */
+  --bg: var(--color-canvas);
+  --bg2: var(--color-canvas-elevated);
+  --panel: var(--color-surface-1);
+  --panel2: var(--color-surface-2);
+  --panel3: var(--color-surface-3);
+  --glass: rgba(14, 19, 28, .88);
+  --glass2: rgba(255, 255, 255, .055);
+  --glass3: rgba(255, 255, 255, .085);
+  --line: var(--color-border-subtle);
+  --lineStrong: var(--color-border-strong);
+  --text: var(--color-text-primary);
+  --textStrong: #ffffff;
+  --muted: var(--color-text-secondary);
+  --muted2: var(--color-text-muted);
+  --cyan: var(--color-ai);
+  --blue: var(--color-action-primary);
+  --violet: var(--color-brand);
+  --pink: var(--color-brand);
+  --orange: var(--color-warning);
+  --green: var(--color-success);
+  --red: var(--color-danger);
+  --amber: var(--color-warning);
+  --shadow: var(--shadow-panel);
+  --shadow2: 0 6px 20px rgba(0, 0, 0, .22);
+  --radius: var(--radius-panel);
+}
+
+:root[data-hs-theme="midnight"] {
+  --color-canvas: #050713;
+  --color-canvas-elevated: #080d1d;
+  --color-surface-1: #0b1224;
+  --color-surface-2: #10182c;
+  --color-surface-3: #172033;
+  --color-surface-hover: #202c43;
+  --color-overlay: rgba(7, 12, 26, .96);
+  --color-border-subtle: #283551;
+  --color-border-default: #3b4b6a;
+  --color-border-strong: #64779c;
+  --color-text-primary: #eaf1ff;
+  --color-text-secondary: #b4c2da;
+  --color-text-muted: #8fa0bd;
+  --color-action-primary: #315ee8;
+  --color-action-primary-hover: #284dcc;
+  --color-action-primary-active: #223fa8;
+  --color-ai: #22d3ee;
+  --color-brand: #8b5cf6;
+  --color-brand-strong: #7c3aed;
+  --color-focus: #67e8f9;
+  --shadow-panel: 0 12px 34px rgba(0, 0, 0, .32);
+}
+
+:root[data-hs-theme="high-contrast"] {
+  --color-canvas: #000000;
+  --color-canvas-elevated: #05070a;
+  --color-surface-1: #0b0f14;
+  --color-surface-2: #111820;
+  --color-surface-3: #192431;
+  --color-surface-hover: #243446;
+  --color-overlay: rgba(0, 0, 0, .98);
+  --color-border-subtle: #65758a;
+  --color-border-default: #91a1b6;
+  --color-border-strong: #d6deea;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #e5eaf1;
+  --color-text-muted: #c1cad8;
+  --color-text-disabled: #8793a4;
+  --color-action-primary: #1d63ed;
+  --color-action-primary-hover: #3b7cff;
+  --color-action-primary-active: #174fc0;
+  --color-ai: #54e4ff;
+  --color-ai-on: #001014;
+  --color-ai-surface: rgba(84, 228, 255, .15);
+  --color-ai-border: #54e4ff;
+  --color-brand: #a78bfa;
+  --color-brand-strong: #8b5cf6;
+  --color-success: #49e278;
+  --color-warning: #ffd24a;
+  --color-danger: #ff6680;
+  --color-info: #68cfff;
+  --color-focus: #ffffff;
+  --shadow-panel: none;
+  --shadow-floating: 0 0 0 2px #ffffff;
+}
+
+html,
+body {
+  background: var(--color-canvas);
+  color: var(--color-text-primary);
+}
+body {
+  background-image:
+    radial-gradient(circle at 10% -10%, color-mix(in srgb, var(--color-brand) 10%, transparent), transparent 34%),
+    radial-gradient(circle at 88% 0%, color-mix(in srgb, var(--color-ai) 8%, transparent), transparent 30%),
+    linear-gradient(145deg, var(--color-canvas), var(--color-canvas-elevated));
+}
+body::before { opacity: .10; }
+::selection { background: var(--color-selection); color: var(--color-text-primary); }
+::-webkit-scrollbar-track { background: var(--color-canvas); }
+::-webkit-scrollbar-thumb {
+  border-color: var(--color-canvas);
+  background: var(--color-border-default);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-border-strong); }
+
+/* Calm, professional controls. */
+button,
+input,
+select,
+textarea {
+  border-color: var(--color-border-subtle);
+  border-radius: var(--radius-control);
+}
+input,
+select,
+textarea {
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
+  box-shadow: none;
+}
+input:hover,
+select:hover,
+textarea:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-default);
+}
+input:focus,
+select:focus,
+textarea:focus,
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-color: var(--color-focus);
+  box-shadow: none;
+}
+input::placeholder,
+textarea::placeholder { color: var(--color-text-muted); opacity: 1; }
+select option { background: var(--color-surface-1); color: var(--color-text-primary); }
+
+button {
+  background: var(--color-action-secondary);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-subtle);
+  box-shadow: none;
+  font-weight:600;
+}
+button:hover:not(:disabled) {
+  transform: none;
+  background: var(--color-action-secondary-hover);
+  border-color: var(--color-border-default);
+  box-shadow: none;
+}
+button:active:not(:disabled) { background: var(--color-surface-3); }
+button.primary,
+.primary,
+button.ok,
+button.primaryStrong,
+.settingsTabs button.active,
+.uSourceTabs button.active,
+.uPreset.active {
+  background: var(--color-action-primary) !important;
+  color: var(--color-action-on-primary) !important;
+  border-color: color-mix(in srgb, var(--color-action-primary) 72%, white) !important;
+  box-shadow: none !important;
+}
+button.primary:hover:not(:disabled),
+button.primaryStrong:hover:not(:disabled),
+button.ok:hover:not(:disabled) { background: var(--color-action-primary-hover) !important; }
+button.success {
+  background: var(--color-success) !important;
+  color: #07140b !important;
+  border-color: var(--color-success) !important;
+  box-shadow: none !important;
+}
+button.dangerBtn,
+button.danger {
+  background: var(--color-danger-surface) !important;
+  color: #ffd9df !important;
+  border-color: color-mix(in srgb, var(--color-danger) 62%, transparent) !important;
+}
+
+/* Neutral workspace surfaces; brand color is reserved for identity and AI state. */
+.studioTopbar,
+.jobBar,
+.studioSidebar,
+.uCard,
+.card,
+.uNextAction,
+.stepHero,
+.firstRunWizard,
+.utilityMenu,
+.paidBetaBlock,
+.massReleasePanel,
+.accountSessions,
+.roleGuide article,
+.renderLiveCard,
+.workflowGuardCard,
+.releaseAuditCard,
+.artifactCheckCard,
+.twitchLiveProgressCard {
+  background: var(--color-surface-1) !important;
+  border-color: var(--color-border-subtle) !important;
+  box-shadow: var(--shadow-panel) !important;
+}
+.studioTopbar {
+  background: color-mix(in srgb, var(--color-canvas) 90%, transparent) !important;
+  border-bottom-color: var(--color-border-subtle) !important;
+}
+.studioSidebar { border-radius: var(--radius-panel); }
+.uCard,
+.card,
+.uNextAction,
+.stepHero { border-radius: var(--radius-panel); }
+.uMainClipPlayer,
+.playerStatusCard,
+.uTimelinePanel {
+  background: #020304 !important;
+  border-color: var(--color-border-default) !important;
+}
+
+/* One clear primary accent; active navigation uses a quiet AI surface. */
+.stepButton.active,
+.modeSwitch button.selected,
+.settingsTabs button.active,
+.uSourceTabs button.active,
+.uPreset.active {
+  background: var(--color-ai-surface) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-ai-border) !important;
+  box-shadow: inset 3px 0 0 var(--color-ai) !important;
+}
+.stepButton.active .stepNum,
+.uMomentNumber,
+.brandIcon {
+  color: var(--color-text-primary);
+}
+.brandIcon {
+  background: linear-gradient(145deg, var(--color-brand), var(--color-ai));
+  box-shadow: 0 0 0 1px var(--color-border-default);
+}
+.eyebrow,
+.sidebarTitle,
+.uCardHead > div > span,
+.uField > span,
+.uFormGrid label > span { color: var(--color-ai); }
+
+.statusChip,
+.pill,
+.modePill,
+.badge,
+.miniBadge,
+.settingsStatePill,
+.settingsCount,
+.settingsSaveState {
+  background: var(--color-surface-2);
+  border-color: var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  box-shadow: none;
+}
+.statusChip.ok,
+.badge.ok,
+.miniBadge.ok,
+.noticeBanner.success {
+  background: var(--color-success-surface) !important;
+  border-color: color-mix(in srgb, var(--color-success) 48%, transparent) !important;
+}
+.statusChip.warn,
+.noticeBanner.warning {
+  background: var(--color-warning-surface) !important;
+  border-color: color-mix(in srgb, var(--color-warning) 48%, transparent) !important;
+}
+.statusChip.bad,
+.miniBadge.bad,
+.noticeBanner.error {
+  background: var(--color-danger-surface) !important;
+  border-color: color-mix(in srgb, var(--color-danger) 52%, transparent) !important;
+}
+.noticeBanner.info {
+  background: var(--color-info-surface) !important;
+  border-color: color-mix(in srgb, var(--color-info) 48%, transparent) !important;
+}
+
+.progress span,
+.uProgressLine.render span,
+.uProgressLine.stage span,
+.uProgressLine.twitch span {
+  background: var(--color-action-primary) !important;
+  box-shadow: none !important;
+}
+.jobDot.running { background: var(--color-success); box-shadow: 0 0 0 5px var(--color-success-surface); }
+.jobDot.done { background: var(--color-info); }
+.jobDot.error { background: var(--color-danger); }
+
+/* Reduce decorative glow and excessive rounding in editor screens. */
+.stableProfileCard::before,
+.finalSuccessCard::before,
+.successHistoryCard::before,
+.productHealthCard::before,
+.doctorCard::before,
+.stepHero::before { opacity: .18; }
+.uMomentCard,
+.uHistory button,
+.readyItem,
+.renderLiveGrid > div,
+.twitchProgressGrid > div,
+.settingsGridClean label { border-color: var(--color-border-subtle); box-shadow: none; }
+.uMomentCard:hover,
+.uHistory button:hover { border-color: var(--color-border-default); transform: none; }
+
+/* Theme picker */
+.themePicker {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.themeChoice {
+  min-height: 82px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  text-align: left;
+  background: var(--color-surface-2);
+  border-color: var(--color-border-subtle);
+}
+.themeChoice.selected {
+  background: var(--color-ai-surface);
+  border-color: var(--color-ai-border);
+  box-shadow: inset 3px 0 0 var(--color-ai);
+}
+.themeChoice b { display: block; font-size: 13px; }
+.themeChoice small { display: block; margin-top: 3px; line-height: 1.35; color: var(--color-text-muted); }
+.themeSwatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-default);
+  background: linear-gradient(135deg, var(--swatch-a), var(--swatch-b));
+}
+.themeChoice[data-theme-choice="graphite"] { --swatch-a: #080a10; --swatch-b: #2563eb; }
+.themeChoice[data-theme-choice="midnight"] { --swatch-a: #050713; --swatch-b: #22d3ee; }
+.themeChoice[data-theme-choice="high-contrast"] { --swatch-a: #000000; --swatch-b: #ffffff; }
+.utilityMenuSection { padding: 6px; display: grid; gap: 4px; border-top: 1px solid var(--color-border-subtle); }
+.utilityMenuSection:first-child { border-top: 0; }
+.utilityMenuLabel { padding: 2px 6px 5px; color: var(--color-text-muted); font-size: 10px; font-weight:700; letter-spacing: .08em; text-transform: uppercase; }
+.utilityMenu button.selected { background: var(--color-ai-surface); border-color: var(--color-ai-border); color: var(--color-text-primary); }
+
+:root[data-hs-theme="high-contrast"] .studioTopbar,
+:root[data-hs-theme="high-contrast"] .studioSidebar,
+:root[data-hs-theme="high-contrast"] .uCard,
+:root[data-hs-theme="high-contrast"] .card,
+:root[data-hs-theme="high-contrast"] input,
+:root[data-hs-theme="high-contrast"] select,
+:root[data-hs-theme="high-contrast"] textarea,
+:root[data-hs-theme="high-contrast"] button {
+  border-width: 2px;
+}
+:root[data-hs-theme="high-contrast"] .muted,
+:root[data-hs-theme="high-contrast"] small { color: var(--color-text-secondary) !important; }
+
+@media (max-width: 780px) {
+  .themePicker { grid-template-columns: 1fr; }
+}
+@media (prefers-contrast: more) {
+  :root:not([data-hs-theme="midnight"]):not([data-hs-theme="graphite"]) {
+    --color-border-subtle: #65758a;
+    --color-border-default: #91a1b6;
+  }
+}
+@media (forced-colors: active) {
+  * { forced-color-adjust: auto; }
+  .brandIcon, .themeSwatch { border: 1px solid CanvasText; }
+}
+
+/* Compact density follows the same restrained design language. */
+.studioApp.density-compact {
+  --radius: 14px;
+  --shadow: var(--shadow-panel);
+  --shadow2: 0 4px 14px rgba(0, 0, 0, .18);
+}
+.studioApp.density-compact button,
+.studioApp.density-compact button:hover:not(:disabled) {
+  box-shadow: none;
+  transform: none;
+  border-radius: var(--radius-control);
+}
+.studioApp.density-compact .brandIcon { box-shadow: 0 0 0 1px var(--color-border-default); }
+.studioApp.density-compact .uCard,
+.studioApp.density-compact .card { border-radius: 14px; }
+
+/* Web-account screens use brand color for identity, not for every control. */
+.authPage {
+  background: var(--color-canvas);
+  color: var(--color-text-primary);
+}
+.authVisual {
+  background:
+    radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--color-brand) 18%, transparent), transparent 36%),
+    radial-gradient(circle at 90% 80%, color-mix(in srgb, var(--color-ai) 12%, transparent), transparent 34%),
+    linear-gradient(145deg, var(--color-canvas-elevated), var(--color-canvas));
+}
+.authPanel { background: var(--color-canvas-elevated); }
+.authCard {
+  border-color: var(--color-border-subtle);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface-1);
+  box-shadow: var(--shadow-floating);
+}
+.authBrand small,
+.authCardHead span,
+.authSwitch button { color: var(--color-ai); }
+.authLogo,
+.teamMember .avatar,
+.accountPill span { background: linear-gradient(145deg, var(--color-brand), var(--color-ai)); box-shadow: none; }
+.authHero > p,
+.authCardHead p,
+.authSwitch,
+.authRemember span { color: var(--color-text-secondary) !important; }
+.authBenefits span,
+.authEyebrow {
+  background: var(--color-surface-2);
+  border-color: var(--color-border-subtle);
+  color: var(--color-text-secondary);
+}
+.authInput {
+  background: var(--color-surface-2);
+  border-color: var(--color-border-default);
+  border-radius: var(--radius-control);
+}
+.authInput:focus-within {
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-focus) 25%, transparent);
+}
+.authSubmit {
+  background: var(--color-action-primary) !important;
+  color: var(--color-action-on-primary) !important;
+  border-color: var(--color-action-primary) !important;
+  box-shadow: none !important;
+  font-weight: 700;
+}
+.authSubmit:hover:not(:disabled) { background: var(--color-action-primary-hover) !important; }
+.accountPill,
+.adminUser,
+.sessionRow,
+.teamMember,
+.roleGuide article {
+  background: var(--color-surface-2) !important;
+  border-color: var(--color-border-subtle) !important;
+}
+
+/* Keep disabled controls distinguishable without lowering readable text too far. */
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 1;
+  color: var(--color-text-disabled);
+  background: color-mix(in srgb, var(--color-surface-1) 82%, black);
+  border-color: var(--color-border-subtle);
+  cursor: not-allowed;
+  filter: none;
+}

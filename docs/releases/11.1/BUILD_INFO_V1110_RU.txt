@@ -1,0 +1,14 @@
+Highlight Studio 11.1.0
+Release: Durable Pipeline + Portable Projects + Native Shorts Editor
+App identity: v11.1.0-durable-pipeline-shorts-resume
+Design identity: studio-audited-v15
+Portable root: Highlight_Studio_11.1.0
+Project schema: 4
+
+Ключевые гарантии:
+- атомарные checkpoint-состояния длительных стадий;
+- восстановление interrupted-задач как partial/pending;
+- перенос проекта без потери исходника и без ложной инвалидизации кэша;
+- единая очередь GPU-heavy для Whisper, Ollama и FFmpeg;
+- раздельные таймауты first-token и stream-stall, circuit breaker Ollama;
+- атомарная перегенерация одного Short с сохранением предыдущего валидного файла.

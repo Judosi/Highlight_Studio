@@ -1,0 +1,13 @@
+Highlight Studio 10.15.18 — Architecture Cleanup
+
+Цель версии: привести portable/source release к понятной архитектуре папок без изменения рабочей логики анализа, монтажа и рендера.
+
+Главное:
+- в корне оставлен один основной launcher START_HERE.bat;
+- вспомогательные BAT-команды распределены по commands/launch, commands/setup и commands/diagnostics;
+- исторические BUILD/CHANGE/REMEDIATION материалы перенесены в docs/releases/10.15;
+- старые release-check BAT перенесены в tools/release/checks/legacy;
+- audit-скриншоты перенесены в docs/audits/legacy/screenshots;
+- обязательная структура релиза теперь задаётся централизованно в tools/release/release_layout.py.
+
+Функциональная база: 10.15.18.

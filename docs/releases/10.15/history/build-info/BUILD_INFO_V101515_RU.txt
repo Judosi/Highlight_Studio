@@ -1,0 +1,15 @@
+Highlight Studio 10.15.15 — Production Stabilization
+App identity: v10.15.15-production-stabilization
+Design identity: studio-audited-v15
+
+Фокус релиза:
+- единый production workflow-state;
+- true New Project draft context;
+- stale-response guards;
+- manual step navigation;
+- terminal job hydration;
+- result-first Review;
+- global Task Center;
+- сохранение AI Reliability/Semantic Quality.
+
+Честное ограничение: clean npm/Vite rebuild не подтверждён в текущей изолированной QA-среде.

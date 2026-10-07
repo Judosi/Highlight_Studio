@@ -1,0 +1,6 @@
+.env
+.env.generated
+data/
+*.sqlite3
+caddy_data/
+caddy_config/

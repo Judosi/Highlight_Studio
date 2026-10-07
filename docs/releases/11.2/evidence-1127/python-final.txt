@@ -1,0 +1,110 @@
+........................................................................ [ 12%]
+........................................................................ [ 25%]
+........................................................................ [ 37%]
+........................................................................ [ 50%]
+........................................................................ [ 63%]
+........................................................F............... [ 75%]
+........................................................................ [ 88%]
+.................................................................        [100%]
+=================================== FAILURES ===================================
+______ test_current_mediapipe_can_process_frames_without_legacy_solutions ______
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_current_mediapipe_can_pro0')
+
+    def test_current_mediapipe_can_process_frames_without_legacy_solutions(tmp_path):
+        pytest.importorskip('mediapipe')
+        raw = tmp_path/'frames.rgb'
+        raw.write_bytes(bytes(128*128*3*2))
+>       assert pipeline._detect_faces_mediapipe_from_raw(raw,width=128,height=128,fps=1) == []
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_shorts_reframing.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/src/highlight_studio/services/pipeline.py:10678: in _detect_faces_mediapipe_from_raw
+    return detect_faces(raw_path, width=width, height=height, fps=fps,
+backend/src/highlight_studio/services/face_tracking.py:29: in detect_faces
+    with mp.tasks.vision.FaceDetector.create_from_options(options) as detector, raw_path.open('rb') as stream:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../audit-venv/lib/python3.12/site-packages/mediapipe/tasks/python/vision/face_detector.py:237: in create_from_options
+    lib = mediapipe_c_bindings.load_shared_library(_CTYPES_SIGNATURES)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../audit-venv/lib/python3.12/site-packages/mediapipe/tasks/python/core/mediapipe_c_bindings.py:86: in load_shared_library
+    raw_lib = load_raw_library()
+              ^^^^^^^^^^^^^^^^^^
+../audit-venv/lib/python3.12/site-packages/mediapipe/tasks/python/core/mediapipe_c_bindings.py:57: in load_raw_library
+    _shared_lib = ctypes.CDLL(absolute_lib_path)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <CDLL '<AUDIT_VENV>/lib/python3.12/site-packages/mediapipe/tasks/c/libmediapipe.so', handle 0 at 0x7f451b9a2e10>
+name = '<AUDIT_VENV>/lib/python3.12/site-packages/mediapipe/tasks/c/libmediapipe.so'
+mode = 0, handle = None, use_errno = False, use_last_error = False
+winmode = None
+
+    def __init__(self, name, mode=DEFAULT_MODE, handle=None,
+                 use_errno=False,
+                 use_last_error=False,
+                 winmode=None):
+        if name:
+            name = _os.fspath(name)
+        self._name = name
+        flags = self._func_flags_
+        if use_errno:
+            flags |= _FUNCFLAG_USE_ERRNO
+        if use_last_error:
+            flags |= _FUNCFLAG_USE_LASTERROR
+        if _sys.platform.startswith("aix"):
+            """When the name contains ".a(" and ends with ")",
+               e.g., "libFOO.a(libFOO.so)" - this is taken to be an
+               archive(member) syntax for dlopen(), and the mode is adjusted.
+               Otherwise, name is presented to dlopen() as a file argument.
+            """
+            if name and name.endswith(")") and ".a(" in name:
+                mode |= ( _os.RTLD_MEMBER | _os.RTLD_NOW )
+        if _os.name == "nt":
+            if winmode is not None:
+                mode = winmode
+            else:
+                import nt
+                mode = nt._LOAD_LIBRARY_SEARCH_DEFAULT_DIRS
+                if '/' in name or '\\' in name:
+                    self._name = nt._getfullpathname(self._name)
+                    mode |= nt._LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR
+    
+        class _FuncPtr(_CFuncPtr):
+            _flags_ = flags
+            _restype_ = self._func_restype_
+        self._FuncPtr = _FuncPtr
+    
+        if handle is None:
+>           self._handle = _dlopen(self._name, mode)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           OSError: libGLESv2.so.2: cannot open shared object file: No such file or directory
+
+/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/ctypes/__init__.py:379: OSError
+=============================== warnings summary ===============================
+backend/src/highlight_studio/services/pipeline.py:6
+  <APP_ROOT>/backend/src/highlight_studio/services/pipeline.py:6: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13
+    import audioop
+
+../audit-venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  <AUDIT_VENV>/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+../audit-venv/lib/python3.12/site-packages/starlette/testclient.py:53
+  <AUDIT_VENV>/lib/python3.12/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 8 durations ==============================
+5.49s call     tests/test_analysis_montage_hotfix.py::test_waiting_worker_emits_heartbeat
+3.28s call     tests/test_shorts_integration.py::test_real_shorts_render_validates_and_cleans_stale_outputs
+2.96s call     tests/test_shorts_prepare_hotfix.py::test_real_vertical_render_with_caption_worker_crash
+2.27s call     tests/test_web_accounts_postgresql.py::test_web_viewer_cannot_read_server_logs_and_twitch_paths_are_redacted
+2.08s call     tests/test_shorts_integration.py::test_blur_background_keeps_off_center_subject_visible
+1.76s call     tests/test_shorts_reframing.py::test_current_mediapipe_can_process_frames_without_legacy_solutions
+1.52s call     tests/test_audit_regressions_1126.py::test_interrupted_render_part_preserves_previous_valid_cache
+1.50s call     tests/test_ai_runtime_101512.py::test_runtime_retries_only_transient_transport
+=========================== short test summary info ============================
+FAILED tests/test_shorts_reframing.py::test_current_mediapipe_can_process_frames_without_legacy_solutions
+1 failed, 568 passed, 3 warnings in 36.48s

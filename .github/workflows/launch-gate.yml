@@ -1,0 +1,37 @@
+name: Launch configuration gate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "launch/**"
+      - "website/**"
+      - "desktop/electron/*channel.json"
+      - "deploy/**"
+      - "tools/launch/**"
+  push:
+    branches: [main]
+    paths:
+      - "launch/**"
+      - "website/**"
+      - "desktop/electron/*channel.json"
+      - "deploy/**"
+      - "tools/launch/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate generated launch configuration when present
+        run: |
+          if [ -f launch/launch_config.json ]; then
+            python tools/launch/validate_launch.py --config launch/launch_config.json --strict
+          else
+            echo "launch/launch_config.json is not committed; using example-only mode."
+          fi
+      - name: Compile launch tooling
+        run: python -m py_compile tools/launch/*.py

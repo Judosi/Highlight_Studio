@@ -1,0 +1,15 @@
+Highlight Studio 10.15.17 — Post-process Reliability
+App identity: v10.15.17-postprocess-reliability
+Design: studio-audited-v15
+
+Исправления по реальному логу успешной нарезки:
+- Dedup AI больше не получает один тяжёлый запрос без подготовки после выгрузки модели.
+- Перед Dedup/Storyline выполняется локальный Ollama warmup, чтобы загрузка модели не считалась 45-секундным stall.
+- Dedup использует компактный глобальный prompt и rescue-batches при transport failure.
+- Storyline разбит на bounded batches и точечный rescue только для неразобранных ID.
+- Storyline проверяет контракт segments/id/keep и пишет storyline_runtime.json.
+- Refill теперь сначала удаляет дубли, затем добирает из неиспользованных качественных кандидатов.
+- Refill стремится к реальной target_minutes, а target_fill_ratio используется как quality-floor, а не как преждевременная точка остановки.
+- Exact template duplicates и non-primary/weak clips не возвращаются ради длительности.
+
+Regression: tests/test_postprocess_reliability_101517.py

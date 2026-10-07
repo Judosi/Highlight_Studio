@@ -1,0 +1,29 @@
+fastapi==0.140.11
+starlette==1.3.1
+uvicorn[standard]==0.34.3
+python-multipart==0.0.32
+requests==2.33.0
+faster-whisper==1.1.1
+ctranslate2==4.8.1
+onnxruntime==1.28.0
+pydantic==2.11.7
+httpx==0.28.1
+packaging==26.0
+
+yt-dlp==2026.7.4
+streamlink==8.4.0
+
+# Python 3.13 removed audioop from the standard library.
+audioop-lts==0.2.2; python_version >= "3.13"
+
+# Offline verification of signed Paid Beta license tokens.
+cryptography==50.0.0
+
+# Multi-user web mode and PostgreSQL
+SQLAlchemy==2.0.51
+alembic==1.18.5
+psycopg[binary]==3.3.4
+argon2-cffi==25.1.0
+
+# Shorts face tracking (CPU); model and Apache-2.0 notices ship with this app.
+mediapipe==1.0.1

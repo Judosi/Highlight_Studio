@@ -1,0 +1,13 @@
+{$HIGHLIGHT_STUDIO_WEB_DOMAIN} {
+  encode zstd gzip
+  reverse_proxy web-app:8000
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "no-referrer"
+  }
+}
+{$HIGHLIGHT_STUDIO_API_DOMAIN} {
+  encode zstd gzip
+  reverse_proxy license-server:8080
+}

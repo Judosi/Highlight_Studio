@@ -1,0 +1,9 @@
+{
+  "windows_devices_tested": 0,
+  "production_sessions": 0,
+  "crashed_sessions": 0,
+  "artifacts_signed": false,
+  "installer_verified": false,
+  "update_verified": false,
+  "notes": "Заполняется только реальными подтверждёнными данными."
+}

@@ -1,0 +1,9 @@
+Highlight Studio 10.15.16 — Review Unlock Hotfix
+App identity: v10.15.16-review-unlock-hotfix
+Design identity: studio-audited-v15
+
+Ключевое исправление:
+- готовый анализ больше не блокирует «Монтаж» из-за расхождения persisted CPU/int8 и runtime CUDA/int8_float32;
+- известное false-stale состояние 10.15.15 мигрируется безопасно без повторного анализа;
+- First Run Wizard: исправлены растянутые checkbox на шаге «Локальный AI»;
+- frontend assets имеют release marker 101516.

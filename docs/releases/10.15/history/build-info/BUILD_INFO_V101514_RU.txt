@@ -1,0 +1,38 @@
+Highlight Studio 10.15.14 — AI Reliability & Phase 2 Remediation
+App identity: v10.15.14-ai-reliability
+Design identity: studio-audited-v13
+
+Главная цель релиза:
+- воспроизвести и исправить реальный зависший Block AI запуск из пользовательского архива 10.15.12;
+- не допускать ложного «AI batch готов», если Qwen3:8b вернул error/неполный контракт;
+- ограничить зависание Ollama hard-deadline/stall-timeout и убрать вложенное умножение retry;
+- сохранить Qwen3:8b и quality-first логику;
+- исправить Auto Hardware → effective Whisper CUDA/NVENC при реально доступном runtime;
+- продолжить безопасные P2/Data Integrity исправления из полного аудита.
+
+Реально исправлено в AI runtime:
+- JSON {"error": ...} = contract failure, а не success;
+- numeric-object Qwen ответы локально нормализуются без повторного inference;
+- completeness каждого ожидаемого ID обязательна по умолчанию;
+- Block/Micro AI не повторяют один большой prompt пять раз;
+- transient transport retry имеет отдельный ограниченный budget;
+- stream stall timeout и hard wall-clock deadline;
+- heartbeat во время долгого Ollama ответа;
+- targeted missing-ID/single-ID rescue вместо повторения всего batch;
+- checkpoint пишется только для полного валидного batch;
+- невалидный batch делает stage failed/recoverable, а не fake-success.
+
+Дополнительные remediation:
+- web auth recovery response не раскрывает существование аккаунта;
+- rate limit reset/verification requests;
+- несколько свежих account tokens могут сосуществовать (bounded), повторный запрос не инвалидирует только что полученную ссылку;
+- web Twitch не использует browser cookies backend-хоста;
+- viewer не может скачать внутренние project diagnostics через generic /file;
+- legacy review-action использует общий segment lock и unknown action возвращает 422;
+- clear-cache сообщает locked/permission failure честно;
+- web delete использует quarantine + rollback при DB failure;
+- last_result_check указывает на canonical final, не .rendering path;
+- source React guards добавлены для presets/access/new-project settings.
+
+Честное ограничение:
+- HS-AUDIT-008/010 не закрыты полностью: clean Vite rebuild всё ещё не подтверждён, потому что в QA environment отсутствуют npm payloads и registry недоступен. Shipped production bundle остаётся React bundle + compatibility layer. Backend/AI исправления реально находятся в исполняемом Python коде.

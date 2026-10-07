@@ -1,0 +1,26 @@
+Highlight Studio 10.15.9 — Semantic Quality / Best Moments First
+Release identity: v10.15.9-semantic-quality
+Design identity: studio-audited-v11
+
+Главный принцип релиза:
+качество и смысл нарезки важнее заполнения целевой длительности.
+
+Что изменено:
+- Qwen3 8B сохранён без замены на меньшую модель.
+- Добавлен настоящий нейтральный Auto-пресет «Сбалансированный / смысл».
+- Убрано скрытое падение Auto/Twitch в irl_funny / «Только смешное».
+- Добавлена семантическая классификация primary_live / live_reaction / waiting /
+  reconnect / intermission / replay / prerecorded / advertisement.
+- Reconnect/waiting/replay/prerecorded не могут добираться в монтаж только ради 30 минут.
+- Единичный OCR-признак в длинном хорошем блоке не удаляет весь блок: для coarse-блоков
+  требуется повторяемое визуальное подтверждение технической сцены.
+- Visual/OCR semantic guard работает до Micro AI prefilter, чтобы поздний сильный момент
+  имел шанс получить полноценную вторую AI-оценку.
+- Temporal fairness даёт всему VOD шанс на Micro AI, но НЕ заставляет финальный монтаж
+  быть искусственно равномерным по четвертям.
+- Storyline проверяет смысл мини-сцены: причина -> развитие -> реакция/payoff; при необходимости
+  расширяет границы контекстом, а бессвязные фрагменты удаляет.
+- Dedup учитывает semantic topic и повторяющиеся technical template signatures.
+- Quality-first selection допускает монтаж короче цели, если качественного материала меньше.
+- Сохраняются диагностические temporal/semantic отчёты для проверки покрытия всего VOD.
+- CPU/GPU, OCR parallelism, ETA и manual review улучшения 10.15.7/10.15.8 сохранены.

@@ -1,0 +1,47 @@
+name: Deploy sales website
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "website/**"
+      - ".github/workflows/deploy-website.yml"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject placeholder production config
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          data=json.load(open('website/config.json', encoding='utf-8'))
+          text=json.dumps(data)
+          if re.search(r'example\\.com|replace[_ -]?me', text, re.I):
+              raise SystemExit('website/config.json still contains placeholders')
+          required=['downloadUrl','checkoutUrl','privacyUrl','termsUrl','supportUrl']
+          missing=[k for k in required if not str(data.get(k,'')).startswith('https://')]
+          if missing:
+              raise SystemExit(f'missing HTTPS website fields: {missing}')
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: website
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

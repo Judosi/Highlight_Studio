@@ -1,0 +1,17 @@
+Highlight Studio 11.2.7 — audited source candidate
+Identity: 11.2.7 / v11.2.7-quality-recovery-audit / studio-audited-v15
+Platform used: Linux x86_64; Python 3.12.14; Node 24.19.0; npm 11.9.0; Vite 8.0.16.
+Pinned backend requirements installed in isolated venv; cryptography 50.0.0.
+Frontend: npm ci + npm run build; two builds have identical SHA-256 manifests.
+Build provenance: frontend/dist/build-manifest.json.
+Archive: tools/release/make_release.py; member checksums in RELEASE_CHECKSUMS.json.
+Integrity: tools/diagnostics/verify_release_identity.py and tools/release/verify_archive.py.
+Python: 568 passed / 1 failed / 3 warnings / 0 skipped.
+Native failure: libGLESv2.so.2 unavailable, MediaPipe CPU detector not verified.
+Frontend: 112 passed / 0 failed / 0 skipped. Electron policies: 10 passed / 0 failed.
+Ruff + compile + syntax: PASS. ESLint: 0 errors / 1 existing workflow dependency warning.
+Dependency scanners: no known vulnerabilities in audited requirements/lockfiles.
+Windows installer / signing / CUDA / long VOD / live Ollama / YouTube / real PostgreSQL: NOT VERIFIED.
+Mass release: BLOCKED (21 blockers, 4 warnings in existing product gate).
+This ZIP is source + built web assets, not a newly compiled Windows installer.
+See TECHNICAL_AUDIT_11.2.7_RU.md and evidence-1127 for commands, scope and raw results.

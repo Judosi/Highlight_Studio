@@ -1,0 +1,80 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-highlight_studio}
+      POSTGRES_USER: ${POSTGRES_USER:-highlight}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes: [postgres_data:/var/lib/postgresql]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-highlight} -d ${POSTGRES_DB:-highlight_studio}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  postgres-backup:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    depends_on:
+      postgres: {condition: service_healthy}
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: ${POSTGRES_DB:-highlight_studio}
+      PGUSER: ${POSTGRES_USER:-highlight}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_RETENTION_DAYS: ${POSTGRES_BACKUP_RETENTION_DAYS:-14}
+    volumes:
+      - postgres_backups:/backups
+    command: >-
+      sh -c 'while true; do
+        stamp=$$(date -u +%Y%m%dT%H%M%SZ);
+        pg_dump --format=custom --file=/backups/highlight_studio_$${stamp}.dump;
+        find /backups -type f -name "*.dump" -mtime +$${BACKUP_RETENTION_DAYS} -delete;
+        sleep 86400;
+      done'
+  web-app:
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres: {condition: service_healthy}
+    env_file: [.env]
+    environment:
+      HIGHLIGHT_STUDIO_DEPLOYMENT_MODE: web
+      HIGHLIGHT_STUDIO_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-highlight}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-highlight_studio}
+      HIGHLIGHT_STUDIO_COOKIE_SECURE: "1"
+      HIGHLIGHT_STUDIO_DATA_DIR: /data/app
+      HIGHLIGHT_STUDIO_PROJECTS_DIR: /data/projects
+    volumes:
+      - web_data:/data/app
+      - project_data:/data/projects
+    expose: ["8000"]
+  license-server:
+    build:
+      context: ..
+      dockerfile: services/license_server/Dockerfile
+    restart: unless-stopped
+    env_file: [.env]
+    volumes: [license_data:/data]
+    expose: ["8080"]
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [web-app, license-server]
+    env_file: [.env]
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../website:/srv/website:ro
+      - caddy_data:/data
+      - caddy_config:/config
+volumes:
+  postgres_data:
+  postgres_backups:
+  web_data:
+  project_data:
+  license_data:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,24 @@
+Highlight Studio 11.2.6
+App identity: v11.2.6-quality-recovery-audit
+Design identity: studio-audited-v15
+Portable root: Highlight_Studio_11.2.6
+Entry point: START_HERE.bat
+Base release preserved: 11.2.5
+
+Frontend: проверенные точечные изменения исходника и готового JS; полный Vite build недоступен из-за npm/network.
+Runtime verification: Python 3.12, Node 24, Linux, настоящий FFmpeg/ffprobe.
+Не выполнены: реальный Windows/GPU/Ollama/Whisper и внешняя YouTube публикация.
+Подробности: TECHNICAL_AUDIT_11.2.6_RU.md
+
+Итоговая проверка:
+python -m pytest -q: 471 passed, 0 failed, 0 skipped; 2 deprecation warnings; 20.80 s.
+node --test frontend/tests/*.test.js (cwd frontend, tests/*.test.js): 89 passed, 2 failed, 0 skipped.
+Два failed — app.integration.test.js и onboarding.test.js: отсутствует jsdom; тесты не отключены.
+Новые frontend/tests/audit1126.test.js: 6 passed; выполняют функции готового JS и request guard.
+node --test desktop/electron/tests/*.test.js: 10 passed, 0 failed, 0 skipped.
+node --check frontend/dist/assets/index-1126-ac423e3e0a0f.js: exit 0.
+python -m compileall -q backend/src/highlight_studio backend/desktop_entry.py: exit 0.
+python tools/diagnostics/verify_release_identity.py .: OK.
+
+Полного npm/Vite build нет: попытка npm ci завершилась сетевой ошибкой шлюза; зависимости не установлены.
+Новый набор backend regression tests: tests/test_audit_regressions_1126.py (39 сценариев с параметрами).

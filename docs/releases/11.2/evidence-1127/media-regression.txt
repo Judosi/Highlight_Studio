@@ -1,0 +1,17 @@
+..........................                                               [100%]
+=============================== warnings summary ===============================
+backend/src/highlight_studio/services/pipeline.py:6
+  <APP_ROOT>/backend/src/highlight_studio/services/pipeline.py:6: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13
+    import audioop
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 8 durations ==============================
+2.98s call     tests/test_shorts_integration.py::test_real_shorts_render_validates_and_cleans_stale_outputs
+1.71s call     tests/test_shorts_integration.py::test_blur_background_keeps_off_center_subject_visible
+0.97s call     tests/test_media_integration.py::test_real_ffmpeg_render_creates_valid_video_and_audio[ascii]
+0.89s call     tests/test_media_integration.py::test_real_ffmpeg_render_creates_valid_video_and_audio[\u0412\u0438\u0434\u0435\u043e \u0441 \u043f\u0440\u043e\u0431\u0435\u043b\u043e\u043c ' \u0438 \u043a\u0438\u0440\u0438\u043b\u043b\u0438\u0446\u0435\u0439]
+0.09s call     tests/test_audit_regressions_1127.py::test_failed_metadata_job_cannot_report_done[False]
+0.01s call     tests/test_audit_regressions_1127.py::test_ai_failure_preserves_saved_metadata[False]
+
+(2 durations < 0.005s hidden.  Use -vv to show these durations.)
+26 passed, 1 warning in 7.38s

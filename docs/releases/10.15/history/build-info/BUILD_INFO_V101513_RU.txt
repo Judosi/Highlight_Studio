@@ -1,0 +1,30 @@
+Highlight Studio 10.15.13 — Phase 1 Remediation
+App identity: v10.15.13-phase1-remediation
+Design identity: studio-audited-v13
+
+Цель релиза:
+- первый этап remediation после полного pre-release аудита 10.15.12;
+- закрыть P0/P1, которые можно безопасно устранить без изменения алгоритма качества;
+- вернуть пользователю ручное управление шагами workflow;
+- гарантировать, что завершённый анализ позволяет вручную открыть «Монтаж» даже при stale frontend snapshot;
+- не менять Qwen3 8B, Semantic Quality, scoring, Visual/OCR coverage и критерии отбора.
+
+Phase 1 исправляет:
+- canonical project identity / web RBAC encoded-alias bypass;
+- race двух конкурентных PUT segments с одной revision;
+- race project.json между settings и Twitch source finalization;
+- слабую сигнатуру source для больших файлов;
+- stale frontend response после Add Candidate при переключении проекта;
+- TOCTOU job start vs delete/clear-cache;
+- restart recovery для cancel_requested;
+- plain pytest import path в release test environment;
+- ручной переход по шагам 1–5 с backend revalidation для «Монтаж»/«Экспорт».
+
+Навигация:
+- приложение НЕ перекидывает пользователя автоматически на следующий крупный шаг;
+- пользователь сам нажимает «Источник», «Формат», «Анализ», «Монтаж», «Экспорт»;
+- заблокированный на старом snapshot шаг остаётся кликабельным: frontend запрашивает свежий dashboard-state и открывает его, если backend подтверждает prerequisites;
+- если prerequisite действительно не выполнен, показывается понятное объяснение.
+
+Известный незакрытый P1 после Phase 1:
+- HS-AUDIT-008: production frontend всё ещё содержит compatibility layer ux-workflow рядом с React bundle. В текущей QA-среде clean Vite rebuild недоступен из-за отсутствующих npm payloads/недоступного registry. Поведение синхронизировано и протестировано, но архитектурный build-debt переносится в следующий этап и платный релиз всё ещё заблокирован.

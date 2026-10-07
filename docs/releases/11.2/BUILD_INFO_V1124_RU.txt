@@ -1,0 +1,21 @@
+Highlight Studio 11.2.4
+
+Release: Long-form Target Integrity
+App identity: v11.2.4-longform-target-integrity
+Design identity: studio-audited-v15
+Portable root: Highlight_Studio_11.2.4
+
+Проверка на предоставленном проекте:
+- исходное видео: 1:00:00;
+- ориентир: 35 минут;
+- Micro AI: 40/40 окон, 100%;
+- результат 11.2.3: 28 фрагментов / 7:23;
+- ложная coarse-классификация: 5 gameplay-блоков как prerecorded и 2 как reconnect;
+- симуляция исправленного отбора: 14/15 primary-live блоков;
+- результат 11.2.4: 73 фрагмента / 35:00;
+- добавлено: 45 подписанных primary-live context частей;
+- semantic non-primary context: 0.
+
+Транскрипция и тяжёлые Visual/OCR checkpoints совместимы. Из-за новой политики
+длинной нарезки пересчитываются Micro AI decisions, но уже готовые предыдущие
+этапы используются повторно при совпадении их fingerprints.

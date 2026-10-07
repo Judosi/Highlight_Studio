@@ -1,0 +1,15 @@
+Highlight Studio 11.2.2
+Release: Duration Capacity & Review Feedback
+App identity: v11.2.2-duration-capacity-review-feedback
+Design identity: studio-audited-v15
+Portable root: Highlight_Studio_11.2.2
+
+Ключевая проверка на предоставленном проекте:
+- исходный VOD: 5:45:49.70;
+- целевая длительность: 60 минут;
+- прежний AI-черновик: 80 фрагментов / 37:37.75;
+- новый отбор: 109 фрагментов / 60:09.74;
+- добавлено: 29 strict-quality сцен;
+- relaxed/recovery filler: 0.
+
+Проверка кода: 416 backend/regression tests + 81 frontend/desktop contract tests.

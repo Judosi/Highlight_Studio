@@ -1,0 +1,111 @@
+name: Build Windows Hybrid Desktop
+
+on:
+  workflow_dispatch:
+    inputs:
+      require_signature:
+        description: Fail when Windows artifacts are not signed
+        required: false
+        default: false
+        type: boolean
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  windows-installer:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            desktop/electron/package-lock.json
+
+      - name: Prepare optional engine signing certificate
+        shell: powershell
+        env:
+          WINDOWS_SIGN_PFX_BASE64: ${{ secrets.WINDOWS_SIGN_PFX_BASE64 }}
+          WINDOWS_SIGN_PFX_PASSWORD: ${{ secrets.WINDOWS_SIGN_PFX_PASSWORD }}
+        run: |
+          if ($env:WINDOWS_SIGN_PFX_BASE64) {
+            $Path = Join-Path $env:RUNNER_TEMP "highlight-studio-signing.pfx"
+            [IO.File]::WriteAllBytes($Path, [Convert]::FromBase64String($env:WINDOWS_SIGN_PFX_BASE64))
+            "HIGHLIGHT_STUDIO_SIGN_PFX_PATH=$Path" | Out-File -FilePath $env:GITHUB_ENV -Append
+            "HIGHLIGHT_STUDIO_SIGN_PFX_PASSWORD=$env:WINDOWS_SIGN_PFX_PASSWORD" | Out-File -FilePath $env:GITHUB_ENV -Append
+          } else {
+            Write-Host "Engine signing certificate is not configured; manual RC builds may remain unsigned."
+          }
+
+      - name: Validate release secrets for a signed tag
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: powershell
+        env:
+          FFMPEG_SHA256: ${{ secrets.HIGHLIGHT_STUDIO_FFMPEG_SHA256 }}
+          FFMPEG_URL: ${{ secrets.HIGHLIGHT_STUDIO_FFMPEG_URL }}
+          UPDATE_URL: ${{ secrets.HIGHLIGHT_STUDIO_UPDATE_URL }}
+          SIGN_PFX: ${{ secrets.WINDOWS_SIGN_PFX_BASE64 }}
+          HIGHLIGHT_STUDIO_LICENSE_PUBLIC_KEY_B64: ${{ secrets.HIGHLIGHT_STUDIO_LICENSE_PUBLIC_KEY_B64 }}
+          HIGHLIGHT_STUDIO_CHECKOUT_URL: ${{ secrets.HIGHLIGHT_STUDIO_CHECKOUT_URL }}
+          HIGHLIGHT_STUDIO_PRIVACY_URL: ${{ secrets.HIGHLIGHT_STUDIO_PRIVACY_URL }}
+          HIGHLIGHT_STUDIO_TERMS_URL: ${{ secrets.HIGHLIGHT_STUDIO_TERMS_URL }}
+        run: |
+          if (!$env:FFMPEG_SHA256) { throw "HIGHLIGHT_STUDIO_FFMPEG_SHA256 is required for tag builds" }
+          if (!$env:FFMPEG_URL) { throw "HIGHLIGHT_STUDIO_FFMPEG_URL is required for tag builds" }
+          if (!$env:UPDATE_URL) { throw "HIGHLIGHT_STUDIO_UPDATE_URL is required for tag builds" }
+          if (!$env:SIGN_PFX) { throw "WINDOWS_SIGN_PFX_BASE64 is required for signed tag builds" }
+          if (!$env:HIGHLIGHT_STUDIO_LICENSE_PUBLIC_KEY_B64) { throw "HIGHLIGHT_STUDIO_LICENSE_PUBLIC_KEY_B64 is required for Paid Beta tag builds" }
+          if (!$env:HIGHLIGHT_STUDIO_CHECKOUT_URL) { throw "HIGHLIGHT_STUDIO_CHECKOUT_URL is required for Paid Beta tag builds" }
+          if (!$env:HIGHLIGHT_STUDIO_PRIVACY_URL) { throw "HIGHLIGHT_STUDIO_PRIVACY_URL is required for Paid Beta tag builds" }
+          if (!$env:HIGHLIGHT_STUDIO_TERMS_URL) { throw "HIGHLIGHT_STUDIO_TERMS_URL is required for Paid Beta tag builds" }
+
+      - name: Build installer and portable package
+        shell: powershell
+        env:
+          CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
+          HIGHLIGHT_STUDIO_FFMPEG_SHA256: ${{ secrets.HIGHLIGHT_STUDIO_FFMPEG_SHA256 }}
+          HIGHLIGHT_STUDIO_FFMPEG_URL: ${{ secrets.HIGHLIGHT_STUDIO_FFMPEG_URL }}
+          HIGHLIGHT_STUDIO_UPDATE_URL: ${{ secrets.HIGHLIGHT_STUDIO_UPDATE_URL }}
+          HIGHLIGHT_STUDIO_BETA_UPDATE_URL: ${{ secrets.HIGHLIGHT_STUDIO_BETA_UPDATE_URL }}
+          HIGHLIGHT_STUDIO_LICENSE_PUBLIC_KEY_B64: ${{ secrets.HIGHLIGHT_STUDIO_LICENSE_PUBLIC_KEY_B64 }}
+          HIGHLIGHT_STUDIO_LICENSE_SERVER_URL: ${{ secrets.HIGHLIGHT_STUDIO_LICENSE_SERVER_URL }}
+          HIGHLIGHT_STUDIO_CHECKOUT_URL: ${{ secrets.HIGHLIGHT_STUDIO_CHECKOUT_URL }}
+          HIGHLIGHT_STUDIO_ACCOUNT_URL: ${{ secrets.HIGHLIGHT_STUDIO_ACCOUNT_URL }}
+          HIGHLIGHT_STUDIO_SUPPORT_URL: ${{ secrets.HIGHLIGHT_STUDIO_SUPPORT_URL }}
+          HIGHLIGHT_STUDIO_PRIVACY_URL: ${{ secrets.HIGHLIGHT_STUDIO_PRIVACY_URL }}
+          HIGHLIGHT_STUDIO_TERMS_URL: ${{ secrets.HIGHLIGHT_STUDIO_TERMS_URL }}
+          HIGHLIGHT_STUDIO_TELEMETRY_URL: ${{ secrets.HIGHLIGHT_STUDIO_TELEMETRY_URL }}
+          HIGHLIGHT_STUDIO_FEEDBACK_URL: ${{ secrets.HIGHLIGHT_STUDIO_FEEDBACK_URL }}
+          HIGHLIGHT_STUDIO_CRASH_REPORT_URL: ${{ secrets.HIGHLIGHT_STUDIO_CRASH_REPORT_URL }}
+        run: |
+          $RequireSigned = "${{ startsWith(github.ref, 'refs/tags/') || inputs.require_signature }}" -eq "true"
+          ./scripts/windows/build_hybrid_release.ps1 -RequireSigned:$RequireSigned
+
+      - name: Upload desktop artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: highlight-studio-windows-${{ github.ref_name }}
+          path: |
+            build/desktop/installer/*
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish signed tag release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/desktop/installer/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true

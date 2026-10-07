@@ -1,0 +1,16 @@
+Highlight Studio 11.2.5
+
+Release: Stream-specific Creator Pack
+App identity: v11.2.5-stream-specific-creator-pack
+Design identity: studio-audited-v15
+Portable root: Highlight_Studio_11.2.5
+
+Проверяемые изменения:
+- Creator Pack строится по финальным segments.json и соответствующей расшифровке;
+- прежний шаблон «ЭТОТ СБАЛАНСИРОВАННЫЙ...» удалён;
+- сильные сцены совмещаются с равномерным покрытием всего таймлайна;
+- metadata получает context_signature текущего монтажа;
+- AI metadata проходит specificity audit;
+- общий AI-ответ заменяется доказательным локальным вариантом;
+- IRL и игровой поток покрыты отдельными regression-тестами;
+- Micro AI checkpoints 11.2.4 не инвалидируются metadata-only обновлением.
