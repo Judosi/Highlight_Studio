@@ -631,7 +631,14 @@ def test_hs020_orphan_reconcile_terminates_only_matching_recorded_process(tmp_pa
     monkeypatch.setattr(core_utils, "_read_process_command", lambda pid: f"ffmpeg -i {project / 'input.mp4'}")
     monkeypatch.setattr(core_utils, "_read_process_start_marker", lambda pid: "start-1")
     killed = []
-    monkeypatch.setattr(core_utils.os, "kill", lambda pid, sig: killed.append(pid))
+    if core_utils.os.name == "nt":
+        monkeypatch.setattr(
+            core_utils.subprocess,
+            "run",
+            lambda command, **kwargs: killed.append(int(command[2])),
+        )
+    else:
+        monkeypatch.setattr(core_utils.os, "kill", lambda pid, sig: killed.append(pid))
     assert core_utils.reconcile_orphaned_processes(project) == 1
     assert killed == [23456]
 
