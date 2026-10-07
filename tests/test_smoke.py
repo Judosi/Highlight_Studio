@@ -412,6 +412,22 @@ def test_openai_key_check_endpoint_is_disabled_in_ollama_only_build():
 
 
 def test_system_check_endpoint_returns_readiness(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        main,
+        "detect_hardware_capabilities",
+        lambda **_kwargs: {
+            "profile_id": "TEST_CPU_ONLY",
+            "summary": "deterministic test hardware",
+            "nvidia": {"ok": False, "gpus": [], "hint": "mocked without a GPU"},
+            "ctranslate2": {"cuda_ok": False, "hint": "mocked CPU fallback"},
+            "ffmpeg": {
+                "nvenc_advertised": True,
+                "nvenc_runtime_ok": False,
+                "hint": "mocked NVENC runtime fallback",
+            },
+            "recommended_settings": {"video_encoder": "libx264", "whisper_device": "cpu"},
+        },
+    )
     client = TestClient(main.app)
     r = client.get("/api/system-check", headers=auth_headers())
     assert r.status_code == 200
@@ -472,6 +488,17 @@ def test_metadata_preset_endpoint_saves_and_clamps_for_ollama(tmp_path, monkeypa
 
 
 def test_hardware_preset_endpoint_saves_gtx1050ti_balanced(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        main,
+        "detect_hardware_capabilities",
+        lambda **_kwargs: {
+            "cpu": {"logical_threads": 8},
+            "memory": {"total_gb": 16.0},
+            "nvidia": {"ok": False, "gpus": []},
+            "ctranslate2": {"cuda_ok": False, "compute_types": []},
+            "ffmpeg": {"nvenc_runtime_ok": False, "nvdec_advertised": False},
+        },
+    )
     monkeypatch.setattr(main, "PROJECTS_DIR", tmp_path)
     make_project(tmp_path, "hw")
     client = TestClient(main.app)

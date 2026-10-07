@@ -2,6 +2,7 @@ name: Highlight Studio CI
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 defaults:
@@ -10,7 +11,11 @@ defaults:
 
 jobs:
   backend:
+    needs: frontend
     runs-on: ${{ matrix.os }}
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: utf-8
     strategy:
       fail-fast: false
       matrix:
@@ -24,9 +29,26 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
+      - name: Restore production frontend build
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: Highlight_Studio_11.2.7/frontend/dist
       - name: Install Linux media runtime
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ffmpeg libgles2 libegl1
+      - name: Install Windows media runtime
+        if: runner.os == 'Windows'
+        run: |
+          choco install ffmpeg --no-progress --yes
+          ffmpeg -version
+          ffprobe -version
+      - name: Preserve the Windows subprocess environment
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          "SystemRoot=$env:SystemRoot" >> $env:GITHUB_ENV
+          "ComSpec=$env:ComSpec" >> $env:GITHUB_ENV
       - name: Install backend development dependencies
         run: python -m pip install -r backend/requirements-dev.txt
       - name: Compile Python
@@ -47,21 +69,31 @@ jobs:
           path: Highlight_Studio_11.2.7
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "22.14.0"
           cache: npm
           cache-dependency-path: Highlight_Studio_11.2.7/frontend/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Install frontend dependencies
         working-directory: Highlight_Studio_11.2.7/frontend
         run: npm ci
       - name: Lint frontend
         working-directory: Highlight_Studio_11.2.7/frontend
         run: npm run lint
-      - name: Test frontend
-        working-directory: Highlight_Studio_11.2.7/frontend
-        run: npm test
       - name: Build frontend
         working-directory: Highlight_Studio_11.2.7/frontend
         run: npm run build
+      - name: Test frontend against the production build
+        working-directory: Highlight_Studio_11.2.7/frontend
+        run: npm test
+      - name: Publish production frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: Highlight_Studio_11.2.7/frontend/dist
+          if-no-files-found: error
+          retention-days: 1
       - name: Audit frontend dependencies
         working-directory: Highlight_Studio_11.2.7/frontend
         # Dependency remediation is tracked separately from the code/test
@@ -78,12 +110,12 @@ jobs:
           path: Highlight_Studio_11.2.7
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: npm
-          cache-dependency-path: Highlight_Studio_11.2.7/desktop/electron/package-lock.json
+          node-version: "22.14.0"
       - name: Install locked Electron dependency without downloading runtime
         working-directory: Highlight_Studio_11.2.7/desktop/electron
-        run: npm ci --ignore-scripts
+        env:
+          npm_config_cache: ${{ runner.temp }}/highlight-studio-electron-npm-cache
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Validate Electron entrypoints
         working-directory: Highlight_Studio_11.2.7/desktop/electron
         run: |
@@ -112,14 +144,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - uses: actions/setup-node@v4
+      - name: Restore verified production frontend build
+        uses: actions/download-artifact@v4
         with:
-          node-version: "22"
-      - name: Rebuild and verify source checkout identity
-        run: |
-          npm --prefix frontend ci
-          npm --prefix frontend run build
-          python tools/diagnostics/verify_release_identity.py .
+          name: frontend-dist
+          path: Highlight_Studio_11.2.7/frontend/dist
+      - name: Verify source checkout identity against the production build
+        run: python tools/diagnostics/verify_release_identity.py .
       - name: Keep release-only Twitch binary outside Git
         run: |
           test ! -e vendor/twitchdownloadercli/TwitchDownloaderCLI.exe
