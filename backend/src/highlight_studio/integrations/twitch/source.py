@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import math
 import os
 import re
 import sys
@@ -20,6 +21,7 @@ from ...core.settings import BUNDLED_TWITCHDOWNLOADERCLI_DIR, BUNDLED_ARIA2_DIR
 from ...core.artifacts import portable_source_fields, validate_media_file
 from ...core.revisions import mark_source_changed
 from ...infrastructure.project_locks import project_metadata_lock
+from ...core.disk_budget import DiskBudgetError, estimate_analysis_disk_budget, estimate_source_download_bytes
 
 TWITCH_VIDEO_EXTENSIONS = {".mp4", ".mkv", ".mov", ".webm", ".m4v", ".avi", ".ts"}
 TWITCH_DOWNLOAD_MANIFEST_VERSION = 1
@@ -1179,6 +1181,58 @@ def _twitch_cache_location_warning(path: Path) -> str:
     return ""
 
 
+def _known_twitch_duration(twitch: dict[str, Any], *, live_seconds: float | None = None) -> float:
+    if live_seconds is not None:
+        return max(0.0, float(live_seconds))
+    start = float(twitch.get("start_seconds") or 0.0)
+    end = twitch.get("end_seconds")
+    if end is not None:
+        return max(0.0, float(end) - start)
+    for key in ("duration_seconds", "vod_duration_seconds", "recorded_duration_seconds"):
+        try:
+            duration = float(twitch.get(key) or 0.0)
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if duration > start:
+            return duration - start
+    return 0.0
+
+
+def _ensure_twitch_disk_budget(
+    project_dir: Path,
+    cache: Path,
+    twitch: dict[str, Any],
+    settings: dict[str, Any],
+    logger,
+    *,
+    duration_seconds: float,
+    existing_download_bytes: int = 0,
+) -> None:
+    if duration_seconds <= 0:
+        logger.log("[disk] Twitch duration is unknown; download budget will be checked after source preparation.")
+        return
+    estimated_source = estimate_source_download_bytes(duration_seconds)
+    remaining_source = max(0, estimated_source - max(0, int(existing_download_bytes or 0)))
+    interval = max(3, int(settings.get("visual_scan_interval_seconds", 5) or 5))
+    max_samples = max(20, int(settings.get("visual_scan_max_samples", 1200) or 1200))
+    visual_samples = min(max_samples, math.ceil(duration_seconds / interval)) if settings.get("visual_scan_enabled", True) else 0
+    report = estimate_analysis_disk_budget(
+        project_dir,
+        duration_seconds=duration_seconds,
+        source_path=cache / "pending_source.media",
+        pending_source_bytes=remaining_source,
+        chunk_seconds=max(1, int(settings.get("chunk_seconds", 900) or 900)),
+        visual_scan_samples=visual_samples,
+        audio_dynamics_enabled=bool(settings.get("audio_dynamics_enabled", True)),
+    )
+    if not report["ok"]:
+        raise DiskBudgetError(report["message"])
+    logger.log(
+        f"[disk] Twitch source+analysis budget OK: required={report['required_bytes']} bytes; "
+        f"free={report['free_bytes']} bytes; path={cache}"
+    )
+
+
 def prepare_twitch_source(project_dir: Path, settings: dict[str, Any], logger) -> dict[str, Any]:
     """Download/cache Twitch VOD range or record a live stream into project cache.
 
@@ -1213,6 +1267,16 @@ def prepare_twitch_source(project_dir: Path, settings: dict[str, Any], logger) -
             attempt_cache, manifest = _prepare_vod_download_cache(cache, identity, logger)
             logger.log(
                 f"[twitch] attempt cache_id={manifest['cache_id']}; state={manifest['state']}; cache={attempt_cache}"
+            )
+            duration = _known_twitch_duration(twitch)
+            _ensure_twitch_disk_budget(
+                project_dir,
+                attempt_cache,
+                twitch,
+                settings,
+                logger,
+                duration_seconds=duration,
+                existing_download_bytes=_cache_size_bytes(attempt_cache),
             )
             try:
                 if engine == "twitchdownloadercli":
@@ -1306,6 +1370,8 @@ def prepare_twitch_source(project_dir: Path, settings: dict[str, Any], logger) -
             except OperationCancelled:
                 logger.log(f"[twitch] {engine}: cancelled by user; fallback suppressed")
                 raise
+            except DiskBudgetError:
+                raise
             except Exception as exc:
                 msg = f"{engine}: {exc}"
                 errors.append(msg)
@@ -1369,6 +1435,15 @@ def prepare_twitch_source(project_dir: Path, settings: dict[str, Any], logger) -
                     twitch_completion_mode="recovered_existing",
                 )
                 return result.get("twitch", {})
+
+        _ensure_twitch_disk_budget(
+            project_dir,
+            cache,
+            twitch,
+            settings,
+            logger,
+            duration_seconds=_known_twitch_duration(twitch, live_seconds=seconds),
+        )
 
         logger.set_status(
             "running", 2, f"Twitch Live: подключаюсь к каналу и пишу {minutes} мин.", stage="twitch_live", progress_source="twitch_import"

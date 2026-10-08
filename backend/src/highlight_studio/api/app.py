@@ -47,6 +47,7 @@ from .schemas import (
 )
 
 from ..services.hardware import detect_hardware_capabilities, recommend_settings as recommend_hardware_settings
+from ..core.disk_budget import estimate_analysis_disk_budget
 from ..infrastructure.project_locks import project_metadata_lock, project_lifecycle_lock
 
 from ..services.pipeline import (
@@ -2792,12 +2793,31 @@ def smart_preflight_report(project_dir_: Path, settings: dict[str, Any], *, forc
         required=twitch_downloader_needed,
     )
     try:
-        free_gb = shutil.disk_usage(project_dir_).free / (1024**3)
-        # The analysis pipeline treats low disk as a warning; keep the UI gate
-        # consistent instead of rejecting a short project on a fixed 5 GB rule.
-        add("disk", "Хватает места на диске", free_gb >= 5, f"{free_gb:.1f} GB свободно", "Освободи хотя бы 5–10 GB для cache/render.", required=False)
+        duration = video_duration(video) if video.exists() else 0.0
+        if duration > 0:
+            interval = max(3, int(settings.get("visual_scan_interval_seconds", 5) or 5))
+            max_samples = max(20, int(settings.get("visual_scan_max_samples", 1200) or 1200))
+            visual_samples = min(max_samples, math.ceil(duration / interval)) if settings.get("visual_scan_enabled", True) else 0
+            disk = estimate_analysis_disk_budget(
+                project_dir_,
+                duration_seconds=duration,
+                source_path=video,
+                chunk_seconds=max(1, int(settings.get("chunk_seconds", 900) or 900)),
+                visual_scan_samples=visual_samples,
+                audio_dynamics_enabled=bool(settings.get("audio_dynamics_enabled", True)),
+            )
+            add(
+                "disk",
+                "Хватает места на диске",
+                disk["ok"],
+                disk["message"],
+                "Освободи указанное место или перенеси проект на диск с достаточным запасом.",
+                required=True,
+            )
+        else:
+            add("disk", "Проверка места на диске", False, "Не удалось определить длительность source.", "Проверь исходное видео.")
     except Exception as exc:
-        add("disk", "Проверка места на диске", False, str(exc), "Проверь права доступа к папке проекта.", required=False)
+        add("disk", "Проверка места на диске", False, str(exc), "Проверь права доступа к папке проекта.")
     try:
         test = project_dir_ / ".write_test"
         test.write_text("ok", encoding="utf-8")
