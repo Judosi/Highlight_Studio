@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
+import json
 import os
 import re
 import sys
@@ -20,6 +22,7 @@ from ...core.revisions import mark_source_changed
 from ...infrastructure.project_locks import project_metadata_lock
 
 TWITCH_VIDEO_EXTENSIONS = {".mp4", ".mkv", ".mov", ".webm", ".m4v", ".avi", ".ts"}
+TWITCH_DOWNLOAD_MANIFEST_VERSION = 1
 
 # v10.14.4/v10.14.7 release archives accidentally contained truncated copies
 # of the portable Turbo tools. A truncated PE file still exists on disk, so a
@@ -147,18 +150,6 @@ def _cookies_browser_arg(value: Any) -> str | None:
     browser = aliases.get(browser, browser)
     allowed = {"firefox", "chrome", "edge", "brave", "opera", "vivaldi", "safari"}
     return browser if browser in allowed else None
-
-
-def _clean_incomplete_twitch_downloads(cache_dir: Path) -> None:
-    # Remove temp files from a cancelled/failed previous run, but keep finished
-    # source videos so the user does not lose an already cached VOD by accident.
-    for pattern in ("*.part", "*.ytdl", "*.temp", "*.tmp", "*.frag.urls"):
-        try:
-            for f in cache_dir.glob(pattern):
-                if f.is_file():
-                    f.unlink(missing_ok=True)
-        except Exception:
-            pass
 
 
 def _cache_size_bytes(cache_dir: Path) -> int:
@@ -660,6 +651,150 @@ def _quality_for_tdcli(value: Any) -> str:
     return q[:80]
 
 
+def _vod_download_identity(
+    info: dict[str, Any],
+    twitch: dict[str, Any],
+    settings: dict[str, Any],
+    engine: str,
+) -> dict[str, Any]:
+    """Return the compatibility fields that make a partial VOD reusable."""
+    if engine == "twitchdownloadercli":
+        output_format = _quality_for_tdcli(twitch.get("quality", settings.get("twitch_quality", "best")))
+    else:
+        output_format = _safe_format_selector(twitch.get("format_selector", settings.get("twitch_format", "best")))
+
+    def seconds(value: Any) -> float | None:
+        return None if value is None else float(value)
+
+    return {
+        "engine": engine,
+        "format": output_format,
+        "range": {
+            "end_seconds": seconds(twitch.get("end_seconds")),
+            "start_seconds": seconds(twitch.get("start_seconds")),
+        },
+        "vod_id": str(info.get("vod_id") or "").strip(),
+    }
+
+
+def _vod_download_cache_id(identity: dict[str, Any]) -> str:
+    canonical = json.dumps(
+        {"version": TWITCH_DOWNLOAD_MANIFEST_VERSION, "identity": identity},
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:24]
+
+
+def _download_manifest_matches(manifest: Any, cache_id: str, identity: dict[str, Any]) -> bool:
+    return bool(
+        isinstance(manifest, dict)
+        and manifest.get("version") == TWITCH_DOWNLOAD_MANIFEST_VERSION
+        and manifest.get("cache_id") == cache_id
+        and manifest.get("identity") == identity
+    )
+
+
+def _quarantine_incompatible_download(cache_root: Path, attempt_cache: Path, logger) -> None:
+    if not attempt_cache.exists():
+        return
+    orphans = cache_root / "orphans"
+    orphans.mkdir(parents=True, exist_ok=True)
+    suffix = time.time_ns()
+    target = orphans / f"{attempt_cache.name}-incompatible-{suffix}"
+    counter = 1
+    while target.exists():
+        target = orphans / f"{attempt_cache.name}-incompatible-{suffix}-{counter}"
+        counter += 1
+    attempt_cache.replace(target)
+    logger.log(f"[twitch] incompatible partial cache quarantined: {target}")
+
+
+def _prepare_vod_download_cache(
+    cache_root: Path,
+    identity: dict[str, Any],
+    logger,
+) -> tuple[Path, dict[str, Any]]:
+    cache_id = _vod_download_cache_id(identity)
+    attempt_cache = cache_root / "downloads" / cache_id
+    manifest_path = attempt_cache / "download_manifest.json"
+    existing = read_json(manifest_path, None) if manifest_path.exists() else None
+    if attempt_cache.exists() and not _download_manifest_matches(existing, cache_id, identity):
+        _quarantine_incompatible_download(cache_root, attempt_cache, logger)
+        existing = None
+    attempt_cache.mkdir(parents=True, exist_ok=True)
+    now = time.time()
+    manifest = dict(existing) if isinstance(existing, dict) else {
+        "version": TWITCH_DOWNLOAD_MANIFEST_VERSION,
+        "cache_id": cache_id,
+        "identity": identity,
+        "created_at": now,
+    }
+    manifest.update({"state": "partial", "updated_at": now})
+    write_json(manifest_path, manifest)
+    return attempt_cache, manifest
+
+
+def _update_vod_download_manifest(attempt_cache: Path, state: str, **details: Any) -> None:
+    manifest_path = attempt_cache / "download_manifest.json"
+    manifest = read_json(manifest_path, {}) or {}
+    if not isinstance(manifest, dict):
+        return
+    manifest.update(details)
+    manifest.update({"state": state, "updated_at": time.time()})
+    write_json(manifest_path, manifest)
+
+
+def _path_is_within(path: Path, parent: Path) -> bool:
+    try:
+        path.resolve(strict=False).relative_to(parent.resolve(strict=False))
+        return True
+    except ValueError:
+        return False
+
+
+def _cleanup_vod_attempts_after_success(
+    cache_root: Path,
+    successful_cache: Path,
+    final_source: Path,
+    logger,
+) -> None:
+    """Remove failed/orphan attempts only after a validated final source exists."""
+    successful_cache = successful_cache.resolve(strict=False)
+    final_source = final_source.resolve(strict=False)
+    for container_name in ("downloads", "attempts", "orphans"):
+        container = cache_root / container_name
+        if not container.is_dir():
+            continue
+        for candidate in list(container.iterdir()):
+            resolved = candidate.resolve(strict=False)
+            if resolved == successful_cache or _path_is_within(final_source, resolved):
+                continue
+            try:
+                if candidate.is_dir():
+                    shutil.rmtree(candidate)
+                else:
+                    candidate.unlink(missing_ok=True)
+                logger.log(f"[twitch] cleaned obsolete download attempt: {candidate}")
+            except Exception as exc:
+                logger.log(f"[twitch] cleanup warning for {candidate}: {exc}")
+
+    for pattern in ("*.part", "*.ytdl", "*.temp", "*.tmp", "*.frag.urls"):
+        for residue in successful_cache.rglob(pattern):
+            try:
+                if residue.is_file() and residue.resolve(strict=False) != final_source:
+                    residue.unlink(missing_ok=True)
+            except Exception as exc:
+                logger.log(f"[twitch] cleanup warning for {residue}: {exc}")
+    tdcli_temp = successful_cache / "tdcli_temp"
+    if tdcli_temp.is_dir() and not _path_is_within(final_source, tdcli_temp):
+        try:
+            shutil.rmtree(tdcli_temp)
+        except Exception as exc:
+            logger.log(f"[twitch] cleanup warning for {tdcli_temp}: {exc}")
+
+
 def _prepare_ytdlp_vod(
     project_dir: Path,
     cache: Path,
@@ -701,7 +836,6 @@ def _prepare_ytdlp_vod(
         twitch_threads=threads,
         twitch_cookies_browser=cookies_browser or "none",
     )
-    _clean_incomplete_twitch_downloads(cache)
     out_tpl = cache / "source.%(ext)s"
     cmd = _python_module_cmd("yt_dlp", "yt-dlp") + [
         "--no-playlist",
@@ -811,7 +945,6 @@ def _prepare_tdcli_vod(
         twitch_threads=threads,
         twitch_quality=quality,
     )
-    _clean_incomplete_twitch_downloads(cache)
     cmd = tdcli + [
         "videodownload",
         "--id",
@@ -1076,25 +1209,78 @@ def prepare_twitch_source(project_dir: Path, settings: dict[str, Any], logger) -
 
         def attempt(engine: str):
             tried.append(engine)
-            run_id = f"{int(time.time() * 1000)}-{os.getpid()}-{len(tried)}"
-            attempt_cache = cache / "attempts" / f"{run_id}-{engine.replace('+', '_')}"
-            attempt_cache.mkdir(parents=True, exist_ok=True)
-            logger.log(f"[twitch] attempt {run_id}: isolated cache={attempt_cache}")
-            if engine == "twitchdownloadercli":
-                return _prepare_tdcli_vod(project_dir, attempt_cache, info, twitch, settings, logger)
-            if engine == "yt-dlp-aria2c":
-                return _prepare_ytdlp_vod(project_dir, attempt_cache, info, twitch, settings, logger, use_aria2=True, engine_label="yt-dlp+aria2c")
-            if engine == "yt-dlp":
-                return _prepare_ytdlp_vod(project_dir, attempt_cache, info, twitch, settings, logger, use_aria2=False, engine_label="yt-dlp")
-            if engine == "streamlink":
-                raise RuntimeError(
-                    "streamlink в Highlight Studio используется для Live. Для VOD выбери TwitchDownloaderCLI/yt-dlp или manual TwitchLink import."
-                )
-            if engine == "manual-twitchlink":
-                raise RuntimeError(
-                    "Manual TwitchLink: скачай VOD во внешнем TwitchLink, затем импортируй mp4 как локальное видео. Автоматически управлять GUI TwitchLink нельзя безопасно."
-                )
-            raise RuntimeError(f"Неизвестный Twitch downloader engine: {engine}")
+            identity = _vod_download_identity(info, twitch, settings, engine)
+            attempt_cache, manifest = _prepare_vod_download_cache(cache, identity, logger)
+            logger.log(
+                f"[twitch] attempt cache_id={manifest['cache_id']}; state={manifest['state']}; cache={attempt_cache}"
+            )
+            try:
+                if engine == "twitchdownloadercli":
+                    result = _prepare_tdcli_vod(project_dir, attempt_cache, info, twitch, settings, logger)
+                elif engine == "yt-dlp-aria2c":
+                    result = _prepare_ytdlp_vod(
+                        project_dir,
+                        attempt_cache,
+                        info,
+                        twitch,
+                        settings,
+                        logger,
+                        use_aria2=True,
+                        engine_label="yt-dlp+aria2c",
+                    )
+                elif engine == "yt-dlp":
+                    result = _prepare_ytdlp_vod(
+                        project_dir,
+                        attempt_cache,
+                        info,
+                        twitch,
+                        settings,
+                        logger,
+                        use_aria2=False,
+                        engine_label="yt-dlp",
+                    )
+                elif engine == "streamlink":
+                    raise RuntimeError(
+                        "streamlink в Highlight Studio используется для Live. Для VOD выбери TwitchDownloaderCLI/yt-dlp или manual TwitchLink import."
+                    )
+                elif engine == "manual-twitchlink":
+                    raise RuntimeError(
+                        "Manual TwitchLink: скачай VOD во внешнем TwitchLink, затем импортируй mp4 как локальное видео. Автоматически управлять GUI TwitchLink нельзя безопасно."
+                    )
+                else:
+                    raise RuntimeError(f"Неизвестный Twitch downloader engine: {engine}")
+
+                final_source = Path(str(result.get("cached_video_path") or "")).expanduser()
+                if not str(result.get("cached_video_path") or "").strip():
+                    final_source = _find_downloaded_video(attempt_cache)
+                final_check = validate_media_file(final_source)
+                if not final_check.get("ok"):
+                    raise RuntimeError(
+                        "Twitch downloader не создал валидный финальный source: "
+                        + str(final_check.get("message") or final_check)
+                    )
+                try:
+                    _update_vod_download_manifest(
+                        attempt_cache,
+                        "ready",
+                        completed_at=time.time(),
+                        final_source=str(final_source.resolve()),
+                        final_size_bytes=final_source.stat().st_size,
+                    )
+                except Exception as exc:
+                    logger.log(f"[twitch] final manifest warning: {exc}")
+                _cleanup_vod_attempts_after_success(cache, attempt_cache, final_source, logger)
+                return result
+            except Exception as exc:
+                try:
+                    _update_vod_download_manifest(
+                        attempt_cache,
+                        "partial",
+                        last_error=f"{type(exc).__name__}: {exc}"[:1000],
+                    )
+                except Exception as manifest_exc:
+                    logger.log(f"[twitch] partial manifest warning: {manifest_exc}")
+                raise
 
         plan = []
         if requested_engine == "auto":
