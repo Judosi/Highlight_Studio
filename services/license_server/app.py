@@ -20,6 +20,7 @@ from pydantic import BaseModel, Field
 TOKEN_PREFIX = "HSB1"
 KNOWN_ENTITLEMENTS = frozenset({"analysis", "render", "shorts", "twitch", "metadata_ai"})
 DEFAULT_ENTITLEMENTS = sorted(KNOWN_ENTITLEMENTS)
+DEFAULT_TRIAL_DAYS = 14
 DB_PATH = Path(os.environ.get("HIGHLIGHT_STUDIO_LICENSE_DB", "license_service.sqlite3")).resolve()
 
 
@@ -74,6 +75,14 @@ def init_db() -> None:
                 PRIMARY KEY (license_key, device_id),
                 FOREIGN KEY (license_key) REFERENCES licenses(license_key) ON DELETE CASCADE
             );
+            CREATE TABLE IF NOT EXISTS trial_devices (
+                device_id TEXT PRIMARY KEY,
+                trial_id TEXT NOT NULL UNIQUE,
+                started_at REAL NOT NULL,
+                expires_at REAL NOT NULL,
+                created_at REAL NOT NULL,
+                last_seen_at REAL NOT NULL
+            );
             CREATE INDEX IF NOT EXISTS idx_licenses_customer ON licenses(customer_id);
             """
         )
@@ -105,6 +114,10 @@ def _issue_token(row: sqlite3.Row, device_id: str) -> str:
         "expires_at": float(row["expires_at"] or 0),
         "entitlements": json.loads(row["entitlements_json"]),
     }
+    return _sign_payload(payload)
+
+
+def _sign_payload(payload: dict[str, Any]) -> str:
     encoded = _b64url(json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8"))
     signed = f"{TOKEN_PREFIX}.{encoded}".encode("ascii")
     signature = _private_key().sign(signed)
@@ -121,7 +134,32 @@ def _verify_own_token(token: str) -> dict[str, Any]:
         payload = json.loads(_b64decode(parts[1]))
     except (InvalidSignature, ValueError, json.JSONDecodeError) as exc:
         raise HTTPException(400, "Invalid token") from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(400, "Invalid token")
     return payload
+
+
+def _trial_days() -> int:
+    try:
+        return max(1, min(90, int(os.environ.get("HIGHLIGHT_STUDIO_TRIAL_DAYS", DEFAULT_TRIAL_DAYS))))
+    except (TypeError, ValueError):
+        return DEFAULT_TRIAL_DAYS
+
+
+def _issue_trial_token(row: sqlite3.Row) -> str:
+    now = time.time()
+    return _sign_payload(
+        {
+            "license_id": f"trial:{row['trial_id']}",
+            "plan": "paid_beta_trial",
+            "device_id": row["device_id"],
+            "issued_at": now,
+            "trial_started_at": float(row["started_at"]),
+            "not_before": float(row["started_at"]) - 60,
+            "expires_at": float(row["expires_at"]),
+            "entitlements": DEFAULT_ENTITLEMENTS,
+        }
+    )
 
 
 class LicenseCreate(BaseModel):
@@ -143,6 +181,12 @@ class TokenRequest(BaseModel):
     token: str = Field(..., min_length=20, max_length=10000)
     device_id: str = Field(..., min_length=16, max_length=128)
     app_version: str = Field("", max_length=100)
+
+
+class TrialRequest(BaseModel):
+    device_id: str = Field(..., min_length=16, max_length=128)
+    app_version: str = Field("", max_length=100)
+    local_started_at: float | None = Field(default=None, ge=0)
 
 
 @asynccontextmanager
@@ -199,22 +243,31 @@ def _license_row(db: sqlite3.Connection, key: str) -> sqlite3.Row:
 @app.post("/activate")
 def activate(payload: ActivationRequest) -> dict[str, Any]:
     with closing(_connect()) as db:
-        row = _license_row(db, payload.license_key.strip())
-        existing = db.execute(
-            "SELECT 1 FROM devices WHERE license_key=? AND device_id=?", (row["license_key"], payload.device_id)
-        ).fetchone()
-        if not existing:
-            count = db.execute("SELECT COUNT(*) FROM devices WHERE license_key=?", (row["license_key"],)).fetchone()[0]
-            if count >= int(row["max_devices"]):
-                raise HTTPException(409, "Device limit reached")
-            db.execute("INSERT INTO devices VALUES (?, ?, ?, ?)", (row["license_key"], payload.device_id, time.time(), time.time()))
-        else:
-            db.execute(
-                "UPDATE devices SET last_seen_at=? WHERE license_key=? AND device_id=?",
-                (time.time(), row["license_key"], payload.device_id),
-            )
-        db.commit()
-        return {"ok": True, "token": _issue_token(row, payload.device_id)}
+        try:
+            # SQLite's write lock is cross-process. Acquiring it before COUNT
+            # serializes the admission decision and prevents limit overbooking.
+            db.execute("BEGIN IMMEDIATE")
+            row = _license_row(db, payload.license_key.strip())
+            existing = db.execute(
+                "SELECT 1 FROM devices WHERE license_key=? AND device_id=?", (row["license_key"], payload.device_id)
+            ).fetchone()
+            now = time.time()
+            if not existing:
+                count = db.execute("SELECT COUNT(*) FROM devices WHERE license_key=?", (row["license_key"],)).fetchone()[0]
+                if count >= int(row["max_devices"]):
+                    raise HTTPException(409, "Device limit reached")
+                db.execute("INSERT INTO devices VALUES (?, ?, ?, ?)", (row["license_key"], payload.device_id, now, now))
+            else:
+                db.execute(
+                    "UPDATE devices SET last_seen_at=? WHERE license_key=? AND device_id=?",
+                    (now, row["license_key"], payload.device_id),
+                )
+            token = _issue_token(row, payload.device_id)
+            db.commit()
+            return {"ok": True, "token": token}
+        except Exception:
+            db.rollback()
+            raise
 
 
 @app.post("/refresh")
@@ -241,13 +294,42 @@ def refresh(payload: TokenRequest) -> dict[str, Any]:
 @app.post("/deactivate")
 def deactivate(payload: TokenRequest) -> dict[str, Any]:
     token_payload = _verify_own_token(payload.token)
+    token_device = str(token_payload.get("device_id") or "")
+    if not token_device or token_device != payload.device_id:
+        raise HTTPException(403, "Wrong device")
     license_id = str(token_payload.get("license_id") or "")
     with closing(_connect()) as db:
         row = db.execute("SELECT license_key FROM licenses WHERE license_id=?", (license_id,)).fetchone()
         if row:
-            db.execute("DELETE FROM devices WHERE license_key=? AND device_id=?", (row["license_key"], payload.device_id))
+            db.execute("DELETE FROM devices WHERE license_key=? AND device_id=?", (row["license_key"], token_device))
             db.commit()
     return {"ok": True, "deactivated": True}
+
+
+@app.post("/trial/start")
+def start_trial(payload: TrialRequest) -> dict[str, Any]:
+    with closing(_connect()) as db:
+        try:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT * FROM trial_devices WHERE device_id=?", (payload.device_id,)).fetchone()
+            now = time.time()
+            if row is None:
+                requested = float(payload.local_started_at or now)
+                started_at = min(now, requested) if requested > 0 else now
+                expires_at = started_at + _trial_days() * 86400
+                db.execute(
+                    "INSERT INTO trial_devices VALUES (?, ?, ?, ?, ?, ?)",
+                    (payload.device_id, secrets.token_hex(12), started_at, expires_at, now, now),
+                )
+                row = db.execute("SELECT * FROM trial_devices WHERE device_id=?", (payload.device_id,)).fetchone()
+            else:
+                db.execute("UPDATE trial_devices SET last_seen_at=? WHERE device_id=?", (now, payload.device_id))
+            token = _issue_trial_token(row)
+            db.commit()
+            return {"ok": True, "token": token}
+        except Exception:
+            db.rollback()
+            raise
 
 
 @app.post("/webhooks/payment")

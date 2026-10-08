@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import platform
+import re
 import time
 import uuid
 from typing import Any
@@ -19,6 +20,7 @@ from ..core.utils import read_json, write_json
 
 LICENSE_PATH = DATA_DIR / "license.json"
 TRIAL_PATH = DATA_DIR / "trial.json"
+DEVICE_ID_PATH = DATA_DIR / "device_identity.json"
 DEFAULT_TRIAL_DAYS = 14
 LICENSE_TOKEN_PREFIX = "HSB1"
 DEFAULT_ENTITLEMENTS = ["analysis", "render", "shorts", "twitch", "metadata_ai"]
@@ -74,8 +76,7 @@ def _safe_https_url(value: str) -> str:
     return candidate
 
 
-def device_id() -> str:
-    """Return a stable, non-reversible device id without storing raw hardware data."""
+def _legacy_device_id() -> str:
     source = "|".join(
         [
             platform.system(),
@@ -86,6 +87,24 @@ def device_id() -> str:
         ]
     )
     return hashlib.sha256(source.encode("utf-8", errors="ignore")).hexdigest()
+
+
+def device_id() -> str:
+    """Persist the existing non-reversible ID so normal hardware drift cannot consume a new slot."""
+    stored = read_json(DEVICE_ID_PATH, {}) or {}
+    value = str(stored.get("device_id") or "") if isinstance(stored, dict) else ""
+    if re.fullmatch(r"[0-9a-f]{64}", value):
+        return value
+    value = _legacy_device_id()
+    write_json(
+        DEVICE_ID_PATH,
+        {
+            "device_id": value,
+            "algorithm": "legacy-hardware-hash-v1-persisted",
+            "created_by_version": APP_VERSION,
+        },
+    )
+    return value
 
 
 def _trial_days() -> int:
@@ -112,9 +131,75 @@ def _ensure_trial(now: float | None = None) -> dict[str, Any]:
     return raw
 
 
-def start_trial(*, now: float | None = None) -> dict[str, Any]:
-    """Start the local trial after legal onboarding, never on a passive status probe."""
-    return _ensure_trial(now)
+def _network_failure_message(action: str, exc: Exception) -> str:
+    # Exception text may contain request bodies supplied by adapters/proxies.
+    # Expose only the error class; license keys and tokens must never be echoed.
+    return f"{action}: сеть недоступна ({type(exc).__name__})."
+
+
+def _server_url() -> str:
+    return _safe_https_url(_configured_value("HIGHLIGHT_STUDIO_LICENSE_SERVER_URL", "licenseServerUrl"))
+
+
+def _save_server_trial(token: str, *, now: float) -> dict[str, Any]:
+    verified = verify_license_token(token, now=now)
+    payload = verified.get("payload") if isinstance(verified.get("payload"), dict) else {}
+    if verified.get("ok"):
+        payload = verified["payload"]
+    elif verified.get("reason") != "expired":
+        return {"ok": False, "message": "Сервер вернул некорректный trial entitlement."}
+    if payload.get("plan") != "paid_beta_trial" or str(payload.get("device_id") or "") != device_id():
+        return {"ok": False, "message": "Сервер вернул trial entitlement для другого устройства."}
+    write_json(
+        TRIAL_PATH,
+        {
+            "mode": "server_signed",
+            "token": token,
+            "started_at": float(payload.get("trial_started_at") or payload.get("issued_at") or now),
+            "expires_at": float(payload.get("expires_at") or 0),
+            "device_id": device_id(),
+            "last_seen_at": now,
+            "updated_at": now,
+        },
+    )
+    return {"ok": True, "payload": payload, "verification": verified}
+
+
+def _request_server_trial(existing: dict[str, Any], *, now: float, timeout: int = 20) -> dict[str, Any]:
+    server = _server_url()
+    if not server:
+        return {"ok": False, "message": "Сервер trial не настроен."}
+    local_started_at = None
+    if isinstance(existing, dict) and not existing.get("token"):
+        try:
+            candidate = float(existing.get("started_at") or 0)
+            local_started_at = candidate if candidate > 0 else None
+        except (TypeError, ValueError, OverflowError):
+            local_started_at = None
+    try:
+        response = requests.post(
+            f"{server}/trial/start",
+            json={
+                "device_id": device_id(),
+                "app_version": APP_VERSION,
+                "local_started_at": local_started_at,
+            },
+            timeout=timeout,
+        )
+        response.raise_for_status()
+        token = str((response.json() or {}).get("token") or "").strip()
+    except Exception as exc:
+        return {"ok": False, "message": _network_failure_message("Не удалось запустить пробный период", exc)}
+    return _save_server_trial(token, now=now)
+
+
+def start_trial(*, now: float | None = None, timeout: int = 20) -> dict[str, Any]:
+    """Start a signed server trial when configured, otherwise preserve legacy offline behavior."""
+    current = float(now if now is not None else _now())
+    existing = read_json(TRIAL_PATH, {}) or {}
+    if _server_url():
+        return _request_server_trial(existing if isinstance(existing, dict) else {}, now=current, timeout=timeout)
+    return _ensure_trial(current)
 
 
 def _trial_can_start() -> bool:
@@ -200,6 +285,75 @@ def license_status(*, now: float | None = None) -> dict[str, Any]:
         invalid_reason = None
 
     trial = read_json(TRIAL_PATH, {}) or {}
+    if _server_url():
+        trial = trial if isinstance(trial, dict) else {}
+        trial_token = str(trial.get("token") or "").strip()
+        verified_trial: dict[str, Any] = {}
+        if trial_token:
+            verified_trial = verify_license_token(trial_token, now=current)
+        trial_payload = verified_trial.get("payload") if isinstance(verified_trial.get("payload"), dict) else {}
+        if verified_trial.get("ok"):
+            trial_payload = verified_trial["payload"]
+        if trial_payload.get("plan") == "paid_beta_trial" and str(trial_payload.get("device_id") or "") == device_id():
+            expires_at = float(trial_payload.get("expires_at") or 0)
+            try:
+                last_seen_at = float(trial.get("last_seen_at") or trial_payload.get("issued_at") or current)
+            except (TypeError, ValueError, OverflowError):
+                last_seen_at = current
+            clock_ok = current + 3600 >= last_seen_at
+            active = bool(verified_trial.get("ok") and current < expires_at and clock_ok)
+            if active and current > last_seen_at + 3600:
+                trial["last_seen_at"] = current
+                write_json(TRIAL_PATH, trial)
+            return {
+                "ok": True,
+                "state": "trial" if active else "expired",
+                "can_use": active,
+                "plan": "paid_beta_trial" if active else "none",
+                "license_id": "",
+                "expires_at": expires_at,
+                "days_remaining": max(0, int((expires_at - current + 86399) // 86400)) if active else 0,
+                "entitlements": list(DEFAULT_ENTITLEMENTS) if active else [],
+                "device_id": device_id()[:12],
+                "device_code": device_id(),
+                "message": "Пробный период активен." if active else "Пробный период завершён. Активируй лицензию.",
+                "invalid_license_reason": invalid_reason or ("clock_rollback" if not clock_ok else None),
+                "trial_protection": "server_signed",
+            }
+        if not _trial_can_start():
+            return {
+                "ok": True,
+                "state": "not_started",
+                "can_use": False,
+                "plan": "none",
+                "license_id": "",
+                "expires_at": None,
+                "days_remaining": _trial_days(),
+                "entitlements": [],
+                "device_id": device_id()[:12],
+                "device_code": device_id(),
+                "message": "Пробный период начнётся после завершения первого запуска.",
+                "invalid_license_reason": invalid_reason,
+                "trial_protection": "server_signed",
+            }
+        started = _request_server_trial(trial, now=current, timeout=5)
+        if started.get("ok"):
+            return license_status(now=current)
+        return {
+            "ok": False,
+            "state": "trial_server_unavailable",
+            "can_use": False,
+            "plan": "none",
+            "license_id": "",
+            "expires_at": None,
+            "days_remaining": 0,
+            "entitlements": [],
+            "device_id": device_id()[:12],
+            "device_code": device_id(),
+            "message": started.get("message") or "Для первого запуска trial нужен доступ к серверу лицензий.",
+            "invalid_license_reason": invalid_reason,
+            "trial_protection": "server_signed",
+        }
     if not isinstance(trial, dict) or not trial.get("started_at"):
         if not _trial_can_start():
             return {
@@ -275,7 +429,7 @@ def activate_license(key_or_token: str, *, timeout: int = 20) -> dict[str, Any]:
             response.raise_for_status()
             token = str((response.json() or {}).get("token") or "").strip()
         except Exception as exc:
-            return {"ok": False, "message": f"Не удалось связаться с сервером активации: {str(exc)[:240]}"}
+            return {"ok": False, "message": _network_failure_message("Не удалось связаться с сервером активации", exc)}
     verified = verify_license_token(token)
     if not verified.get("ok"):
         return {"ok": False, "message": f"Ключ не принят: {verified.get('reason', 'invalid_token')}"}
@@ -288,7 +442,7 @@ def refresh_license(*, timeout: int = 20) -> dict[str, Any]:
     token = _saved_token()
     if not token:
         return {"ok": False, "message": "Активная лицензия не найдена."}
-    server = _safe_https_url(_configured_value("HIGHLIGHT_STUDIO_LICENSE_SERVER_URL", "licenseServerUrl"))
+    server = _server_url()
     if not server:
         return {**license_status(), "refreshed": False, "message": "Локальная лицензия проверена. Сервер обновления лицензии не настроен."}
     try:
@@ -301,7 +455,7 @@ def refresh_license(*, timeout: int = 20) -> dict[str, Any]:
         next_token = str((response.json() or {}).get("token") or token).strip()
     except Exception as exc:
         current = license_status()
-        return {**current, "refreshed": False, "message": f"Не удалось обновить лицензию: {str(exc)[:240]}"}
+        return {**current, "refreshed": False, "message": _network_failure_message("Не удалось обновить лицензию", exc)}
     verified = verify_license_token(next_token)
     if not verified.get("ok"):
         return {"ok": False, "message": "Сервер вернул некорректную лицензию."}
@@ -311,20 +465,31 @@ def refresh_license(*, timeout: int = 20) -> dict[str, Any]:
 
 def deactivate_license(*, timeout: int = 10) -> dict[str, Any]:
     token = _saved_token()
-    server = _safe_https_url(_configured_value("HIGHLIGHT_STUDIO_LICENSE_SERVER_URL", "licenseServerUrl"))
+    server = _server_url()
     remote_released = False
     if token and server:
+        verified = verify_license_token(token)
+        payload = verified.get("payload") if isinstance(verified.get("payload"), dict) else {}
+        token_device = str(payload.get("device_id") or "")
+        if not 16 <= len(token_device) <= 128:
+            return {**license_status(), "deactivated": False, "remote_released": False, "message": "Лицензия повреждена; слот не освобождён."}
         try:
             response = requests.post(
                 f"{server}/deactivate",
-                json={"token": token, "device_id": device_id(), "app_version": APP_VERSION},
+                json={"token": token, "device_id": token_device, "app_version": APP_VERSION},
                 timeout=timeout,
             )
             remote_released = response.ok
         except Exception:
             remote_released = False
-    if LICENSE_PATH.exists():
-        LICENSE_PATH.unlink()
+        if not remote_released:
+            return {
+                **license_status(),
+                "deactivated": False,
+                "remote_released": False,
+                "message": "Сервер лицензий недоступен; локальная лицензия сохранена, чтобы повторить деактивацию.",
+            }
+    LICENSE_PATH.unlink(missing_ok=True)
     return {**license_status(), "deactivated": True, "remote_released": remote_released}
 
 
