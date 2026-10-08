@@ -39,10 +39,28 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ffmpeg libgles2 libegl1
       - name: Install Windows media runtime
         if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          choco install ffmpeg --no-progress --yes
+          $successfulExitCodes = @(0, 1641, 3010)
+          $installed = $false
+          foreach ($attempt in 1..2) {
+            choco install ffmpeg --no-progress --yes
+            if ($successfulExitCodes -contains $LASTEXITCODE) {
+              $installed = $true
+              break
+            }
+            if ($attempt -lt 2) {
+              Write-Warning "Chocolatey FFmpeg install failed; retrying once after 10 seconds."
+              Start-Sleep -Seconds 10
+            }
+          }
+          if (-not $installed) {
+            throw "Chocolatey failed to install FFmpeg after two attempts."
+          }
           ffmpeg -version
+          if ($LASTEXITCODE -ne 0) { throw "ffmpeg is unavailable after installation." }
           ffprobe -version
+          if ($LASTEXITCODE -ne 0) { throw "ffprobe is unavailable after installation." }
       - name: Preserve the Windows subprocess environment
         if: runner.os == 'Windows'
         shell: pwsh
