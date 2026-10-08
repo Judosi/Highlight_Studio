@@ -25,6 +25,7 @@ from ..integrations.ai.runtime import AIResourceManager, AITransportError
 from ..infrastructure.project_locks import project_metadata_lock
 from .hardware import detect_hardware_capabilities, prepare_nvidia_dll_paths, system_resource_snapshot
 from .media_models import Candidate, TranscriptSegment
+from ..core.disk_budget import cleanup_project_audio_temps, estimate_analysis_disk_budget, estimate_render_disk_budget
 from .ai_policy import (
     ai_batch_completeness_required,
     ai_prompt_char_budget,
@@ -3413,8 +3414,8 @@ def preflight(project_dir: Path, settings: dict[str, Any]) -> dict[str, Any]:
     video = p["video"]
     checks = []
 
-    def add(name: str, status: str, details: str = ""):
-        checks.append({"name": name, "status": status, "details": details})
+    def add(name: str, status: str, details: str = "", **extra: Any):
+        checks.append({"name": name, "status": status, "details": details, **extra})
 
     ffmpeg = which("ffmpeg")
     ffprobe = which("ffprobe")
@@ -3422,6 +3423,7 @@ def preflight(project_dir: Path, settings: dict[str, Any]) -> dict[str, Any]:
     add("FFprobe", "OK" if ffprobe else "FAIL", str(ffprobe))
 
     if video.exists():
+        dur = 0.0
         try:
             dur = video_duration(video)
             add("Видео читается", "OK", tc(dur))
@@ -3429,8 +3431,26 @@ def preflight(project_dir: Path, settings: dict[str, Any]) -> dict[str, Any]:
             add("Видео читается", "FAIL", str(exc))
         streams = audio_streams(video)
         add("Аудиодорожки", "OK" if streams else "FAIL", f"найдено: {len(streams)}")
-        free = shutil.disk_usage(project_dir).free / (1024**3)
-        add("Свободное место", "OK" if free > 5 else "WARN", f"{free:.1f} GB")
+        if dur > 0:
+            interval = max(3, int(settings.get("visual_scan_interval_seconds", 5) or 5))
+            max_samples = max(20, int(settings.get("visual_scan_max_samples", 1200) or 1200))
+            visual_samples = min(max_samples, math.ceil(dur / interval)) if settings.get("visual_scan_enabled", True) else 0
+            disk = estimate_analysis_disk_budget(
+                project_dir,
+                duration_seconds=dur,
+                source_path=video,
+                chunk_seconds=max(1, int(settings.get("chunk_seconds", 900) or 900)),
+                visual_scan_samples=visual_samples,
+                audio_dynamics_enabled=bool(settings.get("audio_dynamics_enabled", True)),
+            )
+            add(
+                "Свободное место",
+                "OK" if disk["ok"] else "FAIL",
+                disk["message"],
+                free_bytes=disk["free_bytes"],
+                required_bytes=disk["required_bytes"],
+                filesystems=disk["filesystems"],
+            )
     else:
         add("Видео", "FAIL", "Исходное видео не найдено. Если это Fast Import, проверь что файл не перемещён.")
 
@@ -3461,7 +3481,7 @@ def preflight(project_dir: Path, settings: dict[str, Any]) -> dict[str, Any]:
 def extract_audio(video: Path, out_wav: Path, logger: JobLogger):
     ffmpeg = which("ffmpeg") or "ffmpeg"
     logger.heartbeat("extract_audio", 5, "Извлекаю аудио")
-    cmd = [ffmpeg, "-y", "-i", str(video), "-vn", "-ac", "1", "-ar", "16000", str(out_wav)]
+    cmd = [ffmpeg, "-y", "-i", str(video), "-vn", "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", str(out_wav)]
     r = run_cmd(cmd, project_dir=out_wav.parent, cancel_file=cancel_path(out_wav.parent))
     if r.returncode != 0:
         raise RuntimeError(r.stdout)
@@ -3552,9 +3572,6 @@ def transcribe(project_dir: Path, settings: dict[str, Any], logger: JobLogger) -
         logger.log("Кэш транскрипта устарел: исходник или настройки Whisper изменились, использую новую generation chunks")
 
     from .whisper_worker import WhisperProcess
-
-    audio = project_dir / "audio_16k.wav"
-    extract_audio(p["video"], audio, logger)
 
     model_name = str(settings.get("whisper_model") or "base")
     requested_device = str(settings.get("whisper_device") or "auto").strip().lower()
@@ -3663,7 +3680,7 @@ def transcribe(project_dir: Path, settings: dict[str, Any], logger: JobLogger) -
 
         progress_state.update(stage="transcription", message="Whisper загружен. Подготавливаю распознавание речи")
         pulse()
-        duration = video_duration(audio)
+        duration = video_duration(p["video"])
         chunks_root = project_dir / "transcript_chunks"
         chunks_dir = chunks_root / fp
         chunks_dir.mkdir(parents=True, exist_ok=True)
@@ -3700,7 +3717,24 @@ def transcribe(project_dir: Path, settings: dict[str, Any], logger: JobLogger) -
             pulse()
             chunk_wav = chunks_dir / f"chunk_{i + 1:04d}.wav"
             rr = run_cmd(
-                [ffmpeg, "-y", "-ss", f"{start:.3f}", "-i", str(audio), "-t", f"{end - start:.3f}", "-ac", "1", "-ar", "16000", str(chunk_wav)],
+                [
+                    ffmpeg,
+                    "-y",
+                    "-ss",
+                    f"{start:.3f}",
+                    "-i",
+                    str(p["video"]),
+                    "-t",
+                    f"{end - start:.3f}",
+                    "-vn",
+                    "-ac",
+                    "1",
+                    "-ar",
+                    "16000",
+                    "-c:a",
+                    "pcm_s16le",
+                    str(chunk_wav),
+                ],
                 project_dir=project_dir,
                 cancel_file=cancel_path(project_dir),
             )
@@ -3808,6 +3842,7 @@ def transcribe(project_dir: Path, settings: dict[str, Any], logger: JobLogger) -
                 raise RuntimeError(f"Whisper chunk {i + 1}: некорректные timestamps. Chunk не сохранён; возможен повторный запуск.")
             chunk_segments, _chunk_timing = normalize_transcript_timing(validated_chunk)
             write_json(cache_path, [asdict(x) for x in chunk_segments])
+            chunk_wav.unlink(missing_ok=True)
             result.extend(chunk_segments)
             logger.set_step(
                 "transcription",
@@ -3852,6 +3887,7 @@ def transcribe(project_dir: Path, settings: dict[str, Any], logger: JobLogger) -
     finally:
         for worker in workers:
             worker.close()
+        cleanup_project_audio_temps(project_dir, include_full=False)
 
 
 def build_blocks(segments: list[TranscriptSegment], block_seconds: int) -> list[dict[str, Any]]:
@@ -4472,6 +4508,18 @@ def _save_micro_ai_item_cache(
     write_json(cache_dir / f"item_{fp}.json", {"fingerprint": fp, "item": clean, "updated_at": time.time()})
 
 def analyze(project_dir: Path, settings: dict[str, Any], logger: JobLogger) -> dict[str, Any]:
+    removed = cleanup_project_audio_temps(project_dir)
+    if removed:
+        logger.log(f"Удалены stale audio temp-файлы перед restart: {len(removed)}")
+    try:
+        return _analyze_impl(project_dir, settings, logger)
+    finally:
+        removed = cleanup_project_audio_temps(project_dir)
+        if removed:
+            logger.log(f"Очищены временные audio-файлы: {len(removed)}")
+
+
+def _analyze_impl(project_dir: Path, settings: dict[str, Any], logger: JobLogger) -> dict[str, Any]:
     p = project_paths(project_dir)
     pre = preflight(project_dir, settings)
     if not pre["ok"]:
@@ -8492,6 +8540,23 @@ def render(
     finalize_job_status: bool = True,
 ) -> dict[str, Any]:
     """Serialize GPU-heavy renders with Whisper and local AI across projects."""
+    video = source_video_path(project_dir)
+    render_segments = list(segments_override) if segments_override is not None else read_json(project_dir / "segments.json", []) or []
+    selected_duration = sum(
+        max(0.0, float(item.get("end") or 0.0) - float(item.get("start") or 0.0))
+        for item in render_segments
+        if isinstance(item, dict)
+    )
+    disk = estimate_render_disk_budget(
+        project_dir,
+        selected_duration_seconds=selected_duration,
+        source_size_bytes=video.stat().st_size,
+        source_duration_seconds=video_duration(video),
+        output_path=final_output,
+        authoritative=authoritative,
+    )
+    if not disk["ok"]:
+        raise RuntimeError(disk["message"])
     logger.checkpoint("render", state="running", message="Ожидание общего GPU-ресурса")
     with AIResourceManager.lease(
         "gpu_heavy",

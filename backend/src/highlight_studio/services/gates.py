@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 from typing import Any
 
 from ..core.artifacts import source_readiness, validate_media_file
 from ..core.revisions import freshness_report
 from ..core.utils import read_json, which
+from ..core.disk_budget import estimate_render_disk_budget
 from .pipeline import pre_render_check, source_video_path
 
 
@@ -41,14 +41,42 @@ def authoritative_render_gate(project_dir: Path, settings: dict[str, Any]) -> di
         pre = {"ok": False, "message": f"Pre-render check failed: {exc}"}
     checks.append({"id": "pre_render", "ok": bool(pre.get("ok")), "message": pre.get("message") or "Техническая проверка рендера.", "details": pre})
     try:
-        free = shutil.disk_usage(project_dir).free
-        video_size = source_video_path(project_dir).stat().st_size
-        needed = max(512 * 1024 * 1024, int(video_size * 0.20))
-        disk_ok = free > needed
-    except Exception:
-        free = 0
-        needed = 0
+        video = source_video_path(project_dir)
+        source_duration = float((source.get("source") or {}).get("duration_seconds") or 0.0)
+        if source_duration <= 0:
+            from ..core.utils import video_duration
+
+            source_duration = video_duration(video)
+        selected_duration = sum(
+            max(0.0, float(item.get("end") or 0.0) - float(item.get("start") or 0.0))
+            for item in segments
+            if isinstance(item, dict)
+        )
+        disk = estimate_render_disk_budget(
+            project_dir,
+            selected_duration_seconds=selected_duration,
+            source_size_bytes=video.stat().st_size,
+            source_duration_seconds=source_duration,
+        )
+        free = disk["free_bytes"]
+        needed = disk["required_bytes"]
+        disk_ok = bool(disk["ok"])
+        disk_message = disk["message"]
+        disk_filesystems = disk["filesystems"]
+    except Exception as exc:
+        free = needed = 0
         disk_ok = False
-    checks.append({"id": "disk", "ok": disk_ok, "message": "Свободного места достаточно." if disk_ok else "Недостаточно свободного места для безопасного рендера.", "free_bytes": free, "required_bytes": needed})
+        disk_message = f"Не удалось проверить место для рендера: {exc}"
+        disk_filesystems = []
+    checks.append(
+        {
+            "id": "disk",
+            "ok": disk_ok,
+            "message": disk_message,
+            "free_bytes": free,
+            "required_bytes": needed,
+            "filesystems": disk_filesystems,
+        }
+    )
     failed = [x for x in checks if not x.get("ok")]
     return {"ok": not failed, "checks": checks, "failed": failed, "freshness": fresh}
