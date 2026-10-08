@@ -30,6 +30,13 @@ def signed_token(private_key: Ed25519PrivateKey, payload: dict) -> str:
     return f"HSB1.{encoded}.{b64url(private_key.sign(signed))}"
 
 
+def corrupt_signature(token: str) -> str:
+    prefix, payload, encoded_signature = token.split(".")
+    signature = bytearray(base64.urlsafe_b64decode(encoded_signature + "=" * (-len(encoded_signature) % 4)))
+    signature[0] ^= 0x01
+    return f"{prefix}.{payload}.{b64url(bytes(signature))}"
+
+
 def configure_client(tmp_path: Path, monkeypatch, private_key: Ed25519PrivateKey, *, device: str = "d" * 64) -> None:
     public_raw = private_key.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
     monkeypatch.setenv("HIGHLIGHT_STUDIO_LICENSE_PUBLIC_KEY_B64", b64url(public_raw))
@@ -84,7 +91,7 @@ def test_valid_activation_fake_signature_and_expiry(tmp_path: Path, monkeypatch)
     )
     assert licensing.verify_license_token(valid, now=now)["ok"] is True
 
-    forged = valid[:-1] + ("A" if valid[-1] != "A" else "B")
+    forged = corrupt_signature(valid)
     assert licensing.verify_license_token(forged, now=now)["reason"] == "invalid_signature"
     assert licensing.verify_license_token(valid, now=now + 3600)["reason"] == "expired"
 
@@ -411,7 +418,7 @@ def test_tampered_server_trial_fails_closed_while_offline(tmp_path: Path, monkey
     )
     assert licensing.start_trial()["ok"] is True
     saved = read_json(licensing.TRIAL_PATH, {})
-    saved["token"] = saved["token"][:-1] + ("A" if saved["token"][-1] != "A" else "B")
+    saved["token"] = corrupt_signature(saved["token"])
     write_json(licensing.TRIAL_PATH, saved)
     monkeypatch.setattr(
         licensing.requests,
