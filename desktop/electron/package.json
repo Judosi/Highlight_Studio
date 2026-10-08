@@ -13,7 +13,7 @@
     "node": ">=22"
   },
   "devDependencies": {
-    "electron": "43.1.0",
+    "electron": "43.5.0",
     "electron-builder": "26.15.3"
   },
   "description": "Hybrid desktop shell for Highlight Studio",
