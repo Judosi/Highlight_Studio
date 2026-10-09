@@ -82,6 +82,8 @@ def test_standalone_engine_probes_packaged_media_runtime() -> None:
     spec = (ROOT / "tools/desktop/HighlightStudioEngine.spec").read_text(encoding="utf-8")
 
     assert "--probe-release-runtime" in entry
+    assert "--probe-whisper-vad" in entry
+    assert '[sys.executable, "--probe-whisper-vad"]' in (ROOT / "backend/src/highlight_studio/api/app.py").read_text(encoding="utf-8")
     assert "detect_faces" in entry
     assert 'collect_data_files("mediapipe")' in spec
     assert "blaze_face_short_range.tflite" in spec

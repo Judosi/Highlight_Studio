@@ -68,6 +68,29 @@ def _probe_release_runtime() -> int | None:
     return 0 if payload["ok"] else 2
 
 
+def _probe_whisper_vad() -> int | None:
+    if sys.argv[1:] != ["--probe-whisper-vad"]:
+        return None
+    import importlib.util
+
+    import onnxruntime
+
+    required = ["silero_encoder_v5.onnx", "silero_decoder_v5.onnx"]
+    spec = importlib.util.find_spec("faster_whisper")
+    assets = Path(next(iter(spec.submodule_search_locations))) / "assets" if spec else Path(".missing")
+    missing = [name for name in required if not (assets / name).is_file()]
+    if not missing:
+        onnxruntime.InferenceSession(str(assets / required[0]), providers=["CPUExecutionProvider"])
+    payload = {
+        "ok": not missing,
+        "onnxruntime_version": getattr(onnxruntime, "__version__", "unknown"),
+        "assets": required,
+        "missing": missing,
+    }
+    print("HS_WHISPER_VAD_RESULT=" + json.dumps(payload))
+    return 0 if payload["ok"] else 2
+
+
 def main() -> int:
     multiprocessing.freeze_support()
     root = _project_root()
@@ -82,6 +105,9 @@ def main() -> int:
         from backend.src.highlight_studio.services.hardware import _ctranslate2_probe_in_process
         print("HS_CT2_RESULT=" + json.dumps(_ctranslate2_probe_in_process()))
         return 0
+    whisper_probe = _probe_whisper_vad()
+    if whisper_probe is not None:
+        return whisper_probe
     release_probe = _probe_release_runtime()
     if release_probe is not None:
         return release_probe

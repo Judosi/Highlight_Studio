@@ -2142,13 +2142,22 @@ def _whisper_vad_probe() -> dict[str, Any]:
             "print(json.dumps({'ok':not missing,'onnxruntime_version':getattr(onnxruntime,'__version__','unknown'),"
             "'assets':required,'missing':missing}))"
         )
+        frozen = bool(getattr(sys, "frozen", False))
+        command = [sys.executable, "--probe-whisper-vad"] if frozen else [sys.executable, "-c", code]
         proc = subprocess.run(
-            [sys.executable, "-c", code], capture_output=True, text=True,
+            command, capture_output=True, text=True,
             encoding="utf-8", errors="replace", timeout=12,
         )
         if proc.returncode != 0:
             raise RuntimeError(f"native runtime probe exited {proc.returncode}: {(proc.stderr or proc.stdout)[-300:]}")
-        payload = json.loads((proc.stdout or "{}").strip().splitlines()[-1])
+        output_lines = (proc.stdout or "").strip().splitlines()
+        if frozen:
+            result_line = next((line for line in output_lines if line.startswith("HS_WHISPER_VAD_RESULT=")), "")
+            if not result_line:
+                raise RuntimeError("frozen Whisper/VAD probe returned no result marker")
+            payload = json.loads(result_line.split("=", 1)[1])
+        else:
+            payload = json.loads(output_lines[-1] if output_lines else "{}")
         return {"name": "Whisper Silero VAD", **payload,
                 "hint": "" if payload.get("ok") else f"Не найдены VAD assets: {', '.join(payload.get('missing') or [])}"}
     except Exception as exc:
