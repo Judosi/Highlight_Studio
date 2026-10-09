@@ -20,6 +20,12 @@ def test_windows_build_creates_frontend_before_packaged_tests() -> None:
     assert build < script.index('Run-Step "Frontend tests"')
 
 
+def test_frontend_integration_tests_do_not_race_shared_vite_servers() -> None:
+    package = json.loads((ROOT / "frontend/package.json").read_text(encoding="utf-8"))
+
+    assert "--test-concurrency=1" in package["scripts"]["test"]
+
+
 def test_windows_build_uses_only_checksum_pinned_runtime_downloads() -> None:
     script = (ROOT / "scripts/windows/build_hybrid_release.ps1").read_text(encoding="utf-8")
     ffmpeg = (ROOT / "scripts/windows/fetch_ffmpeg.ps1").read_text(encoding="utf-8")

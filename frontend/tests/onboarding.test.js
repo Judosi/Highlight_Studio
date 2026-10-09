@@ -21,7 +21,7 @@ test('first-run wizard guides the user and saves onboarding choices', { timeout:
     })
   }
 
-  const vite = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' })
+  const vite = await createServer({ root: process.cwd(), server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'silent' })
   let view = null
   try {
     const { render, screen, waitFor } = await import('@testing-library/react')
