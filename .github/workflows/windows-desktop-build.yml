@@ -88,7 +88,14 @@ jobs:
         shell: powershell
         run: |
           $Version = (Get-Content desktop/electron/package.json -Raw | ConvertFrom-Json).version
-          ./scripts/windows/verify_packaged_layout.ps1 -ArtifactsDir build/desktop/installer -Version $Version
+          try {
+            ./scripts/windows/verify_packaged_layout.ps1 -ArtifactsDir build/desktop/installer -Version $Version
+          } catch {
+            $Message = [string]$_.Exception.Message
+            $Message = $Message.Replace("%", "%25").Replace("`r", "%0D").Replace("`n", "%0A")
+            Write-Output "::error title=Packaged layout verification failed::$Message"
+            throw
+          }
 
       - name: Create ready-to-run portable ZIP
         shell: powershell
