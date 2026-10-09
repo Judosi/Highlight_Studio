@@ -63,12 +63,19 @@ if (!(Test-Path $AppAsar -PathType Leaf)) { throw "Packaged Electron app.asar is
 & node (Join-Path $Root "tools\desktop\verify_electron_asar.mjs") $AppAsar
 if ($LASTEXITCODE -ne 0) { throw "Packaged Electron app.asar security verification failed." }
 
-& (Join-Path $Vendor "ffmpeg\bin\ffmpeg.exe") -version | Select-Object -First 1
-if ($LASTEXITCODE -ne 0) { throw "Packaged FFmpeg failed its version smoke check." }
-& (Join-Path $Vendor "ffmpeg\bin\ffprobe.exe") -version | Select-Object -First 1
-if ($LASTEXITCODE -ne 0) { throw "Packaged FFprobe failed its version smoke check." }
-& (Join-Path $Vendor "aria2\aria2c.exe") --version | Select-Object -First 1
-if ($LASTEXITCODE -ne 0) { throw "Packaged aria2c failed its version smoke check." }
+$FfmpegOutput = & (Join-Path $Vendor "ffmpeg\bin\ffmpeg.exe") -version 2>&1 | Out-String
+$FfmpegExit = $LASTEXITCODE
+if ($FfmpegExit -ne 0) { throw "Packaged FFmpeg failed its version smoke check with code $FfmpegExit." }
+$FfprobeOutput = & (Join-Path $Vendor "ffmpeg\bin\ffprobe.exe") -version 2>&1 | Out-String
+$FfprobeExit = $LASTEXITCODE
+if ($FfprobeExit -ne 0) { throw "Packaged FFprobe failed its version smoke check with code $FfprobeExit." }
+$AriaOutput = & (Join-Path $Vendor "aria2\aria2c.exe") --version 2>&1 | Out-String
+$AriaExit = $LASTEXITCODE
+if ($AriaExit -ne 0) { throw "Packaged aria2c failed its version smoke check with code $AriaExit." }
+Write-Host (($FfmpegOutput -split "`r?`n")[0])
+Write-Host (($FfprobeOutput -split "`r?`n")[0])
+Write-Host (($AriaOutput -split "`r?`n")[0])
+$global:LASTEXITCODE = 0
 $TwitchStdout = Join-Path $env:RUNNER_TEMP "highlight-tdcli-help.stdout.txt"
 $TwitchStderr = Join-Path $env:RUNNER_TEMP "highlight-tdcli-help.stderr.txt"
 $TwitchProcess = Start-Process -FilePath (Join-Path $Vendor "twitchdownloadercli\TwitchDownloaderCLI.exe") -ArgumentList @("help") -NoNewWindow -Wait -PassThru -RedirectStandardOutput $TwitchStdout -RedirectStandardError $TwitchStderr

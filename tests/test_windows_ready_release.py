@@ -31,6 +31,7 @@ def test_windows_build_uses_only_checksum_pinned_runtime_downloads() -> None:
     assert "autobuild-2026-10-08-13-05" in ffmpeg
     assert "cf94becb7d17ded5aab4f84e5e01f1e17550f9d4b1a8552665badbd0683f61c4" in ffmpeg
     assert "if (!$Sha256)" in ffmpeg and "throw" in ffmpeg
+    assert "-version | Select-Object -First 1" not in ffmpeg
     assert "TwitchDownloaderCLI-1.56.5-Windows-x64.zip" in twitch
     assert "8b1b0695f2b1b6bf0d2535fab4b84032951cded8cf4078dfdf4d58e391c813a0" in twitch
     assert "if (!$Sha256)" in twitch and "throw" in twitch

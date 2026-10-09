@@ -40,8 +40,15 @@ try {
   New-Item -ItemType Directory -Force -Path $LicenseDir | Out-Null
   foreach ($File in $LicenseFiles) { Copy-Item $File.FullName (Join-Path $LicenseDir $File.Name) -Force }
   @("Source: $Url", "Archive SHA256: $Actual", "Downloaded: $([DateTime]::UtcNow.ToString('o'))", "Build type: LGPL shared") | Set-Content (Join-Path $Target "SOURCE.txt") -Encoding UTF8
-  & $Ffmpeg -version | Select-Object -First 1
-  & $Ffprobe -version | Select-Object -First 1
+  $FfmpegOutput = & $Ffmpeg -version 2>&1 | Out-String
+  $FfmpegExit = $LASTEXITCODE
+  if ($FfmpegExit -ne 0) { throw "FFmpeg version smoke check failed with code $FfmpegExit.`n$FfmpegOutput" }
+  $FfprobeOutput = & $Ffprobe -version 2>&1 | Out-String
+  $FfprobeExit = $LASTEXITCODE
+  if ($FfprobeExit -ne 0) { throw "FFprobe version smoke check failed with code $FfprobeExit.`n$FfprobeOutput" }
+  Write-Host (($FfmpegOutput -split "`r?`n")[0])
+  Write-Host (($FfprobeOutput -split "`r?`n")[0])
+  $global:LASTEXITCODE = 0
   Write-Host "FFmpeg prepared: $Bin"
 } finally {
   Remove-Item $Temp -Recurse -Force -ErrorAction SilentlyContinue
