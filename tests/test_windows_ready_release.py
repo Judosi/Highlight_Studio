@@ -85,6 +85,8 @@ def test_standalone_engine_probes_packaged_media_runtime() -> None:
     assert "detect_faces" in entry
     assert 'collect_data_files("mediapipe")' in spec
     assert "blaze_face_short_range.tflite" in spec
+    excludes = spec.split("excludes=[", 1)[1].split("]", 1)[0]
+    assert '"matplotlib"' not in excludes
     assert 'read_json(opener, f"http://127.0.0.1:{port}/api/twitch/tools")' in verifier
 
 
