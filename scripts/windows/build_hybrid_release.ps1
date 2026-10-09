@@ -134,7 +134,17 @@ if (!$InstallerOnly) {
     & $Python -m PyInstaller --noconfirm --clean --distpath $EngineDist --workpath $EngineWork tools\desktop\HighlightStudioEngine.spec
   }
   $EngineExe = Join-Path $EngineDist "HighlightStudioEngine\HighlightStudioEngine.exe"
-  Run-Step "Verify packaged engine version and startup" { & $Python tools\desktop\verify_engine_runtime.py $EngineExe "v$Version" --app-root $Root }
+  Run-Step "Verify packaged engine version and startup" {
+    $EngineVerifyLog = Join-Path $env:RUNNER_TEMP "highlight-studio-engine-verify.log"
+    & $Python tools\desktop\verify_engine_runtime.py $EngineExe "v$Version" --app-root $Root 2>&1 | Tee-Object -FilePath $EngineVerifyLog
+    $EngineVerifyExitCode = $LASTEXITCODE
+    if ($EngineVerifyExitCode -ne 0) {
+      $EngineVerifyTail = (Get-Content $EngineVerifyLog -Tail 100) -join "`n"
+      $EngineVerifyAnnotation = $EngineVerifyTail.Replace("%", "%25").Replace("`r", "%0D").Replace("`n", "%0A")
+      Write-Output "::error title=Packaged engine verification details::$EngineVerifyAnnotation"
+      throw "Packaged engine verification failed with code $EngineVerifyExitCode"
+    }
+  }
   Run-Step "Sign standalone engine when certificate is configured" { & (Join-Path $PSScriptRoot "sign_engine.ps1") -EnginePath $EngineExe }
 }
 
