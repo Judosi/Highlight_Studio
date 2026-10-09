@@ -107,7 +107,17 @@ if (!$InstallerOnly) {
     $TestPython = Join-Path $TestVenv "Scripts\python.exe"
     Run-Step "Upgrade test environment pip" { & $TestPython -m pip install --upgrade pip }
     Run-Step "Install Python test dependencies" { & $TestPython -m pip install -r backend\requirements-dev.txt }
-    Run-Step "Backend tests" { & $TestPython -m pytest -q }
+    Run-Step "Backend tests" {
+      $PytestLog = Join-Path $env:RUNNER_TEMP "highlight-studio-pytest.log"
+      & $TestPython -m pytest -q 2>&1 | Tee-Object -FilePath $PytestLog
+      $PytestExitCode = $LASTEXITCODE
+      if ($PytestExitCode -ne 0) {
+        $PytestTail = (Get-Content $PytestLog -Tail 100) -join "`n"
+        $PytestAnnotation = $PytestTail.Replace("%", "%25").Replace("`r", "%0D").Replace("`n", "%0A")
+        Write-Output "::error title=Backend test failure details::$PytestAnnotation"
+        throw "Backend tests failed with code $PytestExitCode"
+      }
+    }
     Run-Step "Python lint" { & $TestPython -m ruff check backend tests tools }
     Run-Step "Python compileall" { & $TestPython -m compileall -q backend tools tests }
     Run-Step "Architecture audit" { & $TestPython tools\quality\architecture_audit.py }
