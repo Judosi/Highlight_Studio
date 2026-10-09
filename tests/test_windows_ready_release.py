@@ -100,6 +100,7 @@ def test_packaged_electron_archive_has_secret_and_license_validation() -> None:
     assert "local_auth_token.txt" in verifier
     assert "private_keys_present: false" in verifier
     assert "verify_electron_asar.mjs" in layout
+    assert 'Join-Path $Unpacked "resources\\engine\\HighlightStudioEngine.exe"' in layout
     assert "Frontend output checksum mismatch" in layout
 
 

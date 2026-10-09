@@ -17,7 +17,7 @@ $RequiredFiles = @(
   (Join-Path $Frontend "build-manifest.json"),
   (Join-Path $Frontend "release.json"),
   (Join-Path $Frontend "studio-final-101513.css"),
-  (Join-Path $Resources "engine\HighlightStudioEngine.exe"),
+  (Join-Path $Unpacked "resources\engine\HighlightStudioEngine.exe"),
   (Join-Path $Vendor "ffmpeg\bin\ffmpeg.exe"),
   (Join-Path $Vendor "ffmpeg\bin\ffprobe.exe"),
   (Join-Path $Vendor "ffmpeg\SOURCE.txt"),
