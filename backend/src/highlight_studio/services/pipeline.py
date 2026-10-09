@@ -10781,7 +10781,7 @@ def _shorts_filter_complex(
     elif mode == "smart_zoom":
         chain = (
             "[0:v]split=2[bg][fg];"
-            "[bg]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=24:2,eq=brightness=-0.22[bgv];"
+            "[bg]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=luma_radius=24:luma_power=2,eq=brightness=-0.22[bgv];"
             "[fg]scale=1280:1920:force_original_aspect_ratio=decrease,"
             "crop='min(iw,1080)':'min(ih,1920)':'max(0,(iw-1080)/2)':'max(0,(ih-1920)/2)'[fgv];"
             "[bgv][fgv]overlay=(W-w)/2:(H-h)/2,setsar=1"
@@ -10791,7 +10791,7 @@ def _shorts_filter_complex(
         # explicit blur_background and unknown future modes.
         chain = (
             "[0:v]split=2[bg][fg];"
-            "[bg]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=24:2,eq=brightness=-0.18[bgv];"
+            "[bg]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=luma_radius=24:luma_power=2,eq=brightness=-0.18[bgv];"
             "[fg]scale=1080:1920:force_original_aspect_ratio=decrease[fgv];"
             "[bgv][fgv]overlay=(W-w)/2:(H-h)/2,setsar=1"
         )
