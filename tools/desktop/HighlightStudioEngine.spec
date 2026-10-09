@@ -32,6 +32,9 @@ hiddenimports = [
     "streamlink",
     "streamlink.__main__",
     "streamlink_cli.main",
+    "mediapipe",
+    "mediapipe.tasks",
+    "mediapipe.tasks.python.vision",
 ]
 
 datas = []
@@ -50,6 +53,7 @@ for distribution in [
     "streamlink",
     "audioop-lts",
     "cryptography",
+    "mediapipe",
 ]:
     try:
         datas += copy_metadata(distribution)
@@ -57,9 +61,14 @@ for distribution in [
         pass
 
 datas += collect_data_files("faster_whisper", includes=["assets/*.onnx"])
+datas += collect_data_files("mediapipe")
+datas += [(
+    str(ROOT / "backend" / "src" / "highlight_studio" / "assets" / "face_tracking" / "blaze_face_short_range.tflite"),
+    "backend/src/highlight_studio/assets/face_tracking",
+)]
 
 binaries = []
-for package in ["ctranslate2", "av", "onnxruntime"]:
+for package in ["ctranslate2", "av", "onnxruntime", "mediapipe"]:
     try:
         binaries += collect_dynamic_libs(package)
     except Exception:
@@ -76,7 +85,6 @@ analysis = Analysis(
     runtime_hooks=[],
     excludes=[
         "tkinter",
-        "matplotlib",
         "notebook",
         "IPython",
         "tensorflow",

@@ -111,7 +111,7 @@ test('Review Studio keeps candidate identity, rolls back failed saves and scopes
     return jsonResponse({ ok: true })
   }
 
-  const vite = await createServer({ root: process.cwd(), server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' })
+  const vite = await createServer({ root: process.cwd(), server: { middlewareMode: true, hmr: false }, appType: 'custom', logLevel: 'silent' })
   let view = null
   try {
     const { render, screen, waitFor, within } = await import('@testing-library/react')

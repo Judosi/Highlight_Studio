@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import platform
@@ -9,6 +10,14 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def item(name: str, ok: bool, path: Path | None = None, hint: str = "") -> dict[str, object]:
@@ -28,6 +37,10 @@ def inspect(
     electron_package_path = ROOT / "desktop" / "electron" / "package.json"
     release_channel_path = ROOT / "desktop" / "electron" / "release-channel.json"
     paid_beta_path = ROOT / "desktop" / "electron" / "paid-beta-channel.json"
+    twitch_exe = ROOT / "vendor" / "twitchdownloadercli" / "TwitchDownloaderCLI.exe"
+    twitch_source_path = ROOT / "vendor" / "twitchdownloadercli" / "SOURCE.json"
+    aria_exe = ROOT / "vendor" / "aria2" / "aria2c.exe"
+    aria_source_path = ROOT / "vendor" / "aria2" / "SOURCE.json"
     try:
         electron_package = json.loads(electron_package_path.read_text(encoding="utf-8"))
     except Exception:
@@ -40,6 +53,27 @@ def inspect(
         paid_beta = json.loads(paid_beta_path.read_text(encoding="utf-8"))
     except Exception:
         paid_beta = {}
+    try:
+        twitch_source = json.loads(twitch_source_path.read_text(encoding="utf-8-sig"))
+    except Exception:
+        twitch_source = {}
+    try:
+        aria_source = json.loads(aria_source_path.read_text(encoding="utf-8-sig"))
+    except Exception:
+        aria_source = {}
+    twitch_verified = bool(
+        twitch_exe.is_file()
+        and twitch_exe.stat().st_size >= 60_000_000
+        and twitch_source.get("architecture") == "windows-x64"
+        and twitch_source.get("archive_sha256")
+        and twitch_source.get("executable_sha256") == sha256(twitch_exe)
+    )
+    aria_verified = bool(
+        aria_exe.is_file()
+        and aria_exe.stat().st_size >= 5_000_000
+        and aria_source.get("architecture") == "windows-x64"
+        and aria_source.get("aria2c_sha256") == sha256(aria_exe)
+    )
     updater_dependency = bool((electron_package.get("dependencies") or {}).get("electron-updater"))
     update_url = str(release_channel.get("stableUpdateUrl") or release_channel.get("updateUrl") or "").strip()
     paid_beta_ready = all(
@@ -56,10 +90,11 @@ def inspect(
         ),
         item(
             "TwitchDownloaderCLI",
-            (ROOT / "vendor" / "twitchdownloadercli" / "TwitchDownloaderCLI.exe").exists(),
-            ROOT / "vendor" / "twitchdownloadercli" / "TwitchDownloaderCLI.exe",
+            twitch_verified,
+            twitch_exe,
+            "Запусти scripts/windows/fetch_twitchdownloader.ps1 для проверенной копии",
         ),
-        item("aria2", (ROOT / "vendor" / "aria2" / "aria2c.exe").exists(), ROOT / "vendor" / "aria2" / "aria2c.exe"),
+        item("aria2", aria_verified, aria_exe, "aria2c.exe не совпадает с vendor/aria2/SOURCE.json"),
         item(
             "FFmpeg",
             ffmpeg.exists() or (not require_windows_bins and shutil.which("ffmpeg") is not None),

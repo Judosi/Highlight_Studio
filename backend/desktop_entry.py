@@ -6,10 +6,12 @@ only to loopback and serves both the FastAPI API and the built React UI.
 
 from __future__ import annotations
 
+import json
 import multiprocessing
 import os
 import runpy
 import sys
+import tempfile
 from pathlib import Path
 
 import uvicorn
@@ -35,17 +37,80 @@ def _run_embedded_module() -> int | None:
     return 0
 
 
+def _probe_release_runtime() -> int | None:
+    if sys.argv[1:] != ["--probe-release-runtime"]:
+        return None
+    print("HS_RELEASE_RUNTIME_PROGRESS=import-mediapipe", flush=True)
+    import mediapipe
+    print("HS_RELEASE_RUNTIME_PROGRESS=import-streamlink", flush=True)
+    import streamlink
+    print("HS_RELEASE_RUNTIME_PROGRESS=import-yt-dlp", flush=True)
+    from yt_dlp.version import __version__ as yt_dlp_version
+
+    print("HS_RELEASE_RUNTIME_PROGRESS=import-face-tracking", flush=True)
+    from backend.src.highlight_studio.services.face_tracking import MODEL_PATH, detect_faces
+
+    print("HS_RELEASE_RUNTIME_PROGRESS=detect-faces", flush=True)
+    with tempfile.TemporaryDirectory(prefix="highlight-runtime-probe-") as temp_dir:
+        raw_path = Path(temp_dir) / "black.rgb"
+        raw_path.write_bytes(bytes(128 * 128 * 3 * 2))
+        faces = detect_faces(raw_path, width=128, height=128, fps=1)
+    print("HS_RELEASE_RUNTIME_PROGRESS=build-result", flush=True)
+    payload = {
+        "ok": MODEL_PATH.is_file() and faces == [],
+        "mediapipe": getattr(mediapipe, "__version__", "unknown"),
+        "streamlink": getattr(streamlink, "__version__", "unknown"),
+        "yt_dlp": yt_dlp_version,
+        "face_model": str(MODEL_PATH),
+        "black_frame_face_count": len(faces),
+    }
+    print("HS_RELEASE_RUNTIME_RESULT=" + json.dumps(payload, ensure_ascii=False))
+    return 0 if payload["ok"] else 2
+
+
+def _probe_whisper_vad() -> int | None:
+    if sys.argv[1:] != ["--probe-whisper-vad"]:
+        return None
+    import importlib.util
+
+    import onnxruntime
+
+    required = ["silero_encoder_v5.onnx", "silero_decoder_v5.onnx"]
+    spec = importlib.util.find_spec("faster_whisper")
+    assets = Path(next(iter(spec.submodule_search_locations))) / "assets" if spec else Path(".missing")
+    missing = [name for name in required if not (assets / name).is_file()]
+    if not missing:
+        onnxruntime.InferenceSession(str(assets / required[0]), providers=["CPUExecutionProvider"])
+    payload = {
+        "ok": not missing,
+        "onnxruntime_version": getattr(onnxruntime, "__version__", "unknown"),
+        "assets": required,
+        "missing": missing,
+    }
+    print("HS_WHISPER_VAD_RESULT=" + json.dumps(payload))
+    return 0 if payload["ok"] else 2
+
+
 def main() -> int:
     multiprocessing.freeze_support()
+    root = _project_root()
+    root_text = str(root)
+    if root_text not in sys.path:
+        sys.path.insert(0, root_text)
     if len(sys.argv) == 4 and sys.argv[1] == "--shorts-caption-worker":
         from backend.src.highlight_studio.services.pipeline import _shorts_caption_worker
         _shorts_caption_worker(sys.argv[2], sys.argv[3])
         return 0
     if sys.argv[1:] == ["--probe-ctranslate2"]:
-        import json
         from backend.src.highlight_studio.services.hardware import _ctranslate2_probe_in_process
         print("HS_CT2_RESULT=" + json.dumps(_ctranslate2_probe_in_process()))
         return 0
+    whisper_probe = _probe_whisper_vad()
+    if whisper_probe is not None:
+        return whisper_probe
+    release_probe = _probe_release_runtime()
+    if release_probe is not None:
+        return release_probe
     embedded_result = _run_embedded_module()
     if embedded_result is not None:
         return embedded_result
@@ -57,10 +122,6 @@ def main() -> int:
     if not (1024 <= port <= 65535):
         raise SystemExit("HIGHLIGHT_STUDIO_PORT must be between 1024 and 65535")
 
-    root = _project_root()
-    root_text = str(root)
-    if root_text not in sys.path:
-        sys.path.insert(0, root_text)
     os.environ.setdefault("HIGHLIGHT_STUDIO_APP_ROOT", root_text)
     os.environ.setdefault("HIGHLIGHT_STUDIO_DESKTOP", "1")
     os.environ.setdefault("PYTHONUNBUFFERED", "1")
