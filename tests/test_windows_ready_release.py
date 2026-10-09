@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import base64
 import json
+import re
 import zipfile
 from pathlib import Path
 
@@ -65,6 +67,14 @@ def test_windows_workflow_is_manual_and_publishes_only_verified_zip() -> None:
     assert "build/desktop/portable/*.zip" in workflow
     assert "PYTHONUTF8: '1'" in workflow
     assert "PYTHONIOENCODING: utf-8" in workflow
+
+
+def test_windows_portable_packager_is_codepage_safe_and_keeps_russian_readme() -> None:
+    script = (ROOT / "scripts/windows/package_portable_release.ps1").read_text(encoding="utf-8")
+
+    script.encode("ascii")
+    decoded = [base64.b64decode(value).decode("utf-8") for value in re.findall(r'"([A-Za-z0-9+/=]{80,})"', script)]
+    assert any("Полностью распакуйте ZIP" in value for value in decoded)
 
 
 def test_unsigned_build_keeps_public_license_verification_key() -> None:

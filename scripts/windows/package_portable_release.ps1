@@ -16,11 +16,12 @@ $Signature = Get-AuthenticodeSignature $PortableExe
 if ($RequireSigned -and $Signature.Status -ne "Valid") { throw "Signed portable build required, signature is $($Signature.Status)." }
 $BuildKind = if ($Signature.Status -eq "Valid") { "signed" } else { "unsigned-test" }
 $Suffix = if ($BuildKind -eq "signed") { "signed" } else { "unsigned-test" }
-$SignatureNotice = if ($BuildKind -eq "signed") {
-  "EXE подписан Authenticode; проверьте издателя в свойствах файла."
+$SignatureNoticeB64 = if ($BuildKind -eq "signed") {
+  "RVhFINC/0L7QtNC/0LjRgdCw0L0gQXV0aGVudGljb2RlOyDQv9GA0L7QstC10YDRjNGC0LUg0LjQt9C00LDRgtC10LvRjyDQsiDRgdCy0L7QudGB0YLQstCw0YUg0YTQsNC50LvQsC4="
 } else {
-  "Это тестовая unsigned-сборка. Windows SmartScreen может показать предупреждение."
+  "0K3RgtC+INGC0LXRgdGC0L7QstCw0Y8gdW5zaWduZWQt0YHQsdC+0YDQutCwLiBXaW5kb3dzIFNtYXJ0U2NyZWVuINC80L7QttC10YIg0L/QvtC60LDQt9Cw0YLRjCDQv9GA0LXQtNGD0L/RgNC10LbQtNC10L3QuNC1Lg=="
 }
+$SignatureNotice = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($SignatureNoticeB64))
 $ArchiveName = "Highlight-Studio-$Version-Windows-x64-$Suffix.zip"
 $ArchivePath = Join-Path $OutputDir $ArchiveName
 $Stage = Join-Path $OutputDir ".portable-stage"
@@ -33,20 +34,10 @@ try {
   $EntryPath = Join-Path $PortableRoot $EntryName
   Copy-Item $PortableExe $EntryPath -Force
   $ReadmePath = Join-Path $PortableRoot "README_FIRST_RU.txt"
-  @"
-Highlight Studio $Version — portable Windows x64 ($BuildKind)
-
-1. Полностью распакуйте ZIP в обычную папку.
-2. Запустите $EntryName.
-3. Node.js и Python устанавливать не требуется.
-
-Пользовательские данные сохраняются отдельно:
-- %LOCALAPPDATA%\HighlightStudio
-- %USERPROFILE%\Videos\Highlight Studio
-
-$SignatureNotice
-Исходный GitHub ZIP не является готовой программой.
-"@ | Set-Content -Path $ReadmePath -Encoding UTF8
+  $ReadmeTemplateB64 = "SGlnaGxpZ2h0IFN0dWRpbyB7MH0g4oCUIHBvcnRhYmxlIFdpbmRvd3MgeDY0ICh7MX0pCgoxLiDQn9C+0LvQvdC+0YHRgtGM0Y4g0YDQsNGB0L/QsNC60YPQudGC0LUgWklQINCyINC+0LHRi9GH0L3Rg9GOINC/0LDQv9C60YMuCjIuINCX0LDQv9GD0YHRgtC40YLQtSB7Mn0uCjMuIE5vZGUuanMg0LggUHl0aG9uINGD0YHRgtCw0L3QsNCy0LvQuNCy0LDRgtGMINC90LUg0YLRgNC10LHRg9C10YLRgdGPLgoK0J/QvtC70YzQt9C+0LLQsNGC0LXQu9GM0YHQutC40LUg0LTQsNC90L3Ri9C1INGB0L7RhdGA0LDQvdGP0Y7RgtGB0Y8g0L7RgtC00LXQu9GM0L3QvjoKLSAlTE9DQUxBUFBEQVRBJVxIaWdobGlnaHRTdHVkaW8KLSAlVVNFUlBST0ZJTEUlXFZpZGVvc1xIaWdobGlnaHQgU3R1ZGlvCgp7M30K0JjRgdGF0L7QtNC90YvQuSBHaXRIdWIgWklQINC90LUg0Y/QstC70Y/QtdGC0YHRjyDQs9C+0YLQvtCy0L7QuSDQv9GA0L7Qs9GA0LDQvNC80L7QuS4K"
+  $ReadmeTemplate = [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($ReadmeTemplateB64))
+  $Readme = $ReadmeTemplate -f $Version, $BuildKind, $EntryName, $SignatureNotice
+  [System.IO.File]::WriteAllText($ReadmePath, $Readme, [System.Text.UTF8Encoding]::new($false))
 
   $Files = @()
   foreach ($Path in @($EntryPath, $ReadmePath)) {
