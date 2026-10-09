@@ -121,7 +121,18 @@ if (!$InstallerOnly) {
     Run-Step "Python lint" { & $TestPython -m ruff check backend tests tools }
     Run-Step "Python compileall" { & $TestPython -m compileall -q backend tools tests }
     Run-Step "Architecture audit" { & $TestPython tools\quality\architecture_audit.py }
-    Run-Step "Frontend tests" { npm --prefix frontend test }
+    Run-Step "Frontend tests" {
+      $FrontendTestLog = Join-Path $env:RUNNER_TEMP "highlight-studio-frontend-tests.log"
+      npm --prefix frontend test 2>&1 | Tee-Object -FilePath $FrontendTestLog
+      $FrontendTestExitCode = $LASTEXITCODE
+      if ($FrontendTestExitCode -ne 0) {
+        $FrontendTestTail = ((Get-Content $FrontendTestLog -Tail 60) | ForEach-Object { $_.Trim() }) -join " | "
+        if ($FrontendTestTail.Length -gt 7000) { $FrontendTestTail = $FrontendTestTail.Substring($FrontendTestTail.Length - 7000) }
+        $FrontendTestAnnotation = $FrontendTestTail.Replace("%", "%25")
+        Write-Output "::error title=Frontend test failure details::$FrontendTestAnnotation"
+        throw "Frontend tests failed with code $FrontendTestExitCode"
+      }
+    }
     Run-Step "Frontend lint" { npm --prefix frontend run lint }
     Run-Step "Frontend dependency audit" { npm --prefix frontend audit --audit-level=high }
   }
