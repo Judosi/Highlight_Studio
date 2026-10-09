@@ -53,12 +53,14 @@ try {
   }
   $Source | ConvertTo-Json | Set-Content -Path $SourcePath -Encoding UTF8
 
-  $Output = & $Executable help 2>&1 | Out-String
-  $ExitCode = $LASTEXITCODE
+  $Stdout = Join-Path $Temp "tdcli-help.stdout.txt"
+  $Stderr = Join-Path $Temp "tdcli-help.stderr.txt"
+  $HelpProcess = Start-Process -FilePath $Executable -ArgumentList @("help") -NoNewWindow -Wait -PassThru -RedirectStandardOutput $Stdout -RedirectStandardError $Stderr
+  $ExitCode = $HelpProcess.ExitCode
+  $Output = ((Get-Content $Stdout -Raw -ErrorAction SilentlyContinue) + (Get-Content $Stderr -Raw -ErrorAction SilentlyContinue))
   if ($ExitCode -notin @(0, 1) -or $Output -notmatch "TwitchDownloaderCLI") {
     throw "TwitchDownloaderCLI smoke check failed with code $ExitCode.`n$Output"
   }
-  $global:LASTEXITCODE = 0
   Write-Host "TwitchDownloaderCLI prepared and verified: $Executable"
 } finally {
   Remove-Item $Temp -Recurse -Force -ErrorAction SilentlyContinue

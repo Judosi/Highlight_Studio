@@ -69,12 +69,15 @@ if ($LASTEXITCODE -ne 0) { throw "Packaged FFmpeg failed its version smoke check
 if ($LASTEXITCODE -ne 0) { throw "Packaged FFprobe failed its version smoke check." }
 & (Join-Path $Vendor "aria2\aria2c.exe") --version | Select-Object -First 1
 if ($LASTEXITCODE -ne 0) { throw "Packaged aria2c failed its version smoke check." }
-$TwitchOutput = & (Join-Path $Vendor "twitchdownloadercli\TwitchDownloaderCLI.exe") help 2>&1 | Out-String
-$TwitchExit = $LASTEXITCODE
+$TwitchStdout = Join-Path $env:RUNNER_TEMP "highlight-tdcli-help.stdout.txt"
+$TwitchStderr = Join-Path $env:RUNNER_TEMP "highlight-tdcli-help.stderr.txt"
+$TwitchProcess = Start-Process -FilePath (Join-Path $Vendor "twitchdownloadercli\TwitchDownloaderCLI.exe") -ArgumentList @("help") -NoNewWindow -Wait -PassThru -RedirectStandardOutput $TwitchStdout -RedirectStandardError $TwitchStderr
+$TwitchExit = $TwitchProcess.ExitCode
+$TwitchOutput = ((Get-Content $TwitchStdout -Raw -ErrorAction SilentlyContinue) + (Get-Content $TwitchStderr -Raw -ErrorAction SilentlyContinue))
+Remove-Item $TwitchStdout, $TwitchStderr -Force -ErrorAction SilentlyContinue
 if ($TwitchExit -notin @(0, 1) -or $TwitchOutput -notmatch "TwitchDownloaderCLI") {
   throw "Packaged TwitchDownloaderCLI failed its help smoke check with code $TwitchExit."
 }
-$global:LASTEXITCODE = 0
 
 $AriaExpected = (Get-Content (Join-Path $Vendor "aria2\SOURCE.json") -Raw | ConvertFrom-Json).aria2c_sha256
 $AriaActual = (Get-FileHash (Join-Path $Vendor "aria2\aria2c.exe") -Algorithm SHA256).Hash.ToLowerInvariant()

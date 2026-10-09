@@ -34,6 +34,7 @@ def test_windows_build_uses_only_checksum_pinned_runtime_downloads() -> None:
     assert "TwitchDownloaderCLI-1.56.5-Windows-x64.zip" in twitch
     assert "8b1b0695f2b1b6bf0d2535fab4b84032951cded8cf4078dfdf4d58e391c813a0" in twitch
     assert "if (!$Sha256)" in twitch and "throw" in twitch
+    assert "Start-Process -FilePath $Executable" in twitch
 
 
 def test_tracked_aria2_binary_matches_pinned_official_release() -> None:

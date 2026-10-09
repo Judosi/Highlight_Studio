@@ -75,7 +75,14 @@ jobs:
           HIGHLIGHT_STUDIO_CRASH_REPORT_URL: ${{ secrets.HIGHLIGHT_STUDIO_CRASH_REPORT_URL }}
         run: |
           $RequireSigned = "${{ inputs.require_signature }}" -eq "true"
-          ./scripts/windows/build_hybrid_release.ps1 -RequireSigned:$RequireSigned
+          try {
+            ./scripts/windows/build_hybrid_release.ps1 -RequireSigned:$RequireSigned
+          } catch {
+            $Message = [string]$_.Exception.Message
+            $Message = $Message.Replace("%", "%25").Replace("`r", "%0D").Replace("`n", "%0A")
+            Write-Output "::error title=Windows release build failed::$Message"
+            throw
+          }
 
       - name: Verify packaged production resources and media tools
         shell: powershell
