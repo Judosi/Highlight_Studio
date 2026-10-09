@@ -62,7 +62,9 @@ function Stop-PortableGracefully {
   $Closed = $false
   $WindowProcess = $null
   for ($Attempt = 0; $Attempt -lt 40 -and !$Closed; $Attempt += 1) {
-    $Candidates = Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -eq "Highlight Studio" }
+    # The production HTML title includes the release version even though the
+    # BrowserWindow's initial title is just "Highlight Studio".
+    $Candidates = Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -like "Highlight Studio*" }
     $WindowProcess = $Candidates | Select-Object -First 1
     if ($WindowProcess) { $Closed = $WindowProcess.CloseMainWindow() }
     if (!$Closed) { Start-Sleep -Milliseconds 500 }

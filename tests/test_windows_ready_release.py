@@ -80,6 +80,13 @@ def test_windows_portable_packager_is_codepage_safe_and_keeps_russian_readme() -
     assert any("Полностью распакуйте ZIP" in value for value in decoded)
 
 
+def test_portable_smoke_closes_the_versioned_production_window() -> None:
+    script = (ROOT / "scripts/windows/test_portable_release.ps1").read_text(encoding="utf-8")
+
+    assert 'MainWindowTitle -like "Highlight Studio*"' in script
+    assert 'MainWindowTitle -eq "Highlight Studio"' not in script
+
+
 def test_unsigned_build_keeps_public_license_verification_key() -> None:
     build_script = (ROOT / "scripts/windows/build_hybrid_release.ps1").read_text(encoding="utf-8")
     config = json.loads((ROOT / "desktop/electron/paid-beta-channel.json").read_text(encoding="utf-8"))
