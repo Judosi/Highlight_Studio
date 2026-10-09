@@ -5,11 +5,11 @@
 
 Highlight Studio превращает длинные Twitch VOD и локальные видео в AI-нарезку с ручной проверкой, монтажом, рендером, Shorts и публикацией.
 
-## Запуск
+## Запуск готовой Windows-сборки
 
-1. Полностью распакуй ZIP в отдельную папку Highlight_Studio_11.2.7.
-2. Запусти START_HERE.bat из корня.
-3. Для обычной работы больше ничего в корне запускать не нужно.
+GitHub Source Code ZIP содержит исходники и не является готовой программой. Для Windows 10/11 x64 скачай артефакт workflow **Build ready Windows portable ZIP**, полностью распакуй вложенный ZIP и запусти `Highlight-Studio-Portable-11.2.7-x64.exe`. Устанавливать Python, Node.js или собирать frontend не требуется.
+
+`START_HERE.bat` остаётся совместимым launcher для подготовленного source/developer checkout, но обычному пользователю он не нужен. Инструкции по готовому ZIP находятся в `README_FIRST_RU.txt` внутри архива.
 
 Дополнительные режимы собраны в commands:
 

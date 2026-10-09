@@ -69,6 +69,22 @@ def main() -> int:
     if not engine.is_file():
         raise SystemExit(f"Engine executable not found: {engine}")
 
+    probe = subprocess.run(  # noqa: S603 - executable is the freshly built trusted engine
+        [str(engine), "--probe-release-runtime"],
+        cwd=str(args.app_root.resolve()),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=args.timeout,
+    )
+    probe_line = next((line for line in probe.stdout.splitlines() if line.startswith("HS_RELEASE_RUNTIME_RESULT=")), "")
+    if probe.returncode != 0 or not probe_line:
+        raise RuntimeError(f"Packaged media runtime probe failed with code {probe.returncode}.\n{(probe.stdout + probe.stderr)[-4000:]}")
+    probe_payload = json.loads(probe_line.split("=", 1)[1])
+    if not probe_payload.get("ok") or not probe_payload.get("mediapipe") or not probe_payload.get("yt_dlp"):
+        raise RuntimeError(f"Packaged media runtime is incomplete: {probe_payload!r}")
+
     port = free_port()
     with tempfile.TemporaryDirectory(prefix="highlight-studio-engine-check-") as temp_dir:
         temp = Path(temp_dir)
@@ -123,10 +139,14 @@ def main() -> int:
             migrations = read_json(opener, f"http://127.0.0.1:{port}/api/migrations/status")
             recovery = read_json(opener, f"http://127.0.0.1:{port}/api/startup-recovery")
             runtime_components = read_json(opener, f"http://127.0.0.1:{port}/api/runtime-components")
+            twitch_tools = read_json(opener, f"http://127.0.0.1:{port}/api/twitch/tools")
             if not onboarding.get("ok") or "current_project_schema_version" not in migrations or not recovery.get("ok"):
                 raise RuntimeError("Release-candidate startup APIs returned an invalid payload.")
             if not runtime_components.get("ok") or not runtime_components.get("whisper_vad", {}).get("ok"):
                 raise RuntimeError(f"Packaged Whisper VAD runtime is incomplete: {runtime_components!r}")
+            required_twitch_tools = twitch_tools.get("tools") or {}
+            if not all((required_twitch_tools.get(name) or {}).get("ok") for name in ("twitchdownloadercli", "yt_dlp", "aria2c")):
+                raise RuntimeError(f"Packaged Twitch runtime is incomplete: {twitch_tools!r}")
 
             shutdown = request_shutdown(opener, f"http://127.0.0.1:{port}/api/desktop/shutdown", shutdown_token)
             if not shutdown.get("ok"):
@@ -138,8 +158,8 @@ def main() -> int:
                 raise RuntimeError("Packaged engine exited without recording a clean shutdown.")
 
             print(
-                f"OK: packaged engine {actual} served the UI, verified Whisper VAD, "
-                f"release-candidate APIs, and completed a graceful shutdown on loopback port {port}"
+                f"OK: packaged engine {actual} served the UI, verified Whisper VAD, MediaPipe, yt-dlp, "
+                f"TwitchDownloaderCLI, aria2c, release-candidate APIs, and completed a graceful shutdown on loopback port {port}"
             )
             return 0
         finally:

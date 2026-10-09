@@ -1,10 +1,11 @@
 param(
-  [string]$Url = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-lgpl-shared.zip",
-  [string]$Sha256 = "",
+  [string]$Url = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-10-08-13-05/ffmpeg-N-127252-ga25ba44c0c-win64-lgpl-shared.zip",
+  [string]$Sha256 = "cf94becb7d17ded5aab4f84e5e01f1e17550f9d4b1a8552665badbd0683f61c4",
   [switch]$Force
 )
 
 $ErrorActionPreference = "Stop"
+if (!$Sha256) { throw "FFmpeg download requires a pinned SHA-256 checksum." }
 $Root = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $Target = Join-Path $Root "vendor\ffmpeg"
 $Bin = Join-Path $Target "bin"
@@ -25,12 +26,8 @@ New-Item -ItemType Directory -Force -Path $Target | Out-Null
 try {
   Write-Host "Downloading FFmpeg..."
   Invoke-WebRequest -Uri $Url -OutFile $Zip -UseBasicParsing
-  if ($Sha256) {
-    $Actual = (Get-FileHash -Path $Zip -Algorithm SHA256).Hash.ToLowerInvariant()
-    if ($Actual -ne $Sha256.Trim().ToLowerInvariant()) { throw "FFmpeg checksum mismatch. Expected $Sha256, got $Actual" }
-  } else {
-    Write-Warning "FFmpeg archive checksum was not pinned. Do not publish this build without verifying the exact archive."
-  }
+  $Actual = (Get-FileHash -Path $Zip -Algorithm SHA256).Hash.ToLowerInvariant()
+  if ($Actual -ne $Sha256.Trim().ToLowerInvariant()) { throw "FFmpeg checksum mismatch. Expected $Sha256, got $Actual" }
   Expand-Archive -Path $Zip -DestinationPath $Extract -Force
   $FoundFfmpeg = Get-ChildItem -Path $Extract -Recurse -Filter "ffmpeg.exe" | Select-Object -First 1
   $FoundFfprobe = Get-ChildItem -Path $Extract -Recurse -Filter "ffprobe.exe" | Select-Object -First 1
@@ -42,7 +39,7 @@ try {
   $LicenseDir = Join-Path $Target "licenses"
   New-Item -ItemType Directory -Force -Path $LicenseDir | Out-Null
   foreach ($File in $LicenseFiles) { Copy-Item $File.FullName (Join-Path $LicenseDir $File.Name) -Force }
-  @("Source: $Url", "Downloaded: $([DateTime]::UtcNow.ToString('o'))", "Build type: LGPL shared") | Set-Content (Join-Path $Target "SOURCE.txt") -Encoding UTF8
+  @("Source: $Url", "Archive SHA256: $Actual", "Downloaded: $([DateTime]::UtcNow.ToString('o'))", "Build type: LGPL shared") | Set-Content (Join-Path $Target "SOURCE.txt") -Encoding UTF8
   & $Ffmpeg -version | Select-Object -First 1
   & $Ffprobe -version | Select-Object -First 1
   Write-Host "FFmpeg prepared: $Bin"

@@ -169,7 +169,9 @@ def test_hybrid_build_contract_keeps_python_313_and_dev_tools() -> None:
     assert "requirements-dev.txt" in (ROOT / "scripts" / "windows" / "build_hybrid_release.ps1").read_text(encoding="utf-8")
     assert '"audioop"' in spec
     assert 'collect_data_files("faster_whisper", includes=["assets/*.onnx"])' in spec
-    assert 'for package in ["ctranslate2", "av", "onnxruntime"]' in spec
+    assert 'for package in ["ctranslate2", "av", "onnxruntime", "mediapipe"]' in spec
+    assert 'collect_data_files("mediapipe")' in spec
+    assert "blaze_face_short_range.tflite" in spec
     assert '"onnxruntime.capi._pybind_state"' in spec
     assert "console=False" in spec
 

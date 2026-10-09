@@ -1,29 +1,33 @@
-name: Build Windows Hybrid Desktop
+name: Build ready Windows portable ZIP
 
 on:
   workflow_dispatch:
     inputs:
       require_signature:
-        description: Fail when Windows artifacts are not signed
+        description: Require valid Authenticode signatures (production certificate secrets must be configured)
         required: false
         default: false
         type: boolean
-  push:
-    tags:
-      - "v*"
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUTF8: '1'
+  PYTHONIOENCODING: utf-8
 
 jobs:
-  windows-installer:
+  windows-portable:
     runs-on: windows-latest
-    timeout-minutes: 120
-    permissions:
-      contents: write
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -32,7 +36,7 @@ jobs:
             frontend/package-lock.json
             desktop/electron/package-lock.json
 
-      - name: Prepare optional engine signing certificate
+      - name: Prepare optional Windows signing certificate
         shell: powershell
         env:
           WINDOWS_SIGN_PFX_BASE64: ${{ secrets.WINDOWS_SIGN_PFX_BASE64 }}
@@ -43,39 +47,17 @@ jobs:
             [IO.File]::WriteAllBytes($Path, [Convert]::FromBase64String($env:WINDOWS_SIGN_PFX_BASE64))
             "HIGHLIGHT_STUDIO_SIGN_PFX_PATH=$Path" | Out-File -FilePath $env:GITHUB_ENV -Append
             "HIGHLIGHT_STUDIO_SIGN_PFX_PASSWORD=$env:WINDOWS_SIGN_PFX_PASSWORD" | Out-File -FilePath $env:GITHUB_ENV -Append
+          } elseif ("${{ inputs.require_signature }}" -eq "true") {
+            throw "require_signature was selected, but WINDOWS_SIGN_PFX_BASE64 is not configured."
           } else {
-            Write-Host "Engine signing certificate is not configured; manual RC builds may remain unsigned."
+            Write-Host "No signing certificate configured. The artifact will be explicitly marked unsigned-test."
           }
 
-      - name: Validate release secrets for a signed tag
-        if: startsWith(github.ref, 'refs/tags/')
-        shell: powershell
-        env:
-          FFMPEG_SHA256: ${{ secrets.HIGHLIGHT_STUDIO_FFMPEG_SHA256 }}
-          FFMPEG_URL: ${{ secrets.HIGHLIGHT_STUDIO_FFMPEG_URL }}
-          UPDATE_URL: ${{ secrets.HIGHLIGHT_STUDIO_UPDATE_URL }}
-          SIGN_PFX: ${{ secrets.WINDOWS_SIGN_PFX_BASE64 }}
-          HIGHLIGHT_STUDIO_LICENSE_PUBLIC_KEY_B64: ${{ secrets.HIGHLIGHT_STUDIO_LICENSE_PUBLIC_KEY_B64 }}
-          HIGHLIGHT_STUDIO_CHECKOUT_URL: ${{ secrets.HIGHLIGHT_STUDIO_CHECKOUT_URL }}
-          HIGHLIGHT_STUDIO_PRIVACY_URL: ${{ secrets.HIGHLIGHT_STUDIO_PRIVACY_URL }}
-          HIGHLIGHT_STUDIO_TERMS_URL: ${{ secrets.HIGHLIGHT_STUDIO_TERMS_URL }}
-        run: |
-          if (!$env:FFMPEG_SHA256) { throw "HIGHLIGHT_STUDIO_FFMPEG_SHA256 is required for tag builds" }
-          if (!$env:FFMPEG_URL) { throw "HIGHLIGHT_STUDIO_FFMPEG_URL is required for tag builds" }
-          if (!$env:UPDATE_URL) { throw "HIGHLIGHT_STUDIO_UPDATE_URL is required for tag builds" }
-          if (!$env:SIGN_PFX) { throw "WINDOWS_SIGN_PFX_BASE64 is required for signed tag builds" }
-          if (!$env:HIGHLIGHT_STUDIO_LICENSE_PUBLIC_KEY_B64) { throw "HIGHLIGHT_STUDIO_LICENSE_PUBLIC_KEY_B64 is required for Paid Beta tag builds" }
-          if (!$env:HIGHLIGHT_STUDIO_CHECKOUT_URL) { throw "HIGHLIGHT_STUDIO_CHECKOUT_URL is required for Paid Beta tag builds" }
-          if (!$env:HIGHLIGHT_STUDIO_PRIVACY_URL) { throw "HIGHLIGHT_STUDIO_PRIVACY_URL is required for Paid Beta tag builds" }
-          if (!$env:HIGHLIGHT_STUDIO_TERMS_URL) { throw "HIGHLIGHT_STUDIO_TERMS_URL is required for Paid Beta tag builds" }
-
-      - name: Build installer and portable package
+      - name: Build production frontend, standalone backend, installer, and portable EXE
         shell: powershell
         env:
           CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
-          HIGHLIGHT_STUDIO_FFMPEG_SHA256: ${{ secrets.HIGHLIGHT_STUDIO_FFMPEG_SHA256 }}
-          HIGHLIGHT_STUDIO_FFMPEG_URL: ${{ secrets.HIGHLIGHT_STUDIO_FFMPEG_URL }}
           HIGHLIGHT_STUDIO_UPDATE_URL: ${{ secrets.HIGHLIGHT_STUDIO_UPDATE_URL }}
           HIGHLIGHT_STUDIO_BETA_UPDATE_URL: ${{ secrets.HIGHLIGHT_STUDIO_BETA_UPDATE_URL }}
           HIGHLIGHT_STUDIO_LICENSE_PUBLIC_KEY_B64: ${{ secrets.HIGHLIGHT_STUDIO_LICENSE_PUBLIC_KEY_B64 }}
@@ -89,23 +71,42 @@ jobs:
           HIGHLIGHT_STUDIO_FEEDBACK_URL: ${{ secrets.HIGHLIGHT_STUDIO_FEEDBACK_URL }}
           HIGHLIGHT_STUDIO_CRASH_REPORT_URL: ${{ secrets.HIGHLIGHT_STUDIO_CRASH_REPORT_URL }}
         run: |
-          $RequireSigned = "${{ startsWith(github.ref, 'refs/tags/') || inputs.require_signature }}" -eq "true"
+          $RequireSigned = "${{ inputs.require_signature }}" -eq "true"
           ./scripts/windows/build_hybrid_release.ps1 -RequireSigned:$RequireSigned
 
-      - name: Upload desktop artifacts
+      - name: Verify packaged production resources and media tools
+        shell: powershell
+        run: |
+          $Version = (Get-Content desktop/electron/package.json -Raw | ConvertFrom-Json).version
+          ./scripts/windows/verify_packaged_layout.ps1 -ArtifactsDir build/desktop/installer -Version $Version
+
+      - name: Create ready-to-run portable ZIP
+        shell: powershell
+        run: |
+          $Version = (Get-Content desktop/electron/package.json -Raw | ConvertFrom-Json).version
+          $RequireSigned = "${{ inputs.require_signature }}" -eq "true"
+          ./scripts/windows/package_portable_release.ps1 -ArtifactsDir build/desktop/installer -OutputDir build/desktop/portable -Version $Version -RequireSigned:$RequireSigned
+
+      - name: Validate release archive integrity and secret exclusions
+        shell: powershell
+        run: |
+          $Archive = Get-ChildItem build/desktop/portable/*.zip | Select-Object -First 1
+          if (!$Archive) { throw "Ready portable ZIP was not created." }
+          python tools/desktop/verify_portable_zip.py $Archive.FullName
+
+      - name: Smoke test extracted portable ZIP and persisted project
+        shell: powershell
+        run: |
+          $Version = (Get-Content desktop/electron/package.json -Raw | ConvertFrom-Json).version
+          $Archive = Get-ChildItem build/desktop/portable/*.zip | Select-Object -First 1
+          ./scripts/windows/test_portable_release.ps1 -ArchivePath $Archive.FullName -ArtifactsDir build/desktop/installer -Version $Version
+
+      - name: Upload ready Windows ZIP and verification report
         uses: actions/upload-artifact@v4
         with:
-          name: highlight-studio-windows-${{ github.ref_name }}
+          name: highlight-studio-windows-x64-${{ github.run_number }}
           path: |
-            build/desktop/installer/*
+            build/desktop/portable/*.zip
+            build/desktop/portable-smoke/*
           if-no-files-found: error
           retention-days: 30
-
-      - name: Publish signed tag release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            build/desktop/installer/*
-          generate_release_notes: true
-          fail_on_unmatched_files: true
