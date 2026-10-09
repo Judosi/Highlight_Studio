@@ -147,8 +147,14 @@ if (!$InstallerOnly) {
   $EngineExe = Join-Path $EngineDist "HighlightStudioEngine\HighlightStudioEngine.exe"
   Run-Step "Verify packaged engine version and startup" {
     $EngineVerifyLog = Join-Path $env:RUNNER_TEMP "highlight-studio-engine-verify.log"
-    & $Python tools\desktop\verify_engine_runtime.py $EngineExe "v$Version" --app-root $Root 2>&1 | Tee-Object -FilePath $EngineVerifyLog
-    $EngineVerifyExitCode = $LASTEXITCODE
+    $SavedErrorActionPreference = $ErrorActionPreference
+    try {
+      $ErrorActionPreference = "Continue"
+      & $Python tools\desktop\verify_engine_runtime.py $EngineExe "v$Version" --app-root $Root 2>&1 | Tee-Object -FilePath $EngineVerifyLog
+      $EngineVerifyExitCode = $LASTEXITCODE
+    } finally {
+      $ErrorActionPreference = $SavedErrorActionPreference
+    }
     if ($EngineVerifyExitCode -ne 0) {
       $EngineVerifyTail = ((Get-Content $EngineVerifyLog -Tail 60) | ForEach-Object { $_.ToString().Trim() }) -join " | "
       $EngineVerifyTail = $EngineVerifyTail.Replace("`r", " ").Replace("`n", " ")
