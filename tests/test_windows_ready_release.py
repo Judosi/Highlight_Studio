@@ -67,6 +67,9 @@ def test_windows_workflow_is_manual_and_publishes_only_verified_zip() -> None:
     assert "build/desktop/portable/*.zip" in workflow
     assert "PYTHONUTF8: '1'" in workflow
     assert "PYTHONIOENCODING: utf-8" in workflow
+    smoke_step = workflow.split("- name: Smoke test extracted portable ZIP and persisted project", 1)[1]
+    smoke_step = smoke_step.split("- name: Upload ready Windows ZIP", 1)[0]
+    assert "shell: pwsh" in smoke_step
 
 
 def test_windows_portable_packager_is_codepage_safe_and_keeps_russian_readme() -> None:

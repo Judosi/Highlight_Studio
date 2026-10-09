@@ -119,11 +119,19 @@ jobs:
           python tools/desktop/verify_portable_zip.py $Archive.FullName
 
       - name: Smoke test extracted portable ZIP and persisted project
-        shell: powershell
+        # PowerShell 7 decodes the UTF-8 script deterministically. Windows
+        # PowerShell 5.1 otherwise treats its Cyrillic path literals as the
+        # runner's legacy ANSI code page before the smoke test can start.
+        shell: pwsh
         run: |
-          $Version = (Get-Content desktop/electron/package.json -Raw | ConvertFrom-Json).version
-          $Archive = Get-ChildItem build/desktop/portable/*.zip | Select-Object -First 1
-          ./scripts/windows/test_portable_release.ps1 -ArchivePath $Archive.FullName -ArtifactsDir build/desktop/installer -Version $Version
+          try {
+            $Version = (Get-Content desktop/electron/package.json -Raw | ConvertFrom-Json).version
+            $Archive = Get-ChildItem build/desktop/portable/*.zip | Select-Object -First 1
+            ./scripts/windows/test_portable_release.ps1 -ArchivePath $Archive.FullName -ArtifactsDir build/desktop/installer -Version $Version
+          } catch {
+            Write-Host "::error title=Portable release smoke test failed::$($_.Exception.Message)"
+            throw
+          }
 
       - name: Upload ready Windows ZIP and verification report
         uses: actions/upload-artifact@v4
