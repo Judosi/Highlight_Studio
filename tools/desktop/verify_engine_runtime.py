@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import traceback
 import urllib.error
 import urllib.request
 import http.cookiejar
@@ -173,4 +174,10 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except Exception as exc:
+        traceback.print_exc()
+        detail = " | ".join(str(exc).splitlines())
+        print(f"HS_ENGINE_VERIFY_ERROR={type(exc).__name__}: {detail}", file=sys.stderr)
+        raise SystemExit(1) from None
