@@ -102,7 +102,14 @@ jobs:
         run: |
           $Version = (Get-Content desktop/electron/package.json -Raw | ConvertFrom-Json).version
           $RequireSigned = "${{ inputs.require_signature }}" -eq "true"
-          ./scripts/windows/package_portable_release.ps1 -ArtifactsDir build/desktop/installer -OutputDir build/desktop/portable -Version $Version -RequireSigned:$RequireSigned
+          try {
+            ./scripts/windows/package_portable_release.ps1 -ArtifactsDir build/desktop/installer -OutputDir build/desktop/portable -Version $Version -RequireSigned:$RequireSigned
+          } catch {
+            $Message = [string]$_.Exception.Message
+            $Message = $Message.Replace("%", "%25").Replace("`r", "%0D").Replace("`n", "%0A")
+            Write-Output "::error title=Portable ZIP creation failed::$Message"
+            throw
+          }
 
       - name: Validate release archive integrity and secret exclusions
         shell: powershell
