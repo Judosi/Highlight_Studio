@@ -139,8 +139,9 @@ if (!$InstallerOnly) {
     & $Python tools\desktop\verify_engine_runtime.py $EngineExe "v$Version" --app-root $Root 2>&1 | Tee-Object -FilePath $EngineVerifyLog
     $EngineVerifyExitCode = $LASTEXITCODE
     if ($EngineVerifyExitCode -ne 0) {
-      $EngineVerifyTail = (Get-Content $EngineVerifyLog -Tail 100) -join "`n"
-      $EngineVerifyAnnotation = $EngineVerifyTail.Replace("%", "%25").Replace("`r", "%0D").Replace("`n", "%0A")
+      $EngineVerifyTail = ((Get-Content $EngineVerifyLog -Tail 60) | ForEach-Object { $_.Trim() }) -join " | "
+      if ($EngineVerifyTail.Length -gt 7000) { $EngineVerifyTail = $EngineVerifyTail.Substring($EngineVerifyTail.Length - 7000) }
+      $EngineVerifyAnnotation = $EngineVerifyTail.Replace("%", "%25")
       Write-Output "::error title=Packaged engine verification details::$EngineVerifyAnnotation"
       throw "Packaged engine verification failed with code $EngineVerifyExitCode"
     }
