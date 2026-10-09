@@ -40,16 +40,22 @@ def _run_embedded_module() -> int | None:
 def _probe_release_runtime() -> int | None:
     if sys.argv[1:] != ["--probe-release-runtime"]:
         return None
+    print("HS_RELEASE_RUNTIME_PROGRESS=import-mediapipe", flush=True)
     import mediapipe
+    print("HS_RELEASE_RUNTIME_PROGRESS=import-streamlink", flush=True)
     import streamlink
+    print("HS_RELEASE_RUNTIME_PROGRESS=import-yt-dlp", flush=True)
     from yt_dlp.version import __version__ as yt_dlp_version
 
+    print("HS_RELEASE_RUNTIME_PROGRESS=import-face-tracking", flush=True)
     from backend.src.highlight_studio.services.face_tracking import MODEL_PATH, detect_faces
 
+    print("HS_RELEASE_RUNTIME_PROGRESS=detect-faces", flush=True)
     with tempfile.TemporaryDirectory(prefix="highlight-runtime-probe-") as temp_dir:
         raw_path = Path(temp_dir) / "black.rgb"
         raw_path.write_bytes(bytes(128 * 128 * 3 * 2))
         faces = detect_faces(raw_path, width=128, height=128, fps=1)
+    print("HS_RELEASE_RUNTIME_PROGRESS=build-result", flush=True)
     payload = {
         "ok": MODEL_PATH.is_file() and faces == [],
         "mediapipe": getattr(mediapipe, "__version__", "unknown"),

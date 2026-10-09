@@ -70,15 +70,23 @@ def main() -> int:
     if not engine.is_file():
         raise SystemExit(f"Engine executable not found: {engine}")
 
-    probe = subprocess.run(  # noqa: S603 - executable is the freshly built trusted engine
-        [str(engine), "--probe-release-runtime"],
-        cwd=str(args.app_root.resolve()),
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        timeout=args.timeout,
-    )
+    try:
+        probe = subprocess.run(  # noqa: S603 - executable is the freshly built trusted engine
+            [str(engine), "--probe-release-runtime"],
+            cwd=str(args.app_root.resolve()),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=args.timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout.decode("utf-8", errors="replace") if isinstance(exc.stdout, bytes) else (exc.stdout or "")
+        stderr = exc.stderr.decode("utf-8", errors="replace") if isinstance(exc.stderr, bytes) else (exc.stderr or "")
+        raise RuntimeError(
+            f"Packaged media runtime probe timed out after {args.timeout:.0f}s. "
+            f"Captured output: {(stdout + stderr)[-4000:]}"
+        ) from exc
     probe_line = next((line for line in probe.stdout.splitlines() if line.startswith("HS_RELEASE_RUNTIME_RESULT=")), "")
     if probe.returncode != 0 or not probe_line:
         raise RuntimeError(f"Packaged media runtime probe failed with code {probe.returncode}.\n{(probe.stdout + probe.stderr)[-4000:]}")
